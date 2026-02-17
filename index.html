@@ -347,14 +347,17 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 .cocina-user-pill{background:rgba(233,69,96,.15);border:1px solid rgba(233,69,96,.3);border-radius:20px;padding:5px 14px;font-size:.8rem;color:var(--cook-accent);font-weight:600;}
 .cocina-salir{padding:8px 14px;background:transparent;border:1.5px solid var(--cook-border);border-radius:8px;color:var(--cook-text2);font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer;transition:all .2s;}
 .cocina-salir:hover{border-color:var(--cook-accent);color:var(--cook-accent);}
+.cocina-hist-btn{padding:8px 14px;background:rgba(233,69,96,.12);border:1.5px solid rgba(233,69,96,.35);border-radius:8px;color:var(--cook-accent);font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.cocina-hist-btn:hover{background:rgba(233,69,96,.22);border-color:var(--cook-accent);}
 .cocina-main{padding:18px;flex:1;}
-@media(min-width:768px){.cocina-main{padding:24px 28px;}}
+@media(min-width:768px){.cocina-main{padding:20px 24px;}}
 .cocina-titulo{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--cook-text);margin-bottom:20px;display:flex;align-items:center;gap:12px;}
 .cocina-badge{background:var(--cook-accent);color:#fff;font-size:.78rem;font-weight:700;padding:3px 12px;border-radius:20px;}
-.cocina-grid{display:grid;grid-template-columns:1fr;gap:16px;}
-@media(min-width:600px){.cocina-grid{grid-template-columns:repeat(2,1fr);gap:18px;}}
-@media(min-width:1000px){.cocina-grid{grid-template-columns:repeat(3,1fr);gap:22px;}}
-@media(min-width:1400px){.cocina-grid{grid-template-columns:repeat(4,1fr);gap:24px;}}
+/* SIEMPRE 5 tarjetas máx en pantalla — layout fijo */
+.cocina-grid{display:grid;gap:14px;grid-template-columns:1fr;}
+@media(min-width:500px){.cocina-grid{grid-template-columns:repeat(2,1fr);}}
+@media(min-width:900px){.cocina-grid{grid-template-columns:repeat(3,1fr);gap:16px;}}
+@media(min-width:1300px){.cocina-grid{grid-template-columns:repeat(5,1fr);gap:18px;}}
 
 /* Tarjeta cocina */
 .cocina-card{background:var(--cook-surface);border:2px solid var(--cook-border);border-radius:14px;overflow:hidden;transition:all .25s;position:relative;}
@@ -422,8 +425,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
       <span><span class="sync-dot" id="sync-dot"></span><span id="sync-txt" style="font-size:.74rem;color:var(--text3)">En línea</span></span>
       <span id="fecha-lbl"></span>
       <div class="user-pill"><span id="header-username">—</span><span class="role-badge" id="header-role">—</span></div>
-      <button class="btn-ghost" onclick="exportCSV()">📊 XLSX</button>
-      <button class="cierre-btn" id="btn-cierre" onclick="cierreCaja()">🔒 Cierre</button>
+      <button class="cierre-btn" id="btn-cierre" onclick="cierreCaja()">🔒 Cierre de Caja</button>
       <button class="btn-ghost" onclick="doLogout()">Salir</button>
     </div>
   </header>
@@ -551,6 +553,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <span><span class="sync-dot" id="sync-dot-cocina"></span><span id="sync-txt-cocina" style="font-size:.74rem;color:var(--cook-text2)">En línea</span></span>
       <div class="cocina-user-pill" id="cocina-user-lbl">👨‍🍳 —</div>
+      <button class="cocina-hist-btn" onclick="abrirHistorialCocina()">📋 Pedidos Anteriores</button>
       <button class="cocina-salir" onclick="doLogout()">Salir</button>
     </div>
   </div>
@@ -633,6 +636,19 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
         <button class="btn-primary" onclick="guardarEditProd()">Guardar</button>
         <button class="btn-ghost" onclick="cerrarEditProd()">Cancelar</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HISTORIAL COCINA -->
+<div class="modal-overlay" id="modal-hist-cocina" style="z-index:300;">
+  <div class="modal" style="max-width:680px;background:var(--cook-surface);border:1px solid var(--cook-border);">
+    <div class="modal-header" style="background:var(--cook-surface);border-bottom:1px solid var(--cook-border);">
+      <div class="modal-title" style="color:var(--cook-text);font-family:'Playfair Display',serif;">📋 Pedidos Anteriores — Cocina</div>
+      <button class="modal-close" style="background:rgba(255,255,255,.07);color:var(--cook-text2);" onclick="$('modal-hist-cocina').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
+      <div id="hist-cocina-body"></div>
     </div>
   </div>
 </div>
@@ -821,8 +837,14 @@ function actualizarTimersCocina(){
   }
 }
 
+// ── COLA COCINA (FIFO máx 5) ──────────────────────────────────
+// colaCocina: array de {num, mesa, items, tsConfirmado}
+// ordenados por tsOcupada ASC → los más viejos primero
+// historialCocinaLocal: pedidos ya servidos esta sesión (cuando mesa se libera)
+let historialCocinaLocal = []; // [{num,items,mesero,hora,mesa}]
+
 function renderCocina(){
-  // Solo mesas ocupadas con ítems de categoría "comida"
+  // Recopilar mesas con comida, ordenadas por tiempo de ocupación (más antigua primero = FIFO)
   const mesasConComida = [];
   for(let i=1;i<=TOTAL_MESAS;i++){
     const m=state.mesas[i];
@@ -831,15 +853,27 @@ function renderCocina(){
       const p=state.productos.find(p=>String(p.id)===String(pid));
       return p && (p.cat||'comida')==='comida' && qty>0;
     });
-    if(itemsComida.length>0) mesasConComida.push({num:i,mesa:m,items:itemsComida});
+    if(itemsComida.length>0){
+      mesasConComida.push({
+        num:i, mesa:m, items:itemsComida,
+        ts: m.tsOcupada || 0
+      });
+    }
   }
 
+  // Ordenar por tiempo de ocupación ASC (FIFO: el más antiguo = prioridad)
+  mesasConComida.sort((a,b)=>a.ts-b.ts);
+
+  // Tomar solo las 5 más antiguas
+  const visibles = mesasConComida.slice(0,5);
+
   const badge=$('cocina-badge');
-  if(badge) badge.textContent=`${mesasConComida.length} mesa${mesasConComida.length!==1?'s':''}`;
+  if(badge){
+    const total=mesasConComida.length;
+    badge.textContent=`${total} mesa${total!==1?'s':''} activa${total!==1?'s':''}${total>5?' (mostrando 5)':''}`;
+  }
 
-  const syncDot=$('sync-dot-cocina'), syncTxt=$('sync-txt-cocina');
-
-  if(!mesasConComida.length){
+  if(!visibles.length){
     html('cocina-grid',`<div class="cocina-empty">
       <div class="cocina-empty-icon">🍽</div>
       <div class="cocina-empty-txt">Sin pedidos de comida activos</div>
@@ -847,7 +881,7 @@ function renderCocina(){
     return;
   }
 
-  html('cocina-grid', mesasConComida.map(({num,mesa,items})=>{
+  html('cocina-grid', visibles.map(({num,mesa,items},idx)=>{
     const itemsHtml = items.map(([pid,qty])=>{
       const p=state.productos.find(p=>String(p.id)===String(pid));
       if(!p) return '';
@@ -855,27 +889,87 @@ function renderCocina(){
         <div class="cocina-item-qty">${qty}</div>
         <div>
           <div class="cocina-item-name">${p.nombre}</div>
-          <div class="cocina-item-cat">🍕 Comida</div>
         </div>
       </div>`;
     }).join('');
 
-    return `<div class="cocina-card nueva">
+    // Número de orden FIFO visible
+    const ordenLabel = idx+1;
+    const ordenColor = idx===0?'var(--cook-accent)':'var(--cook-green)';
+
+    return `<div class="cocina-card nueva" style="animation-delay:${idx*0.08}s">
       <div class="cocina-card-header">
-        <div>
-          <div class="cocina-mesa-lbl">Mesa</div>
-          <div class="cocina-mesa-num">${num}</div>
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <div style="background:${ordenColor};color:#fff;font-family:'Playfair Display',serif;font-size:1rem;font-weight:900;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">${ordenLabel}</div>
+          <div>
+            <div class="cocina-mesa-lbl">Mesa</div>
+            <div class="cocina-mesa-num">${num}</div>
+          </div>
         </div>
         <div id="cocina-timer-${num}" class="cocina-timer-big"></div>
       </div>
       <div class="cocina-card-body">
         <div class="cocina-items-list">${itemsHtml}</div>
       </div>
-      ${mesa.mesero?`<div class="cocina-card-footer"><div class="cocina-mesero">👤 Mesero: ${mesa.mesero}</div></div>`:''}
+      ${mesa.mesero?`<div class="cocina-card-footer"><div class="cocina-mesero">👤 ${mesa.mesero}</div></div>`:''}
     </div>`;
   }).join(''));
 
   actualizarTimersCocina();
+}
+
+// ── HISTORIAL COCINA ──────────────────────────────────────────
+// Captura pedidos de comida cuando una mesa se libera
+function capturarHistorialCocina(mesaNum, mesa, pedido){
+  const itemsComida = Object.entries(pedido).filter(([pid,qty])=>{
+    const p=state.productos.find(p=>String(p.id)===String(pid));
+    return p && (p.cat||'comida')==='comida' && qty>0;
+  });
+  if(!itemsComida.length) return;
+  historialCocinaLocal.unshift({
+    mesaNum,
+    mesero: mesa.mesero||'—',
+    hora: hora(),
+    items: itemsComida.map(([pid,qty])=>{
+      const p=state.productos.find(p=>String(p.id)===String(pid));
+      return {nombre:p?p.nombre:'?',qty};
+    })
+  });
+  // Guardar máx 50
+  if(historialCocinaLocal.length>50) historialCocinaLocal=historialCocinaLocal.slice(0,50);
+}
+
+window.abrirHistorialCocina = function(){
+  const body=$('hist-cocina-body'); if(!body) return;
+  if(!historialCocinaLocal.length){
+    body.innerHTML=`<div class="cocina-empty" style="padding:40px 20px;">
+      <div class="cocina-empty-icon">📋</div>
+      <div class="cocina-empty-txt">Sin pedidos anteriores en esta sesión</div>
+    </div>`;
+  } else {
+    body.innerHTML = historialCocinaLocal.map((h,i)=>`
+      <div style="background:rgba(255,255,255,.04);border:1px solid var(--cook-border);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--cook-text);font-weight:700;">Mesa ${h.mesaNum}</div>
+          <div style="font-size:.74rem;color:var(--cook-text2);">🕐 ${h.hora} &nbsp;·&nbsp; 👤 ${h.mesero}</div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;">
+          ${h.items.map(it=>`
+            <div style="background:rgba(233,69,96,.12);border:1px solid rgba(233,69,96,.25);border-radius:7px;padding:5px 12px;font-size:.9rem;color:var(--cook-text);font-weight:600;">
+              <span style="color:var(--cook-accent);font-family:'Playfair Display',serif;font-size:1.1rem;">${it.qty}×</span> ${it.nombre}
+            </div>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+  $('modal-hist-cocina').classList.add('open');
+};
+
+// Capturar al liberar mesa (llamado desde marcarPagado)
+function onMesaLiberada(mesaNum, pedidoAntes, mesaAntes){
+  if(sesion?.role==='cocinero') return; // no aplica
+  // Notificar a la cocina (se hará vía Firebase onValue)
+  // Capturar historial local si sesion es cocina no aplica, pero guardamos en state para cocina
+  capturarHistorialCocina(mesaNum, mesaAntes, pedidoAntes);
 }
 
 // ── AUTH ──────────────────────────────────────────────────────
@@ -948,12 +1042,23 @@ async function cargarDatos(){
 }
 
 function suscribirCambios(){
+  let prevMesas = {}; // para detectar cambios de ocupada→libre en cocina
   onValue(ref(db,'mesas'),snap=>{
     if(snap.exists()){
-      state.mesas=snap.val();
+      const newMesas=snap.val();
+      // Si es cocinero, detectar mesas que pasaron de ocupada→libre y capturar historial
+      if(sesion?.role==='cocinero'){
+        for(let i=1;i<=TOTAL_MESAS;i++){
+          const prev=prevMesas[i], next=newMesas[i];
+          if(prev&&prev.ocupada&&next&&!next.ocupada&&prev.pedidoActual&&Object.keys(prev.pedidoActual).length){
+            capturarHistorialCocina(i, prev, prev.pedidoActual);
+          }
+        }
+      }
+      prevMesas={...newMesas};
+      state.mesas=newMesas;
       renderMesas();
       if(mesaAbierta) renderClientesMesa(mesaAbierta);
-      // Actualizar vista cocina si aplica
       if(sesion?.role==='cocinero') renderCocina();
     }
     setSyncOk(true);
@@ -1138,6 +1243,8 @@ window.marcarPagado = async function(){
     await saveHistorial();
     await registrarActividad('accion-pago',`Marcó Mesa ${mesaAbierta} como pagada — ${fmt(total)}`);
     ticketData={mesa:mesaAbierta,clienteNum:cn.length,detalles,total,mesero,hora:hora()};
+    // Capturar en historial cocina ANTES de limpiar la mesa
+    capturarHistorialCocina(mesaAbierta, m, pedidoActual);
   }
   m.ocupada=false; m.pedidoActual={}; m.mesero=''; m.ultimoUsuario=''; m.tsOcupada=null;
   await saveMesa(mesaAbierta);
@@ -1664,6 +1771,7 @@ function generarXLSX(hist, esCierre){
 $('modal-mesa').addEventListener('click',function(e){if(e.target===this)window.cerrarModal();});
 $('modal-edit-prod').addEventListener('click',function(e){if(e.target===this)window.cerrarEditProd();});
 $('modal-hist-mesa').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+$('modal-hist-cocina').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 $('modal-cambiar-pass').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 
 boot();
