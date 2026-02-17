@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Delicias — Administrador de Mesas</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f5f2ee;
+    --surface: #ffffff;
+    --surface2: #faf8f5;
+    --border: #e8e2da;
+    --accent: #c0392b;
+    --accent2: #e74c3c;
+    --gold: #b8860b;
+    --text: #1a1612;
+    --text2: #5a5248;
+    --text3: #9a928a;
+    --green: #27ae60;
+    --orange: #e67e22;
+    --red: #c0392b;
+    --blue: #2980b9;
+    --shadow: 0 2px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    position:fixed; inset:0; background:var(--bg);
+    display:flex; align-items:center; justify-content:center; z-index:999;
+    background-image: radial-gradient(ellipse at 20% 50%, rgba(192,57,43,0.06) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, rgba(184,134,11,0.06) 0%, transparent 60%);
+  }
+  .login-card {
+    background:var(--surface); border-radius:20px; padding:52px 48px;
+    box-shadow: var(--shadow-lg); width:100%; max-width:420px;
+    text-align:center; border:1px solid var(--border);
+  }
+  .login-logo { font-family:'Playfair Display',serif; font-size:2.4rem; color:var(--accent); margin-bottom:4px; }
+  .login-sub { color:var(--text3); font-size:0.85rem; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:36px; }
+  .login-field { text-align:left; margin-bottom:18px; }
+  .login-field label { display:block; font-size:0.78rem; font-weight:600; color:var(--text2); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:6px; }
+  .login-field input {
+    width:100%; padding:12px 16px; border:1.5px solid var(--border); border-radius:var(--radius-sm);
+    font-family:'DM Sans',sans-serif; font-size:0.95rem; background:var(--surface2);
+    color:var(--text); transition:border-color 0.2s;
+  }
+  .login-field input:focus { outline:none; border-color:var(--accent); }
+  .login-btn {
+    width:100%; padding:14px; background:var(--accent); color:#fff; border:none;
+    border-radius:var(--radius-sm); font-size:1rem; font-weight:600; cursor:pointer;
+    font-family:'DM Sans',sans-serif; letter-spacing:0.04em; transition:background 0.2s, transform 0.1s;
+    margin-top:8px;
+  }
+  .login-btn:hover { background:var(--accent2); }
+  .login-btn:active { transform:scale(0.98); }
+  .login-err { color:var(--red); font-size:0.85rem; margin-top:12px; min-height:20px; }
+
+  /* ── HEADER ── */
+  header {
+    background:var(--surface); border-bottom:1px solid var(--border);
+    padding:0 28px; height:64px; display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,0.05);
+  }
+  .header-brand { display:flex; align-items:center; gap:12px; }
+  .header-brand h1 { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--accent); }
+  .header-brand span { color:var(--text3); font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; }
+  .header-actions { display:flex; align-items:center; gap:10px; }
+  .btn-ghost {
+    padding:8px 16px; border:1.5px solid var(--border); border-radius:var(--radius-sm);
+    background:transparent; font-family:'DM Sans',sans-serif; font-size:0.85rem;
+    font-weight:500; color:var(--text2); cursor:pointer; transition:all 0.2s;
+  }
+  .btn-ghost:hover { border-color:var(--accent); color:var(--accent); background:rgba(192,57,43,0.04); }
+  .btn-primary {
+    padding:8px 18px; border:none; border-radius:var(--radius-sm); background:var(--accent);
+    color:#fff; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:600;
+    cursor:pointer; transition:background 0.2s; letter-spacing:0.03em;
+  }
+  .btn-primary:hover { background:var(--accent2); }
+
+  /* ── TABS ── */
+  .tabs { display:flex; gap:2px; background:var(--surface); padding:16px 28px 0; border-bottom:1px solid var(--border); }
+  .tab {
+    padding:10px 20px; border:none; background:transparent; font-family:'DM Sans',sans-serif;
+    font-size:0.88rem; font-weight:500; color:var(--text3); cursor:pointer;
+    border-bottom:2.5px solid transparent; transition:all 0.2s; border-radius:6px 6px 0 0;
+  }
+  .tab:hover { color:var(--text2); }
+  .tab.active { color:var(--accent); border-bottom-color:var(--accent); font-weight:600; }
+
+  /* ── MAIN ── */
+  .main { padding:28px; max-width:1400px; margin:0 auto; }
+
+  /* ── MESAS GRID ── */
+  .section-title {
+    font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--text); margin-bottom:20px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-title .badge {
+    font-family:'DM Sans',sans-serif; font-size:0.75rem; font-weight:600;
+    padding:3px 10px; border-radius:20px; background:rgba(192,57,43,0.1); color:var(--accent);
+  }
+  .mesas-grid {
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px;
+  }
+  .mesa-card {
+    background:var(--surface); border-radius:var(--radius); border:1.5px solid var(--border);
+    padding:20px 18px; cursor:pointer; transition:all 0.22s; position:relative; overflow:hidden;
+  }
+  .mesa-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:4px;
+    background:var(--green); transition:background 0.22s;
+  }
+  .mesa-card.ocupada::before { background:var(--accent); }
+  .mesa-card.ocupada { border-color:rgba(192,57,43,0.3); background:rgba(192,57,43,0.02); }
+  .mesa-card:hover { box-shadow:var(--shadow-lg); transform:translateY(-2px); }
+  .mesa-num { font-family:'Playfair Display',serif; font-size:2.2rem; color:var(--text); font-weight:700; }
+  .mesa-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text3); margin-bottom:12px; }
+  .mesa-status {
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:0.75rem; font-weight:600; padding:4px 10px; border-radius:20px;
+    text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .mesa-status.libre { background:rgba(39,174,96,0.1); color:var(--green); }
+  .mesa-status.ocupada { background:rgba(192,57,43,0.1); color:var(--accent); }
+  .mesa-status::before { content:''; width:6px; height:6px; border-radius:50%; background:currentColor; }
+  .mesa-mesero { font-size:0.78rem; color:var(--text3); margin-top:8px; }
+  .mesa-total { font-size:1rem; font-weight:600; color:var(--text2); margin-top:4px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position:fixed; inset:0; background:rgba(26,22,18,0.5); z-index:200;
+    display:none; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto;
+    backdrop-filter:blur(2px);
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--surface); border-radius:16px; width:100%; max-width:720px;
+    box-shadow:var(--shadow-lg); animation:slideUp 0.25s ease; margin:auto;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .modal-header {
+    padding:24px 28px 20px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .modal-title { font-family:'Playfair Display',serif; font-size:1.4rem; }
+  .modal-close { width:36px; height:36px; border:none; background:var(--surface2); border-radius:8px; cursor:pointer; font-size:1.1rem; color:var(--text2); transition:background 0.2s; }
+  .modal-close:hover { background:var(--border); }
+  .modal-body { padding:24px 28px; }
+
+  /* ── FORM FIELDS ── */
+  .field { margin-bottom:16px; }
+  .field label { display:block; font-size:0.78rem; font-weight:600; color:var(--text2); letter-spacing:0.05em; text-transform:uppercase; margin-bottom:6px; }
+  .field input, .field select {
+    width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm);
+    font-family:'DM Sans',sans-serif; font-size:0.93rem; background:var(--surface2); color:var(--text);
+    transition:border-color 0.2s;
+  }
+  .field input:focus, .field select:focus { outline:none; border-color:var(--accent); }
+
+  /* ── PEDIDO PANEL ── */
+  .pedido-layout { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media(max-width:600px){ .pedido-layout { grid-template-columns:1fr; } }
+
+  .productos-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:8px; max-height:340px; overflow-y:auto; padding-right:4px;
+  }
+  .producto-btn {
+    padding:10px 8px; border:1.5px solid var(--border); border-radius:var(--radius-sm);
+    background:var(--surface2); cursor:pointer; font-family:'DM Sans',sans-serif;
+    font-size:0.82rem; font-weight:500; color:var(--text2); transition:all 0.18s; text-align:left;
+  }
+  .producto-btn:hover { border-color:var(--accent); color:var(--accent); background:rgba(192,57,43,0.04); }
+  .producto-btn .prod-name { font-weight:600; color:var(--text); display:block; }
+  .producto-btn .prod-price { color:var(--text3); font-size:0.78rem; }
+
+  /* ── ORDEN ACTUAL ── */
+  .orden-panel { background:var(--surface2); border-radius:var(--radius-sm); padding:16px; border:1px solid var(--border); }
+  .orden-panel h4 { font-size:0.8rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text3); margin-bottom:12px; }
+  .orden-items { min-height:80px; max-height:240px; overflow-y:auto; }
+  .orden-item {
+    display:flex; align-items:center; justify-content:space-between; padding:8px 0;
+    border-bottom:1px solid var(--border); font-size:0.88rem;
+  }
+  .orden-item:last-child { border-bottom:none; }
+  .orden-item-name { flex:1; color:var(--text); font-weight:500; }
+  .orden-item-qty { display:flex; align-items:center; gap:6px; }
+  .qty-btn { width:24px; height:24px; border:1.5px solid var(--border); border-radius:6px; background:#fff; cursor:pointer; font-size:0.9rem; font-weight:700; color:var(--text2); transition:all 0.15s; }
+  .qty-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .qty-num { font-weight:700; width:20px; text-align:center; font-size:0.9rem; }
+  .orden-item-price { font-weight:600; color:var(--text); min-width:70px; text-align:right; font-size:0.88rem; }
+
+  .orden-total { border-top:2px solid var(--border); margin-top:12px; padding-top:12px; display:flex; justify-content:space-between; align-items:center; }
+  .orden-total span:first-child { font-weight:600; color:var(--text2); font-size:0.9rem; }
+  .orden-total .total-amount { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--accent); }
+
+  /* ── HISTORIAL CLIENTES ── */
+  .clientes-list { margin-top:16px; }
+  .cliente-item {
+    background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:14px 16px; margin-bottom:10px; position:relative;
+  }
+  .cliente-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .cliente-num { font-family:'Playfair Display',serif; font-size:1rem; color:var(--accent); font-weight:700; }
+  .cliente-total-lbl { font-size:0.88rem; font-weight:600; color:var(--text2); }
+  .cliente-items-list { font-size:0.82rem; color:var(--text3); }
+
+  /* ── ACCIONES MODAL ── */
+  .modal-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; padding-top:20px; border-top:1px solid var(--border); }
+  .btn-success { background:var(--green); color:#fff; border:none; padding:10px 20px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.88rem; cursor:pointer; transition:opacity 0.2s; }
+  .btn-success:hover { opacity:0.85; }
+  .btn-danger { background:var(--accent); color:#fff; border:none; padding:10px 20px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.88rem; cursor:pointer; transition:opacity 0.2s; }
+  .btn-danger:hover { opacity:0.85; }
+  .btn-warning { background:var(--orange); color:#fff; border:none; padding:10px 20px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.88rem; cursor:pointer; transition:opacity 0.2s; }
+  .btn-warning:hover { opacity:0.85; }
+  .btn-blue { background:var(--blue); color:#fff; border:none; padding:10px 20px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.88rem; cursor:pointer; transition:opacity 0.2s; }
+  .btn-blue:hover { opacity:0.85; }
+
+  /* ── PANEL PRODUCTOS ── */
+  .productos-admin { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:14px; }
+  .prod-card {
+    background:var(--surface); border-radius:var(--radius-sm); border:1px solid var(--border);
+    padding:16px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .prod-card .prod-info { flex:1; }
+  .prod-card .prod-info .pname { font-weight:600; color:var(--text); }
+  .prod-card .prod-info .pprice { font-size:0.85rem; color:var(--text3); margin-top:2px; }
+  .prod-card-actions { display:flex; gap:8px; }
+  .icon-btn { width:34px; height:34px; border:1.5px solid var(--border); border-radius:8px; background:#fff; cursor:pointer; font-size:0.9rem; transition:all 0.15s; }
+  .icon-btn:hover { border-color:var(--accent); }
+  .icon-btn.del:hover { background:rgba(192,57,43,0.08); }
+
+  .add-prod-form {
+    background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:24px;
+    display:grid; grid-template-columns:1fr 1fr auto; gap:12px; align-items:end;
+  }
+  @media(max-width:580px){ .add-prod-form { grid-template-columns:1fr; } }
+
+  /* ── HISTORIAL / REPORTES ── */
+  .report-summary { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; margin-bottom:24px; }
+  .stat-card { background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); padding:20px; }
+  .stat-card .stat-val { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--accent); }
+  .stat-card .stat-lbl { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text3); margin-top:4px; }
+
+  .history-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
+  .history-table th { padding:10px 14px; text-align:left; border-bottom:2px solid var(--border); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text3); font-weight:600; }
+  .history-table td { padding:10px 14px; border-bottom:1px solid var(--border); color:var(--text2); }
+  .history-table tr:hover td { background:var(--surface2); }
+  .history-table .total-row td { font-weight:700; color:var(--text); border-top:2px solid var(--border); border-bottom:none; }
+
+  .empty-state { text-align:center; padding:60px 20px; color:var(--text3); }
+  .empty-state .icon { font-size:3rem; margin-bottom:12px; }
+  .empty-state p { font-size:0.9rem; }
+
+  /* ── MESERO BADGE ── */
+  .mesero-badge { display:inline-flex; align-items:center; gap:6px; font-size:0.78rem; color:var(--text3); background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:3px 10px; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width:5px; height:5px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:10px; }
+
+  /* ── TOAST ── */
+  .toast {
+    position:fixed; bottom:24px; right:24px; background:var(--text); color:#fff;
+    padding:12px 20px; border-radius:var(--radius-sm); font-size:0.88rem; z-index:9999;
+    animation:toastIn 0.3s ease; box-shadow:var(--shadow-lg);
+  }
+  @keyframes toastIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  /* hidden */
+  .hidden { display:none !important; }
+
+  /* tag */
+  .tag-verde { display:inline-block; background:rgba(39,174,96,0.1); color:var(--green); font-size:0.72rem; font-weight:600; padding:2px 8px; border-radius:20px; }
+  .tag-rojo { display:inline-block; background:rgba(192,57,43,0.1); color:var(--accent); font-size:0.72rem; font-weight:600; padding:2px 8px; border-radius:20px; }
+</style>
+</head>
+<body>
+
+<!-- ─────────── LOGIN ─────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🍽 Delicias</div>
+    <div class="login-sub">Administrador de Mesas</div>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="inp-user" placeholder="admin" autocomplete="username"/>
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="inp-pass" placeholder="••••••" autocomplete="current-password"/>
+    </div>
+    <button class="login-btn" onclick="doLogin()">Ingresar</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ─────────── APP ─────────── -->
+<div id="app" class="hidden">
+  <header>
+    <div class="header-brand">
+      <div>
+        <h1>🍽 Delicias</h1>
+        <span>Administrador de Mesas</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span id="fecha-lbl" style="font-size:0.82rem;color:var(--text3)"></span>
+      <button class="btn-ghost" onclick="exportGoogleSheets()">📊 Exportar a Sheets</button>
+      <button class="btn-ghost" onclick="doLogout()">Salir</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('mesas',this)">🪑 Mesas</button>
+    <button class="tab" onclick="setTab('productos',this)">🛒 Productos</button>
+    <button class="tab" onclick="setTab('historial',this)">📋 Historial</button>
+  </div>
+
+  <div class="main">
+
+    <!-- TAB MESAS -->
+    <div id="tab-mesas">
+      <div class="section-title">
+        Mesas del Restaurante
+        <span class="badge" id="badge-mesas">0 ocupadas</span>
+      </div>
+      <div class="mesas-grid" id="mesas-grid"></div>
+    </div>
+
+    <!-- TAB PRODUCTOS -->
+    <div id="tab-productos" class="hidden">
+      <div class="section-title">Gestión de Productos</div>
+      <div class="add-prod-form">
+        <div class="field" style="margin:0">
+          <label>Nombre del producto</label>
+          <input type="text" id="prod-nombre" placeholder="Ej: Mojito"/>
+        </div>
+        <div class="field" style="margin:0">
+          <label>Precio (Gs.)</label>
+          <input type="number" id="prod-precio" placeholder="0" step="1" min="0"/>
+        </div>
+        <button class="btn-primary" onclick="agregarProducto()" style="height:42px;align-self:end">+ Añadir</button>
+      </div>
+      <div class="productos-admin" id="productos-admin-list"></div>
+    </div>
+
+    <!-- TAB HISTORIAL -->
+    <div id="tab-historial" class="hidden">
+      <div class="section-title">Historial de Ventas — Noche</div>
+      <div class="report-summary">
+        <div class="stat-card"><div class="stat-val" id="stat-clientes">0</div><div class="stat-lbl">Clientes Atendidos</div></div>
+        <div class="stat-card"><div class="stat-val" id="stat-mesas">0</div><div class="stat-lbl">Mesas Usadas</div></div>
+        <div class="stat-card"><div class="stat-val" id="stat-total">SS 0</div><div class="stat-lbl">Ingreso Total</div></div>
+      </div>
+      <div style="background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;">
+        <div id="historial-container"></div>
+      </div>
+      <div style="margin-top:16px;text-align:right;">
+        <button class="btn-danger" onclick="limpiarHistorial()">🗑 Limpiar historial de noche</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─────────── MODAL MESA ─────────── -->
+<div class="modal-overlay" id="modal-mesa">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title">Mesa 1</div>
+        <div style="font-size:0.8rem;color:var(--text3);margin-top:2px" id="modal-subtitle"></div>
+      </div>
+      <button class="modal-close" onclick="cerrarModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Mesero -->
+      <div class="field">
+        <label>Mesero / Mesonero</label>
+        <input type="text" id="inp-mesero" placeholder="Nombre del mesero"/>
+      </div>
+
+      <!-- Pedido -->
+      <div class="pedido-layout">
+        <div>
+          <div style="font-size:0.78rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Productos</div>
+          <div class="productos-grid" id="productos-grid"></div>
+        </div>
+        <div>
+          <div class="orden-panel">
+            <h4>Pedido actual</h4>
+            <div class="orden-items" id="orden-items">
+              <div style="color:var(--text3);font-size:0.85rem;padding:10px 0;">Sin productos</div>
+            </div>
+            <div class="orden-total">
+              <span>Total</span>
+              <span class="total-amount" id="pedido-total">SS 0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historial clientes de la mesa esta noche -->
+      <div id="historial-mesa-panel" style="margin-top:20px;">
+        <div style="font-size:0.78rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">
+          Clientes esta noche en esta mesa
+        </div>
+        <div class="clientes-list" id="clientes-mesa-list"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-success" onclick="confirmarPedido()">✅ Confirmar pedido</button>
+        <button class="btn-warning" onclick="marcarPagado()">💰 Pagado — Liberar mesa</button>
+        <button class="btn-blue" onclick="verHistorialMesa()">📋 Ver historial completo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── MODAL EDITAR PRODUCTO ─────────── -->
+<div class="modal-overlay" id="modal-edit-prod">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">Editar Producto</div>
+      <button class="modal-close" onclick="cerrarModalEditProd()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-prod-id"/>
+      <div class="field">
+        <label>Nombre</label>
+        <input type="text" id="edit-prod-nombre"/>
+      </div>
+      <div class="field">
+        <label>Precio (Gs.)</label>
+        <input type="number" id="edit-prod-precio" step="1" min="0"/>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn-primary" onclick="guardarEditProd()">Guardar</button>
+        <button class="btn-ghost" onclick="cerrarModalEditProd()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── MODAL HISTORIAL COMPLETO MESA ─────────── -->
+<div class="modal-overlay" id="modal-hist-mesa">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div class="modal-title" id="hist-mesa-title">Historial Mesa</div>
+      <button class="modal-close" onclick="document.getElementById('modal-hist-mesa').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="hist-mesa-body"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  ESTADO
+// ═══════════════════════════════════════════════
+const CURRENCY = 'Gs.';
+const TOTAL_MESAS = 12;
+
+// Formato guaraníes: Gs. 1.000.000 (sin decimales, puntos de miles)
+function fmt(n) {
+  return CURRENCY + ' ' + Math.round(n).toLocaleString('es-PY');
+}
+
+let state = {
+  mesas: {},        // { 1: { ocupada, mesero, pedidoActual:[], clientesNoche:[] } }
+  productos: [],    // { id, nombre, precio }
+  historialNoche: [], // registro de pagos finalizados
+};
+
+let mesaAbierta = null;
+let pedidoActual = {}; // { prodId: qty }
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+function initState() {
+  // Mesas
+  for (let i = 1; i <= TOTAL_MESAS; i++) {
+    state.mesas[i] = { ocupada: false, mesero:'', pedidoActual:{}, clientesNoche:[] };
+  }
+  // Productos por defecto
+  state.productos = [
+    { id:1, nombre:'Coca Cola',    precio:150 },
+    { id:2, nombre:'Pizza',        precio:850 },
+    { id:3, nombre:'Lomito',       precio:950 },
+    { id:4, nombre:'Jugos',        precio:120 },
+    { id:5, nombre:'Cerveza',      precio:200 },
+    { id:6, nombre:'Agua',         precio:80  },
+    { id:7, nombre:'Hamburguesa',  precio:700 },
+    { id:8, nombre:'Papas fritas', precio:350 },
+  ];
+}
+
+// ═══════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════
+function doLogin() {
+  const u = document.getElementById('inp-user').value.trim();
+  const p = document.getElementById('inp-pass').value.trim();
+  if (u === 'ADMIN' && p === '1234RD') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').classList.remove('hidden');
+    renderAll();
+  } else {
+    document.getElementById('login-err').textContent = 'Usuario o contraseña incorrectos.';
+  }
+}
+document.getElementById('inp-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('inp-user').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function doLogout() {
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('inp-user').value = '';
+  document.getElementById('inp-pass').value = '';
+  document.getElementById('login-err').textContent = '';
+}
+
+// ═══════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════
+function setTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-mesas').classList.add('hidden');
+  document.getElementById('tab-productos').classList.add('hidden');
+  document.getElementById('tab-historial').classList.add('hidden');
+  document.getElementById('tab-' + tab).classList.remove('hidden');
+  if (tab === 'historial') renderHistorial();
+  if (tab === 'productos') renderProductosAdmin();
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER MESAS
+// ═══════════════════════════════════════════════
+function renderMesas() {
+  const grid = document.getElementById('mesas-grid');
+  let html = '';
+  let ocupadas = 0;
+  for (let i = 1; i <= TOTAL_MESAS; i++) {
+    const m = state.mesas[i];
+    const totalMesa = calcTotalPedido(m.pedidoActual);
+    if (m.ocupada) ocupadas++;
+    html += `
+      <div class="mesa-card ${m.ocupada?'ocupada':''}" onclick="abrirMesa(${i})">
+        <div class="mesa-label">Mesa</div>
+        <div class="mesa-num">${i}</div>
+        <div class="mesa-status ${m.ocupada?'ocupada':'libre'}">${m.ocupada?'Ocupada':'Libre'}</div>
+        ${m.mesero ? `<div class="mesa-mesero">👤 ${m.mesero}</div>` : ''}
+        ${m.ocupada && totalMesa > 0 ? `<div class="mesa-total">${fmt(totalMesa)}</div>` : ''}
+      </div>`;
+  }
+  grid.innerHTML = html;
+  document.getElementById('badge-mesas').textContent = `${ocupadas} ocupada${ocupadas!==1?'s':''}`;
+  // fecha
+  document.getElementById('fecha-lbl').textContent = new Date().toLocaleDateString('es-DO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+
+function calcTotalPedido(pedido) {
+  let t = 0;
+  for (const [pid, qty] of Object.entries(pedido)) {
+    const prod = state.productos.find(p => p.id == pid);
+    if (prod) t += prod.precio * qty;
+  }
+  return t;
+}
+
+// ═══════════════════════════════════════════════
+//  MODAL MESA
+// ═══════════════════════════════════════════════
+function abrirMesa(num) {
+  mesaAbierta = num;
+  const m = state.mesas[num];
+  pedidoActual = { ...m.pedidoActual };
+  document.getElementById('modal-title').textContent = `Mesa ${num}`;
+  document.getElementById('modal-subtitle').textContent = m.ocupada ? '🔴 Ocupada' : '🟢 Disponible';
+  document.getElementById('inp-mesero').value = m.mesero || '';
+  renderProductosGrid();
+  renderPedidoActual();
+  renderClientesMesa(num);
+  document.getElementById('modal-mesa').classList.add('open');
+}
+
+function cerrarModal() {
+  document.getElementById('modal-mesa').classList.remove('open');
+  mesaAbierta = null;
+}
+
+function renderProductosGrid() {
+  const grid = document.getElementById('productos-grid');
+  if (!state.productos.length) {
+    grid.innerHTML = '<div style="color:var(--text3);font-size:0.85rem;grid-column:1/-1">No hay productos. Añade en la pestaña Productos.</div>';
+    return;
+  }
+  grid.innerHTML = state.productos.map(p => `
+    <button class="producto-btn" onclick="addProducto(${p.id})">
+      <span class="prod-name">${p.nombre}</span>
+      <span class="prod-price">${fmt(p.precio)}</span>
+    </button>
+  `).join('');
+}
+
+function addProducto(pid) {
+  pedidoActual[pid] = (pedidoActual[pid] || 0) + 1;
+  renderPedidoActual();
+}
+
+function cambiarQty(pid, delta) {
+  pedidoActual[pid] = (pedidoActual[pid] || 0) + delta;
+  if (pedidoActual[pid] <= 0) delete pedidoActual[pid];
+  renderPedidoActual();
+}
+
+function renderPedidoActual() {
+  const container = document.getElementById('orden-items');
+  const items = Object.entries(pedidoActual);
+  if (!items.length) {
+    container.innerHTML = '<div style="color:var(--text3);font-size:0.85rem;padding:10px 0">Sin productos</div>';
+    document.getElementById('pedido-total').textContent = `${fmt(0)}`;
+    return;
+  }
+  let total = 0;
+  let html = '';
+  for (const [pid, qty] of items) {
+    const prod = state.productos.find(p => p.id == pid);
+    if (!prod) continue;
+    const sub = prod.precio * qty;
+    total += sub;
+    html += `
+      <div class="orden-item">
+        <span class="orden-item-name">${prod.nombre}</span>
+        <span class="orden-item-qty">
+          <button class="qty-btn" onclick="cambiarQty(${pid},-1)">−</button>
+          <span class="qty-num">${qty}</span>
+          <button class="qty-btn" onclick="cambiarQty(${pid},1)">+</button>
+        </span>
+        <span class="orden-item-price">${fmt(sub)}</span>
+      </div>`;
+  }
+  container.innerHTML = html;
+  document.getElementById('pedido-total').textContent = fmt(total);
+}
+
+function confirmarPedido() {
+  if (!mesaAbierta) return;
+  if (!Object.keys(pedidoActual).length) { toast('Añade al menos un producto.'); return; }
+  const mesero = document.getElementById('inp-mesero').value.trim();
+  const m = state.mesas[mesaAbierta];
+  m.pedidoActual = { ...pedidoActual };
+  m.mesero = mesero;
+  m.ocupada = true;
+  toast(`Pedido confirmado para Mesa ${mesaAbierta}`);
+  renderMesas();
+  document.getElementById('modal-subtitle').textContent = '🔴 Ocupada';
+  renderClientesMesa(mesaAbierta);
+}
+
+function marcarPagado() {
+  if (!mesaAbierta) return;
+  const m = state.mesas[mesaAbierta];
+  const mesero = document.getElementById('inp-mesero').value.trim();
+
+  // Guardar cliente en historial de mesa y en historial global
+  const items = pedidoActual;
+  if (Object.keys(items).length > 0 || m.clientesNoche.length > 0) {
+    // si hay pedido abierto, añadirlo como cliente
+    if (Object.keys(items).length > 0) {
+      const clienteNum = m.clientesNoche.length + 1;
+      const detalles = itemsToDetalle(items);
+      const total = calcTotalPedido(items);
+      m.clientesNoche.push({ num: clienteNum, detalles, total, mesero });
+      state.historialNoche.push({
+        mesa: mesaAbierta, clienteNum, detalles, total, mesero, hora: horaActual()
+      });
+    }
+  }
+
+  // Liberar mesa
+  m.ocupada = false;
+  m.pedidoActual = {};
+  m.mesero = '';
+  pedidoActual = {};
+  cerrarModal();
+  renderMesas();
+  toast(`Mesa ${mesaAbierta} liberada y pagada ✅`);
+}
+
+function itemsToDetalle(items) {
+  return Object.entries(items).map(([pid, qty]) => {
+    const prod = state.productos.find(p => p.id == pid);
+    return prod ? { nombre: prod.nombre, qty, precio: prod.precio, sub: prod.precio * qty } : null;
+  }).filter(Boolean);
+}
+
+function renderClientesMesa(num) {
+  const m = state.mesas[num];
+  const container = document.getElementById('clientes-mesa-list');
+  if (!m.clientesNoche.length) {
+    container.innerHTML = '<div style="color:var(--text3);font-size:0.83rem;">Sin clientes registrados aún esta noche.</div>';
+    return;
+  }
+  container.innerHTML = m.clientesNoche.map(c => `
+    <div class="cliente-item">
+      <div class="cliente-header">
+        <span class="cliente-num">Cliente ${c.num}${ordinal(c.num)}</span>
+        <span class="cliente-total-lbl">${fmt(c.total)}</span>
+      </div>
+      <div class="cliente-items-list">${c.detalles.map(d => `${d.qty}x ${d.nombre} = ${fmt(d.sub)}`).join(' · ')}</div>
+      ${c.mesero ? `<div style="margin-top:6px;"><span class="mesero-badge">👤 ${c.mesero}</span></div>` : ''}
+    </div>
+  `).join('');
+}
+
+function verHistorialMesa() {
+  if (!mesaAbierta) return;
+  const m = state.mesas[mesaAbierta];
+  document.getElementById('hist-mesa-title').textContent = `Historial Completo — Mesa ${mesaAbierta}`;
+  const body = document.getElementById('hist-mesa-body');
+  if (!m.clientesNoche.length) {
+    body.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>Sin historial esta noche.</p></div>';
+  } else {
+    let total = 0;
+    let html = '<table class="history-table"><thead><tr><th>Cliente</th><th>Detalle</th><th>Mesero</th><th>Total</th></tr></thead><tbody>';
+    m.clientesNoche.forEach(c => {
+      total += c.total;
+      html += `<tr><td>Cliente ${c.num}${ordinal(c.num)}</td><td>${c.detalles.map(d=>`${d.qty}× ${d.nombre}`).join(', ')}</td><td>${c.mesero||'—'}</td><td>${fmt(c.total)}</td></tr>`;
+    });
+    html += `<tr class="total-row"><td colspan="3">Total Mesa ${mesaAbierta}</td><td>${fmt(total)}</td></tr>`;
+    html += '</tbody></table>';
+    body.innerHTML = html;
+  }
+  document.getElementById('modal-hist-mesa').classList.add('open');
+}
+
+// ═══════════════════════════════════════════════
+//  PRODUCTOS ADMIN
+// ═══════════════════════════════════════════════
+function renderProductosAdmin() {
+  const container = document.getElementById('productos-admin-list');
+  container.innerHTML = state.productos.map(p => `
+    <div class="prod-card">
+      <div class="prod-info">
+        <div class="pname">${p.nombre}</div>
+        <div class="pprice">${fmt(p.precio)}</div>
+      </div>
+      <div class="prod-card-actions">
+        <button class="icon-btn" title="Editar" onclick="abrirEditProd(${p.id})">✏️</button>
+        <button class="icon-btn del" title="Eliminar" onclick="eliminarProd(${p.id})">🗑️</button>
+      </div>
+    </div>
+  `).join('') || '<div style="color:var(--text3);">Sin productos.</div>';
+}
+
+function agregarProducto() {
+  const nombre = document.getElementById('prod-nombre').value.trim();
+  const precio = parseFloat(document.getElementById('prod-precio').value);
+  if (!nombre) { toast('Ingresa el nombre del producto.'); return; }
+  if (isNaN(precio) || precio < 0) { toast('Ingresa un precio válido.'); return; }
+  const newId = state.productos.length ? Math.max(...state.productos.map(p=>p.id)) + 1 : 1;
+  state.productos.push({ id: newId, nombre, precio });
+  document.getElementById('prod-nombre').value = '';
+  document.getElementById('prod-precio').value = '';
+  renderProductosAdmin();
+  toast(`Producto "${nombre}" añadido.`);
+}
+
+function eliminarProd(id) {
+  if (!confirm('¿Eliminar este producto?')) return;
+  state.productos = state.productos.filter(p => p.id !== id);
+  renderProductosAdmin();
+  toast('Producto eliminado.');
+}
+
+function abrirEditProd(id) {
+  const prod = state.productos.find(p => p.id === id);
+  if (!prod) return;
+  document.getElementById('edit-prod-id').value = id;
+  document.getElementById('edit-prod-nombre').value = prod.nombre;
+  document.getElementById('edit-prod-precio').value = prod.precio;
+  document.getElementById('modal-edit-prod').classList.add('open');
+}
+
+function guardarEditProd() {
+  const id = parseInt(document.getElementById('edit-prod-id').value);
+  const nombre = document.getElementById('edit-prod-nombre').value.trim();
+  const precio = parseFloat(document.getElementById('edit-prod-precio').value);
+  if (!nombre || isNaN(precio)) { toast('Completa los campos.'); return; }
+  const prod = state.productos.find(p => p.id === id);
+  if (prod) { prod.nombre = nombre; prod.precio = precio; }
+  cerrarModalEditProd();
+  renderProductosAdmin();
+  toast('Producto actualizado.');
+}
+
+function cerrarModalEditProd() {
+  document.getElementById('modal-edit-prod').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════
+//  HISTORIAL
+// ═══════════════════════════════════════════════
+function renderHistorial() {
+  const hist = state.historialNoche;
+  let totalGlobal = 0;
+  const mesasUsadas = new Set();
+  const clientesTotales = hist.length;
+
+  // Agrupar por mesa
+  const byMesa = {};
+  hist.forEach(r => {
+    if (!byMesa[r.mesa]) byMesa[r.mesa] = [];
+    byMesa[r.mesa].push(r);
+    totalGlobal += r.total;
+    mesasUsadas.add(r.mesa);
+  });
+
+  document.getElementById('stat-clientes').textContent = clientesTotales;
+  document.getElementById('stat-mesas').textContent = mesasUsadas.size;
+  document.getElementById('stat-total').textContent = fmt(totalGlobal);
+
+  const container = document.getElementById('historial-container');
+  if (!hist.length) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>Sin ventas registradas esta noche. Las ventas aparecen cuando marcas una mesa como pagada.</p></div>';
+    return;
+  }
+
+  let html = '<table class="history-table"><thead><tr><th>Mesa</th><th>Cliente</th><th>Hora</th><th>Productos</th><th>Mesero</th><th>Total</th></tr></thead><tbody>';
+  Object.keys(byMesa).sort((a,b)=>a-b).forEach(mesa => {
+    const registros = byMesa[mesa];
+    let totalMesa = 0;
+    registros.forEach(r => {
+      totalMesa += r.total;
+      html += `<tr>
+        <td><strong>Mesa ${mesa}</strong></td>
+        <td>Cliente ${r.clienteNum}${ordinal(r.clienteNum)}</td>
+        <td>${r.hora}</td>
+        <td>${r.detalles.map(d=>`${d.qty}× ${d.nombre}`).join(', ')}</td>
+        <td>${r.mesero||'—'}</td>
+        <td>${fmt(r.total)}</td>
+      </tr>`;
+    });
+    html += `<tr class="total-row"><td colspan="5">Subtotal Mesa ${mesa}</td><td>${fmt(totalMesa)}</td></tr>`;
+  });
+  html += `<tr class="total-row" style="background:rgba(192,57,43,0.04)"><td colspan="5">💰 INGRESO TOTAL DE LA NOCHE</td><td style="color:var(--accent);font-size:1rem;">${fmt(totalGlobal)}</td></tr>`;
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function limpiarHistorial() {
+  if (!confirm('¿Limpiar todo el historial de la noche? Esta acción no se puede deshacer.')) return;
+  state.historialNoche = [];
+  for (let i = 1; i <= TOTAL_MESAS; i++) state.mesas[i].clientesNoche = [];
+  renderHistorial();
+  toast('Historial limpiado.');
+}
+
+// ═══════════════════════════════════════════════
+//  EXPORT GOOGLE SHEETS (CSV)
+// ═══════════════════════════════════════════════
+function exportGoogleSheets() {
+  const hist = state.historialNoche;
+  if (!hist.length) { toast('No hay ventas para exportar aún.'); return; }
+
+  const byMesa = {};
+  let totalGlobal = 0;
+  hist.forEach(r => {
+    if (!byMesa[r.mesa]) byMesa[r.mesa] = [];
+    byMesa[r.mesa].push(r);
+    totalGlobal += r.total;
+  });
+
+  let csv = 'Restaurante Delicias — Historial de Ventas\n';
+  csv += `Fecha,${new Date().toLocaleDateString('es-DO')}\n\n`;
+  csv += 'Mesa,Cliente,Hora,Producto,Cantidad,Precio Unitario,Subtotal,Mesero\n';
+
+  Object.keys(byMesa).sort((a,b)=>a-b).forEach(mesa => {
+    byMesa[mesa].forEach(r => {
+      r.detalles.forEach(d => {
+        csv += `Mesa ${mesa},Cliente ${r.clienteNum}${ordinal(r.clienteNum)},${r.hora},"${d.nombre}",${d.qty},${Math.round(d.precio)},${Math.round(d.sub)},"${r.mesero||''}"\n`;
+      });
+    });
+    const totMesa = byMesa[mesa].reduce((s,r)=>s+r.total,0);
+    csv += `Mesa ${mesa},Total Mesa,,,,, ${fmt(totMesa)},\n`;
+    csv += '\n';
+  });
+
+  csv += `\nINGRESO TOTAL DE LA NOCHE,,,,,, ${fmt(totalGlobal)},\n`;
+
+  // Ingreso por mesa resumen
+  csv += '\n\nRESUMEN POR MESA\n';
+  csv += 'Mesa,Clientes,Total\n';
+  Object.keys(byMesa).sort((a,b)=>a-b).forEach(mesa => {
+    const tot = byMesa[mesa].reduce((s,r)=>s+r.total,0);
+    csv += `Mesa ${mesa},${byMesa[mesa].length},"${fmt(tot)}"\n`;
+  });
+
+  const blob = new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Delicias_Ventas_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('📊 Archivo CSV descargado. Ábrelo en Google Sheets.');
+}
+
+// ═══════════════════════════════════════════════
+//  UTILIDADES
+// ═══════════════════════════════════════════════
+function ordinal(n) {
+  const os = ['°','°','°','°'];
+  return os[Math.min(n-1,3)] || '°';
+}
+
+function horaActual() {
+  return new Date().toLocaleTimeString('es-DO', { hour:'2-digit', minute:'2-digit' });
+}
+
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function renderAll() {
+  renderMesas();
+  renderProductosAdmin();
+}
+
+// Cerrar modales al hacer clic fuera
+document.getElementById('modal-mesa').addEventListener('click', function(e) {
+  if (e.target === this) cerrarModal();
+});
+document.getElementById('modal-edit-prod').addEventListener('click', function(e) {
+  if (e.target === this) cerrarModalEditProd();
+});
+document.getElementById('modal-hist-mesa').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+
+// ═══════════════════════════════════════════════
+//  ARRANQUE
+// ═══════════════════════════════════════════════
+initState();
+</script>
+</body>
+</html>
