@@ -425,7 +425,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
       <span><span class="sync-dot" id="sync-dot"></span><span id="sync-txt" style="font-size:.74rem;color:var(--text3)">En línea</span></span>
       <span id="fecha-lbl"></span>
       <div class="user-pill"><span id="header-username">—</span><span class="role-badge" id="header-role">—</span></div>
-      <button class="cierre-btn" id="btn-cierre" onclick="cierreCaja()">🔒 Cierre de Caja</button>
+      <button class="btn-ghost" id="btn-cierre" onclick="cierreCaja()">📊 Cierre de Caja</button>
       <button class="btn-ghost" onclick="doLogout()">Salir</button>
     </div>
   </header>
@@ -837,14 +837,12 @@ function actualizarTimersCocina(){
   }
 }
 
-// ── COLA COCINA (FIFO máx 5) ──────────────────────────────────
-// colaCocina: array de {num, mesa, items, tsConfirmado}
-// ordenados por tsOcupada ASC → los más viejos primero
-// historialCocinaLocal: pedidos ya servidos esta sesión (cuando mesa se libera)
-let historialCocinaLocal = []; // [{num,items,mesero,hora,mesa}]
+// ── COLA COCINA (últimas 5, más nuevas primero) ───────────────
+// Muestra los 5 pedidos más NUEVOS en pantalla.
+// "Pedidos Anteriores" = los que quedaron fuera (posición 6+) + los ya pagados/liberados.
+let historialCocinaLocal = []; // acumula: {mesaNum, mesero, hora, items, tipo:'oculta'|'pagada'}
 
 function renderCocina(){
-  // Recopilar mesas con comida, ordenadas por tiempo de ocupación (más antigua primero = FIFO)
   const mesasConComida = [];
   for(let i=1;i<=TOTAL_MESAS;i++){
     const m=state.mesas[i];
@@ -854,23 +852,46 @@ function renderCocina(){
       return p && (p.cat||'comida')==='comida' && qty>0;
     });
     if(itemsComida.length>0){
-      mesasConComida.push({
-        num:i, mesa:m, items:itemsComida,
-        ts: m.tsOcupada || 0
-      });
+      mesasConComida.push({num:i, mesa:m, items:itemsComida, ts: m.tsOcupada||0});
     }
   }
 
-  // Ordenar por tiempo de ocupación ASC (FIFO: el más antiguo = prioridad)
-  mesasConComida.sort((a,b)=>a.ts-b.ts);
+  // Ordenar DESC: los más nuevos primero
+  mesasConComida.sort((a,b)=>b.ts-a.ts);
 
-  // Tomar solo las 5 más antiguas
-  const visibles = mesasConComida.slice(0,5);
+  // Las 5 más nuevas se muestran en pantalla
+  const visibles  = mesasConComida.slice(0,5);
+  // Las que quedan fuera (posición 6+) van al historial como "ocultas"
+  const ocultas   = mesasConComida.slice(5);
+
+  // Sincronizar ocultas al historial local (evitar duplicados por mesaNum)
+  ocultas.forEach(({num, mesa, items})=>{
+    const yaEsta = historialCocinaLocal.some(h=>h.mesaNum===num && h.tipo==='oculta');
+    if(!yaEsta){
+      historialCocinaLocal.unshift({
+        mesaNum: num,
+        mesero: mesa.mesero||'—',
+        hora: hora(),
+        tipo: 'oculta',
+        items: items.map(([pid,qty])=>{
+          const p=state.productos.find(p=>String(p.id)===String(pid));
+          return {nombre:p?p.nombre:'?',qty};
+        })
+      });
+    }
+  });
+  // Si una mesa oculta volvió a ser visible (se liberaron mesas delante), limpiar su entrada 'oculta'
+  const numsVisibles = visibles.map(v=>v.num);
+  historialCocinaLocal = historialCocinaLocal.filter(h=>
+    !(h.tipo==='oculta' && numsVisibles.includes(h.mesaNum))
+  );
 
   const badge=$('cocina-badge');
   if(badge){
     const total=mesasConComida.length;
-    badge.textContent=`${total} mesa${total!==1?'s':''} activa${total!==1?'s':''}${total>5?' (mostrando 5)':''}`;
+    const oculN=ocultas.length;
+    badge.textContent=total===0?'Sin pedidos'
+      :`${total} pedido${total!==1?'s':''}${oculN>0?` · ${oculN} oculto${oculN!==1?'s':''}`:'' }`;
   }
 
   if(!visibles.length){
@@ -893,14 +914,15 @@ function renderCocina(){
       </div>`;
     }).join('');
 
-    // Número de orden FIFO visible
-    const ordenLabel = idx+1;
-    const ordenColor = idx===0?'var(--cook-accent)':'var(--cook-green)';
+    // idx 0 = más nuevo = recién llegado (resaltado)
+    const esNuevo = idx===0;
+    const borderColor = esNuevo ? 'var(--cook-accent)' : 'var(--cook-border)';
+    const extraClass  = esNuevo ? 'nueva' : '';
 
-    return `<div class="cocina-card nueva" style="animation-delay:${idx*0.08}s">
+    return `<div class="cocina-card ${extraClass}" style="border-color:${borderColor};">
       <div class="cocina-card-header">
         <div style="display:flex;align-items:flex-start;gap:10px;">
-          <div style="background:${ordenColor};color:#fff;font-family:'Playfair Display',serif;font-size:1rem;font-weight:900;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">${ordenLabel}</div>
+          <div style="background:${esNuevo?'var(--cook-accent)':'rgba(255,255,255,.1)'};color:${esNuevo?'#fff':'var(--cook-text2)'};font-family:'DM Sans',sans-serif;font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:20px;margin-top:4px;letter-spacing:.06em;white-space:nowrap;">${esNuevo?'🆕 NUEVO':'#'+(idx+1)}</div>
           <div>
             <div class="cocina-mesa-lbl">Mesa</div>
             <div class="cocina-mesa-num">${num}</div>
@@ -919,43 +941,56 @@ function renderCocina(){
 }
 
 // ── HISTORIAL COCINA ──────────────────────────────────────────
-// Captura pedidos de comida cuando una mesa se libera
+// Captura pedidos PAGADOS (mesa liberada → pasa a historial como tipo 'pagada')
+// y elimina cualquier entrada 'oculta' de esa misma mesa (ya que se solucionó)
 function capturarHistorialCocina(mesaNum, mesa, pedido){
   const itemsComida = Object.entries(pedido).filter(([pid,qty])=>{
     const p=state.productos.find(p=>String(p.id)===String(pid));
     return p && (p.cat||'comida')==='comida' && qty>0;
   });
   if(!itemsComida.length) return;
+
+  // Eliminar entrada 'oculta' de esta mesa si la había
+  historialCocinaLocal = historialCocinaLocal.filter(h=>!(h.mesaNum===mesaNum && h.tipo==='oculta'));
+
+  // Agregar como 'pagada' al inicio
   historialCocinaLocal.unshift({
     mesaNum,
     mesero: mesa.mesero||'—',
     hora: hora(),
+    tipo: 'pagada',
     items: itemsComida.map(([pid,qty])=>{
       const p=state.productos.find(p=>String(p.id)===String(pid));
       return {nombre:p?p.nombre:'?',qty};
     })
   });
-  // Guardar máx 50
-  if(historialCocinaLocal.length>50) historialCocinaLocal=historialCocinaLocal.slice(0,50);
+  if(historialCocinaLocal.length>80) historialCocinaLocal=historialCocinaLocal.slice(0,80);
 }
 
 window.abrirHistorialCocina = function(){
   const body=$('hist-cocina-body'); if(!body) return;
   if(!historialCocinaLocal.length){
-    body.innerHTML=`<div class="cocina-empty" style="padding:40px 20px;">
-      <div class="cocina-empty-icon">📋</div>
-      <div class="cocina-empty-txt">Sin pedidos anteriores en esta sesión</div>
+    body.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--cook-text2);">
+      <div style="font-size:3rem;opacity:.35;margin-bottom:12px;">📋</div>
+      <div>Sin pedidos anteriores en esta sesión</div>
     </div>`;
   } else {
-    body.innerHTML = historialCocinaLocal.map((h,i)=>`
-      <div style="background:rgba(255,255,255,.04);border:1px solid var(--cook-border);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--cook-text);font-weight:700;">Mesa ${h.mesaNum}</div>
-          <div style="font-size:.74rem;color:var(--cook-text2);">🕐 ${h.hora} &nbsp;·&nbsp; 👤 ${h.mesero}</div>
+    const tipoBadge={
+      oculta:`<span style="background:rgba(230,126,34,.18);color:#e67e22;border:1px solid rgba(230,126,34,.3);border-radius:20px;padding:2px 9px;font-size:.7rem;font-weight:700;">EN COLA</span>`,
+      pagada:`<span style="background:rgba(39,174,96,.15);color:#27ae60;border:1px solid rgba(39,174,96,.3);border-radius:20px;padding:2px 9px;font-size:.7rem;font-weight:700;">✓ ENTREGADO</span>`
+    };
+    body.innerHTML = historialCocinaLocal.map(h=>`
+      <div style="background:rgba(255,255,255,.04);border:1px solid var(--cook-border);border-radius:10px;padding:14px 16px;margin-bottom:9px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <span style="font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--cook-text);font-weight:700;">Mesa ${h.mesaNum}</span>
+            ${tipoBadge[h.tipo]||''}
+          </div>
+          <div style="font-size:.74rem;color:var(--cook-text2);">🕐 ${h.hora}&nbsp;·&nbsp;👤 ${h.mesero}</div>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:7px;">
           ${h.items.map(it=>`
-            <div style="background:rgba(233,69,96,.12);border:1px solid rgba(233,69,96,.25);border-radius:7px;padding:5px 12px;font-size:.9rem;color:var(--cook-text);font-weight:600;">
+            <div style="background:rgba(233,69,96,.1);border:1px solid rgba(233,69,96,.2);border-radius:7px;padding:5px 12px;font-size:.9rem;color:var(--cook-text);font-weight:600;">
               <span style="color:var(--cook-accent);font-family:'Playfair Display',serif;font-size:1.1rem;">${it.qty}×</span> ${it.nombre}
             </div>`).join('')}
         </div>
@@ -963,14 +998,6 @@ window.abrirHistorialCocina = function(){
   }
   $('modal-hist-cocina').classList.add('open');
 };
-
-// Capturar al liberar mesa (llamado desde marcarPagado)
-function onMesaLiberada(mesaNum, pedidoAntes, mesaAntes){
-  if(sesion?.role==='cocinero') return; // no aplica
-  // Notificar a la cocina (se hará vía Firebase onValue)
-  // Capturar historial local si sesion es cocina no aplica, pero guardamos en state para cocina
-  capturarHistorialCocina(mesaNum, mesaAntes, pedidoAntes);
-}
 
 // ── AUTH ──────────────────────────────────────────────────────
 window.doLogin = function(){
