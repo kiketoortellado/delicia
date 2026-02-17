@@ -303,7 +303,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
         <span id="header-username">—</span>
         <span class="role-badge" id="header-role">—</span>
       </div>
-      <button class="btn-ghost" id="btn-export" onclick="exportCSV()">📊 CSV</button>
+      <button class="btn-ghost" id="btn-export" onclick="exportCSV()">📊 Exportar XLSX</button>
       <button class="btn-ghost" onclick="doLogout()">Salir</button>
     </div>
   </header>
@@ -1106,31 +1106,302 @@ window.limpiarHistorial=async function(){
   toast('Historial limpiado.');
 };
 
-// ── EXPORT CSV ────────────────────────────────────────────────
-window.exportCSV=function(){
-  const h=state.historial||[];
-  if(!h.length){toast('No hay ventas para exportar.');return;}
-  const byMesa={}; let total=0;
-  h.forEach(r=>{ if(!byMesa[r.mesa]) byMesa[r.mesa]=[]; byMesa[r.mesa].push(r); total+=r.total; });
-  let csv=`Restaurante Delicias — Historial de Ventas\nFecha,${new Date().toLocaleDateString('es-PY')}\n\n`;
-  csv+='Mesa,Cliente,Hora,Producto,Cantidad,Precio Unitario,Subtotal,Mesero,Usuario\n';
-  Object.keys(byMesa).sort((a,b)=>a-b).forEach(mesa=>{
-    byMesa[mesa].forEach(r=>r.detalles.forEach(d=>{
-      csv+=`Mesa ${mesa},Cliente ${r.clienteNum}°,${r.hora},"${d.nombre}",${d.qty},${Math.round(d.precio)},${Math.round(d.sub)},"${r.mesero||''}","${r.usuario||''}"\n`;
-    }));
-    csv+=`Mesa ${mesa},Total Mesa,,,,,${fmt(byMesa[mesa].reduce((s,r)=>s+r.total,0))},,\n\n`;
-  });
-  csv+=`\nINGRESO TOTAL,,,,,,${fmt(total)},,\n\nRESUMEN POR MESA\nMesa,Clientes,Total\n`;
-  Object.keys(byMesa).sort((a,b)=>a-b).forEach(mesa=>
-    csv+=`Mesa ${mesa},${byMesa[mesa].length},"${fmt(byMesa[mesa].reduce((s,r)=>s+r.total,0))}"\n`);
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download=`Delicias_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();URL.revokeObjectURL(url);
-  registrarActividad('accion-admin','Exportó el historial de ventas a CSV');
-  toast('📊 CSV descargado.');
+// ── EXPORT XLSX ───────────────────────────────────────────────
+window.exportCSV = function(){
+  const hist = state.historial||[];
+  if(!hist.length){ toast('No hay ventas para exportar.'); return; }
+
+  // Cargar SheetJS dinámicamente
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  script.onload = () => generarXLSX(hist);
+  script.onerror = () => toast('⚠️ Error cargando librería XLSX. Verifica tu conexión.');
+  document.head.appendChild(script);
 };
+
+function generarXLSX(hist){
+  const XLSX = window.XLSX;
+  const wb   = XLSX.utils.book_new();
+  const fecha = new Date().toLocaleDateString('es-PY');
+
+  // ── Paleta de colores ──────────────────────────────────────
+  const C = {
+    rojoOscuro : 'C0392B',  // accent principal
+    rojoMedio  : 'E74C3C',  // accent2
+    rojoClaro  : 'FADBD8',  // fila detalle
+    grisOscuro : '2C2C2C',  // texto cabecera
+    grisMedio  : 'F2EDE8',  // fila alterna
+    blanco     : 'FFFFFF',
+    naranja    : 'E67E22',  // subtotal mesa
+    naranjaClr : 'FEF0E7',  // subtotal fondo
+    verdeOscuro: '1E8449',  // ingreso total
+    verdeClaro : 'D5F5E3',  // ingreso total fondo
+    azul       : '2980B9',  // resumen
+    azulClaro  : 'D6EAF8',  // resumen fondo
+    amarillo   : 'FFF3CD',  // fila par alterna
+  };
+
+  const estilo = (bgHex, fgHex='000000', bold=false, sz=10, border=false, align='left', numFmt='') => ({
+    fill : { fgColor:{ rgb: bgHex } },
+    font : { color:{ rgb: fgHex }, bold, sz, name:'Arial' },
+    alignment: { horizontal: align, vertical:'center', wrapText: true },
+    border: border ? {
+      top   :{style:'thin',color:{rgb:'CCCCCC'}},
+      bottom:{style:'thin',color:{rgb:'CCCCCC'}},
+      left  :{style:'thin',color:{rgb:'CCCCCC'}},
+      right :{style:'thin',color:{rgb:'CCCCCC'}}
+    } : {},
+    numFmt
+  });
+
+  // ── HOJA 1: Detalle de Ventas ─────────────────────────────
+  const ws1Data = [];
+  const ws1Merges = [];
+  const ws1Styles = {};  // fila,col -> estilo
+
+  // Título principal (fila 0)
+  ws1Data.push(['🍽 RESTAURANTE DELICIAS — HISTORIAL DE VENTAS','','','','','','','','']);
+  ws1Data.push([`Fecha: ${fecha}   |   Generado: ${new Date().toLocaleString('es-PY')}`,'','','','','','','','']);
+  ws1Data.push(['','','','','','','','','']); // espacio
+
+  // Cabecera de tabla (fila 3)
+  const headers = ['Mesa','Cliente','Hora','Producto','Cantidad','Precio Unit. (Gs.)','Subtotal (Gs.)','Mesero','Usuario'];
+  ws1Data.push(headers);
+
+  const byMesa = {};
+  let totalGlobal = 0;
+  hist.forEach(r=>{
+    if(!byMesa[r.mesa]) byMesa[r.mesa]=[];
+    byMesa[r.mesa].push(r);
+    totalGlobal += r.total;
+  });
+
+  let dataRowIdx = 4; // índice en ws1Data (0-based)
+  let altColor = false;
+
+  Object.keys(byMesa).sort((a,b)=>+a-+b).forEach(mesa=>{
+    const registros = byMesa[mesa];
+    let totalMesa = 0;
+    registros.forEach(r=>{
+      r.detalles.forEach(d=>{
+        ws1Data.push([
+          `Mesa ${mesa}`,
+          `Cliente ${r.clienteNum}°`,
+          r.hora,
+          d.nombre,
+          d.qty,
+          Math.round(d.precio),
+          Math.round(d.sub),
+          r.mesero||'—',
+          r.usuario||'—'
+        ]);
+        dataRowIdx++;
+        totalMesa += d.sub;
+      });
+      altColor = !altColor;
+    });
+    // Fila subtotal mesa
+    ws1Data.push([`SUBTOTAL MESA ${mesa}`,'','','','','',Math.round(totalMesa),'','']);
+    dataRowIdx++;
+    // Fila vacía entre mesas
+    ws1Data.push(['','','','','','','','','']);
+    dataRowIdx++;
+  });
+
+  // Total global
+  ws1Data.push(['','','','','','','','','']);
+  ws1Data.push(['💰 INGRESO TOTAL DE LA NOCHE','','','','','',Math.round(totalGlobal),'','']);
+
+  const ws1 = XLSX.utils.aoa_to_sheet(ws1Data);
+
+  // Anchos de columna
+  ws1['!cols'] = [
+    {wch:14},{wch:13},{wch:8},{wch:22},{wch:10},{wch:20},{wch:18},{wch:18},{wch:15}
+  ];
+
+  // Merges: título fila 0 y fila 1 abarcan todas las columnas
+  ws1['!merges'] = [
+    {s:{r:0,c:0},e:{r:0,c:8}},
+    {s:{r:1,c:0},e:{r:1,c:8}},
+  ];
+  // Merge subtotales y total (col 0..5)
+  let ri = 4;
+  Object.keys(byMesa).sort((a,b)=>+a-+b).forEach(mesa=>{
+    const registros = byMesa[mesa];
+    const totalFilas = registros.reduce((s,r)=>s+r.detalles.length,0);
+    ri += totalFilas;
+    ws1['!merges'].push({s:{r:ri,c:0},e:{r:ri,c:5}});  // subtotal merge
+    ri += 2; // subtotal + vacía
+  });
+  // Merge total global
+  const lastRow = ws1Data.length - 1;
+  ws1['!merges'].push({s:{r:lastRow,c:0},e:{r:lastRow,c:5}});
+
+  // Aplicar estilos celda por celda
+  function sc(r,c){ return XLSX.utils.encode_cell({r,c}); }
+
+  // Título
+  ws1[sc(0,0)] = { v: ws1Data[0][0], t:'s',
+    s: estilo(C.rojoOscuro, C.blanco, true, 14, false, 'center') };
+  ws1[sc(1,0)] = { v: ws1Data[1][0], t:'s',
+    s: estilo(C.rojoMedio, C.blanco, false, 9, false, 'center') };
+
+  // Cabecera
+  headers.forEach((h,ci)=>{
+    ws1[sc(3,ci)] = { v:h, t:'s',
+      s: estilo(C.grisOscuro, C.blanco, true, 10, true, 'center') };
+  });
+
+  // Filas de datos
+  let rowI = 4;
+  let alt  = false;
+  Object.keys(byMesa).sort((a,b)=>+a-+b).forEach(mesa=>{
+    const registros = byMesa[mesa];
+    registros.forEach(r=>{
+      r.detalles.forEach(d=>{
+        const bg = alt ? C.grisMedio : C.blanco;
+        const row = ws1Data[rowI];
+        row.forEach((v,ci)=>{
+          const isNum = ci===4||ci===5||ci===6;
+          ws1[sc(rowI,ci)] = {
+            v: isNum ? Number(v) : v, t: isNum?'n':'s',
+            s: estilo(bg,'000000',false,10,true, isNum?'right':'left',
+                      isNum?'#,##0':'')
+          };
+        });
+        rowI++;
+      });
+      alt = !alt;
+    });
+    // Subtotal
+    const stRow = ws1Data[rowI];
+    ws1[sc(rowI,0)] = { v: stRow[0], t:'s',
+      s: estilo(C.naranjaClr, C.naranja, true, 10, true, 'left') };
+    for(let ci=1;ci<=5;ci++) ws1[sc(rowI,ci)] = {v:'',t:'s', s:estilo(C.naranjaClr,C.naranja,true,10,true)};
+    ws1[sc(rowI,6)] = { v: Number(stRow[6]), t:'n',
+      s: estilo(C.naranjaClr, C.naranja, true, 10, true, 'right', '#,##0') };
+    ws1[sc(rowI,7)] = {v:'',t:'s',s:estilo(C.naranjaClr,C.naranja,true,10,true)};
+    ws1[sc(rowI,8)] = {v:'',t:'s',s:estilo(C.naranjaClr,C.naranja,true,10,true)};
+    rowI += 2; // +vacía
+  });
+
+  // Total global
+  ws1[sc(lastRow,0)] = { v: '💰 INGRESO TOTAL DE LA NOCHE', t:'s',
+    s: estilo(C.verdeOscuro, C.blanco, true, 12, true, 'left') };
+  for(let ci=1;ci<=5;ci++) ws1[sc(lastRow,ci)] = {v:'',t:'s', s:estilo(C.verdeOscuro,C.blanco,true,12,true)};
+  ws1[sc(lastRow,6)] = { v: Math.round(totalGlobal), t:'n',
+    s: estilo(C.verdeOscuro, C.blanco, true, 12, true, 'right','#,##0') };
+  ws1[sc(lastRow,7)] = {v:'',t:'s',s:estilo(C.verdeOscuro,C.blanco,true,12,true)};
+  ws1[sc(lastRow,8)] = {v:'',t:'s',s:estilo(C.verdeOscuro,C.blanco,true,12,true)};
+
+  ws1['!rows'] = [];
+  ws1['!rows'][0] = {hpt:28};
+  ws1['!rows'][1] = {hpt:16};
+  ws1['!rows'][3] = {hpt:20};
+
+  XLSX.utils.book_append_sheet(wb, ws1, 'Detalle de Ventas');
+
+  // ── HOJA 2: Resumen por Mesa ──────────────────────────────
+  const ws2Data = [
+    ['🍽 RESTAURANTE DELICIAS — RESUMEN POR MESA','','',''],
+    [`Fecha: ${fecha}`,'','',''],
+    [''],
+    ['Mesa','Clientes Atendidos','Ingreso Total (Gs.)','% del Total']
+  ];
+
+  Object.keys(byMesa).sort((a,b)=>+a-+b).forEach(mesa=>{
+    const clientes = byMesa[mesa].length;
+    const tot = byMesa[mesa].reduce((s,r)=>s+r.total,0);
+    const pct = totalGlobal>0 ? (tot/totalGlobal) : 0;
+    ws2Data.push([`Mesa ${mesa}`, clientes, Math.round(tot), pct]);
+  });
+
+  ws2Data.push(['']);
+  ws2Data.push(['TOTAL', hist.length, Math.round(totalGlobal), 1]);
+
+  const ws2 = XLSX.utils.aoa_to_sheet(ws2Data);
+  ws2['!cols'] = [{wch:14},{wch:20},{wch:22},{wch:14}];
+  ws2['!merges'] = [
+    {s:{r:0,c:0},e:{r:0,c:3}},
+    {s:{r:1,c:0},e:{r:1,c:3}},
+  ];
+
+  // Estilos hoja 2
+  ws2[sc(0,0)] = {v:ws2Data[0][0],t:'s', s:estilo(C.rojoOscuro,C.blanco,true,13,false,'center')};
+  ws2[sc(1,0)] = {v:ws2Data[1][0],t:'s', s:estilo(C.rojoMedio,C.blanco,false,9,false,'center')};
+  ['Mesa','Clientes Atendidos','Ingreso Total (Gs.)','% del Total'].forEach((h,ci)=>{
+    ws2[sc(3,ci)] = {v:h,t:'s', s:estilo(C.grisOscuro,C.blanco,true,10,true,'center')};
+  });
+
+  const mesaKeys = Object.keys(byMesa).sort((a,b)=>+a-+b);
+  mesaKeys.forEach((mesa,idx)=>{
+    const ri2 = 4+idx;
+    const bg = idx%2===0 ? C.azulClaro : C.blanco;
+    const row = ws2Data[ri2];
+    ws2[sc(ri2,0)] = {v:row[0],t:'s', s:estilo(bg,'000000',false,10,true,'left')};
+    ws2[sc(ri2,1)] = {v:Number(row[1]),t:'n', s:estilo(bg,'000000',false,10,true,'center')};
+    ws2[sc(ri2,2)] = {v:Number(row[2]),t:'n', s:estilo(bg,'000000',false,10,true,'right','#,##0')};
+    ws2[sc(ri2,3)] = {v:Number(row[3]),t:'n', s:estilo(bg,'000000',false,10,true,'center','0.0%')};
+  });
+
+  // Fila total
+  const totRI = 4 + mesaKeys.length + 1;
+  ws2[sc(totRI,0)] = {v:'TOTAL',t:'s',  s:estilo(C.verdeOscuro,C.blanco,true,11,true,'left')};
+  ws2[sc(totRI,1)] = {v:hist.length,t:'n',  s:estilo(C.verdeOscuro,C.blanco,true,11,true,'center')};
+  ws2[sc(totRI,2)] = {v:Math.round(totalGlobal),t:'n',s:estilo(C.verdeOscuro,C.blanco,true,11,true,'right','#,##0')};
+  ws2[sc(totRI,3)] = {v:1,t:'n',s:estilo(C.verdeOscuro,C.blanco,true,11,true,'center','0.0%')};
+
+  ws2['!rows'] = [];
+  ws2['!rows'][0] = {hpt:26};
+  ws2['!rows'][3] = {hpt:18};
+
+  XLSX.utils.book_append_sheet(wb, ws2, 'Resumen por Mesa');
+
+  // ── HOJA 3: Actividad de Usuarios ────────────────────────
+  const ws3Data = [
+    ['🍽 RESTAURANTE DELICIAS — ACTIVIDAD DE USUARIOS','','','',''],
+    [`Fecha: ${fecha}`,'','','',''],
+    [''],
+    ['Fecha/Hora','Usuario','Rol','Acción','']
+  ];
+
+  (state.actividad||[]).slice(0,500).forEach(a=>{
+    ws3Data.push([a.fechaHora||'—', a.usuario||'—', a.role==='admin'?'Admin':'Mesero', a.msg||'—','']);
+  });
+
+  const ws3 = XLSX.utils.aoa_to_sheet(ws3Data);
+  ws3['!cols'] = [{wch:18},{wch:20},{wch:10},{wch:50},{wch:5}];
+  ws3['!merges'] = [{s:{r:0,c:0},e:{r:0,c:4}},{s:{r:1,c:0},e:{r:1,c:4}}];
+
+  ws3[sc(0,0)] = {v:ws3Data[0][0],t:'s',s:estilo(C.rojoOscuro,C.blanco,true,13,false,'center')};
+  ws3[sc(1,0)] = {v:ws3Data[1][0],t:'s',s:estilo(C.rojoMedio,C.blanco,false,9,false,'center')};
+  ['Fecha/Hora','Usuario','Rol','Acción',''].forEach((h,ci)=>{
+    ws3[sc(3,ci)] = {v:h,t:'s',s:estilo(C.grisOscuro,C.blanco,true,10,true,'center')};
+  });
+  (state.actividad||[]).slice(0,500).forEach((a,idx)=>{
+    const ri3 = 4+idx;
+    const bg = idx%2===0?C.grisMedio:C.blanco;
+    const row = ws3Data[ri3];
+    row.forEach((v,ci)=>{
+      ws3[sc(ri3,ci)] = {v:v||'',t:'s',s:estilo(bg,'000000',false,9,true,'left')};
+    });
+    if(a.role==='admin'){
+      ws3[sc(ri3,2)] = {v:'Admin',t:'s',s:estilo(bg,C.rojoOscuro,true,9,true,'center')};
+    }
+  });
+
+  ws3['!rows'] = [];
+  ws3['!rows'][0] = {hpt:26};
+  ws3['!rows'][3] = {hpt:18};
+
+  XLSX.utils.book_append_sheet(wb, ws3, 'Actividad de Usuarios');
+
+  // ── Descargar ─────────────────────────────────────────────
+  const fechaArch = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `Restaurante_Delicias_${fechaArch}.xlsx`);
+  registrarActividad('accion-admin','Exportó el historial de ventas a XLSX');
+  toast('📊 Excel descargado: Restaurante_Delicias_'+fechaArch+'.xlsx');
+}
 
 // ── CERRAR MODALES ────────────────────────────────────────────
 $('modal-mesa').addEventListener('click',function(e){if(e.target===this)window.cerrarModal();});
