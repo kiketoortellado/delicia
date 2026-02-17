@@ -10,19 +10,21 @@
   --bg:#f5f2ee;--surface:#fff;--surface2:#faf8f5;--border:#e8e2da;
   --accent:#c0392b;--accent2:#e74c3c;--text:#1a1612;--text2:#5a5248;--text3:#9a928a;
   --green:#27ae60;--orange:#e67e22;--red:#c0392b;--blue:#2980b9;--purple:#8e44ad;
+  --cook-bg:#1a1a2e;--cook-surface:#16213e;--cook-card:#0f3460;--cook-accent:#e94560;
+  --cook-text:#eaeaea;--cook-text2:#a0a0b0;--cook-border:#2a2a4a;--cook-green:#00d4aa;
   --shadow:0 2px 16px rgba(0,0,0,.08);--shadow-lg:0 8px 32px rgba(0,0,0,.12);
   --radius:12px;--radius-sm:8px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-/* LOADING */
+/* ═══ LOADING ═══════════════════════════════════════════════ */
 #loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;}
 .spinner{width:44px;height:44px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-txt{font-size:.9rem;color:var(--text3);}
 
-/* LOGIN */
+/* ═══ LOGIN ══════════════════════════════════════════════════ */
 #login-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:999;
   background-image:radial-gradient(ellipse at 20% 50%,rgba(192,57,43,.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(184,134,11,.06) 0%,transparent 60%);}
 #login-screen.show{display:flex;}
@@ -39,12 +41,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .login-btn:active{transform:scale(.98);}
 .login-err{color:var(--red);font-size:.85rem;margin-top:12px;min-height:20px;}
 
-/* SYNC */
+/* ═══ SYNC ═══════════════════════════════════════════════════ */
 .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px;animation:pulse 2s infinite;}
 .sync-dot.offline{background:var(--red);animation:none;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
-/* HEADER */
+/* ═══ HEADER ═════════════════════════════════════════════════ */
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 14px;
   display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
   position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.05);}
@@ -60,6 +62,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 .role-badge{font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;}
 .role-badge.admin{background:rgba(192,57,43,.12);color:var(--accent);}
 .role-badge.mesero{background:rgba(41,128,185,.12);color:var(--blue);}
+.role-badge.cocinero{background:rgba(231,76,60,.15);color:#e67e22;}
 .btn-ghost{padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:transparent;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s;}
 @media(min-width:768px){.btn-ghost{padding:7px 14px;font-size:.83rem;}}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:rgba(192,57,43,.04);}
@@ -72,7 +75,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 @media(min-width:768px){.cierre-btn{padding:8px 14px;font-size:.83rem;}}
 .cierre-btn:hover{opacity:.82;}
 
-/* TABS */
+/* ═══ TABS ════════════════════════════════════════════════════ */
 .tabs{display:flex;gap:2px;background:var(--surface);padding:14px 14px 0;border-bottom:1px solid var(--border);overflow-x:auto;}
 @media(min-width:768px){.tabs{padding:14px 28px 0;}}
 .tab{padding:10px 16px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:.86rem;font-weight:500;color:var(--text3);cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent;transition:all .2s;border-radius:6px 6px 0 0;}
@@ -80,7 +83,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
 .tab.admin-only.active{color:var(--purple);border-bottom-color:var(--purple);}
 
-/* MAIN */
+/* ═══ MAIN ════════════════════════════════════════════════════ */
 .main{padding:16px;margin:0 auto;}
 @media(min-width:768px){.main{padding:24px;}}
 @media(min-width:1024px){.main{padding:28px 32px;}}
@@ -88,13 +91,13 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 @media(min-width:768px){.section-title{font-size:1.25rem;margin-bottom:20px;}}
 .badge{font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(192,57,43,.1);color:var(--accent);}
 
-/* MESAS GRID */
+/* ═══ MESAS GRID ════════════════════════════════════════════= */
 .mesas-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
 @media(min-width:600px){.mesas-grid{grid-template-columns:repeat(3,1fr);gap:14px;}}
 @media(min-width:900px){.mesas-grid{grid-template-columns:repeat(4,1fr);gap:18px;}}
 @media(min-width:1200px){.mesas-grid{grid-template-columns:repeat(6,1fr);gap:20px;}}
 
-/* TARJETA MESA */
+/* ═══ TARJETA MESA ══════════════════════════════════════════= */
 .mesa-card{background:var(--surface);border-radius:var(--radius);border:1.5px solid var(--border);
   padding:14px 12px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;
   min-height:120px;display:flex;flex-direction:column;justify-content:space-between;}
@@ -104,7 +107,6 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 .mesa-card.ocupada::before{background:var(--accent);}
 .mesa-card.ocupada{border-color:rgba(192,57,43,.3);background:rgba(192,57,43,.02);}
 .mesa-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px);}
-.mesa-top{}
 .mesa-num{font-family:'Playfair Display',serif;font-size:2rem;color:var(--text);font-weight:700;line-height:1;}
 @media(min-width:900px){.mesa-num{font-size:2.8rem;}}
 @media(min-width:1200px){.mesa-num{font-size:3.2rem;}}
@@ -114,18 +116,16 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 .mesa-status.libre{background:rgba(39,174,96,.1);color:var(--green);}
 .mesa-status.ocupada{background:rgba(192,57,43,.1);color:var(--accent);}
 .mesa-status::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;}
-.mesa-bottom{}
 .mesa-mesero{font-size:.72rem;color:var(--text3);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 @media(min-width:900px){.mesa-mesero{font-size:.8rem;}}
 .mesa-total{font-size:.9rem;font-weight:600;color:var(--text2);margin-top:2px;}
 @media(min-width:900px){.mesa-total{font-size:1rem;}}
-/* TIMER */
 .mesa-timer{font-size:.76rem;font-weight:700;color:var(--orange);margin-top:3px;display:flex;align-items:center;gap:3px;font-variant-numeric:tabular-nums;}
 @media(min-width:900px){.mesa-timer{font-size:.86rem;}}
 .mesa-timer.alerta{color:var(--red);animation:timerPulse 1s infinite;}
 @keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.45}}
 
-/* MODAL */
+/* ═══ MODAL ══════════════════════════════════════════════════ */
 .modal-overlay{position:fixed;inset:0;background:rgba(26,22,18,.55);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:0;overflow-y:auto;backdrop-filter:blur(3px);}
 @media(min-width:600px){.modal-overlay{padding:14px;}}
 .modal-overlay.open{display:flex;}
@@ -141,13 +141,13 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 .modal-body{padding:14px 16px;}
 @media(min-width:600px){.modal-body{padding:20px 26px;}}
 
-/* FORM */
+/* ═══ FORM ════════════════════════════════════════════════════ */
 .field{margin-bottom:13px;}
 .field label{display:block;font-size:.75rem;font-weight:600;color:var(--text2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;}
 .field input,.field select{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.92rem;background:var(--surface2);color:var(--text);transition:border-color .2s;}
 .field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
 
-/* CATEGORIAS */
+/* ═══ CATEGORIAS ═════════════════════════════════════════════ */
 .cat-tabs{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
 .cat-tab{padding:5px 11px;border:1.5px solid var(--border);border-radius:20px;background:var(--surface2);font-family:'DM Sans',sans-serif;font-size:.74rem;font-weight:600;cursor:pointer;transition:all .18s;color:var(--text2);}
 .cat-tab.active{color:#fff;border-color:transparent;}
@@ -156,7 +156,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 .cat-tab[data-cat="comida"].active{background:var(--green);}
 .cat-tab[data-cat="postre"].active{background:var(--purple);}
 
-/* PEDIDO */
+/* ═══ PEDIDO ══════════════════════════════════════════════════ */
 .pedido-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 @media(max-width:560px){.pedido-layout{grid-template-columns:1fr;}}
 .productos-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:280px;overflow-y:auto;}
@@ -178,14 +178,14 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 .orden-total{border-top:2px solid var(--border);margin-top:9px;padding-top:9px;display:flex;justify-content:space-between;align-items:center;}
 .total-amount{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--accent);}
 
-/* CLIENTES */
+/* ═══ CLIENTES ════════════════════════════════════════════════ */
 .cliente-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:8px;}
 .cliente-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
 .cliente-num{font-family:'Playfair Display',serif;font-size:.92rem;color:var(--accent);font-weight:700;}
 .cliente-items-list{font-size:.79rem;color:var(--text3);}
 .mesero-badge{display:inline-flex;align-items:center;gap:4px;font-size:.74rem;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:2px 8px;margin-top:4px;}
 
-/* ACCIONES MODAL */
+/* ═══ ACCIONES MODAL ══════════════════════════════════════════ */
 .modal-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);}
 .btn-success{background:var(--green);color:#fff;border:none;padding:9px 16px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-weight:600;font-size:.84rem;cursor:pointer;transition:opacity .2s;}
 .btn-success:hover{opacity:.85;}
@@ -196,7 +196,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 .btn-blue{background:var(--blue);color:#fff;border:none;padding:9px 16px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-weight:600;font-size:.84rem;cursor:pointer;transition:opacity .2s;}
 .btn-blue:hover{opacity:.85;}
 
-/* PRODUCTOS ADMIN */
+/* ═══ PRODUCTOS ADMIN ═════════════════════════════════════════ */
 .add-prod-form{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;}
 @media(min-width:700px){.add-prod-form{grid-template-columns:2fr 1fr 1fr auto;}}
 @media(max-width:500px){.add-prod-form{grid-template-columns:1fr;}}
@@ -212,7 +212,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 .icon-btn{width:32px;height:32px;border:1.5px solid var(--border);border-radius:7px;background:#fff;cursor:pointer;font-size:.84rem;transition:all .15s;}
 .icon-btn:hover{border-color:var(--accent);}
 
-/* HISTORIAL */
+/* ═══ HISTORIAL ══════════════════════════════════════════════ */
 .report-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:14px;}
 @media(min-width:600px){.report-summary{grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}}
 .stat-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:13px;}
@@ -229,7 +229,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 .empty-state{text-align:center;padding:46px 20px;color:var(--text3);}
 .empty-state .icon{font-size:2.8rem;margin-bottom:10px;}
 
-/* ADMIN PANEL */
+/* ═══ ADMIN PANEL ════════════════════════════════════════════ */
 .admin-grid{display:grid;grid-template-columns:1fr;gap:14px;}
 @media(min-width:900px){.admin-grid{grid-template-columns:1fr 1fr;gap:18px;}}
 .admin-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;}
@@ -257,7 +257,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 .activity-user{font-weight:600;color:var(--text);}
 .activity-meta{font-size:.72rem;color:var(--text3);margin-top:1px;}
 
-/* BOTTOM NAV MÓVIL */
+/* ═══ BOTTOM NAV MÓVIL ═══════════════════════════════════════ */
 .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1.5px solid var(--border);z-index:150;box-shadow:0 -4px 20px rgba(0,0,0,.08);}
 .bottom-nav-inner{display:flex;align-items:stretch;}
 .bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 4px;border:none;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.62rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;gap:3px;transition:color .2s;min-height:56px;}
@@ -267,23 +267,118 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 @media(max-width:767px){.tabs{display:none!important;}.bottom-nav{display:block;}.main{padding-bottom:70px!important;}}
 @media(min-width:768px){.bottom-nav{display:none!important;}.tabs{display:flex!important;}}
 
-/* TICKET IMPRESIÓN */
+/* ═══ TICKET — 80mm EXACTO ════════════════════════════════════ */
+/* 80mm = 302.36px @ 96dpi */
 #ticket-print{display:none;}
 @media print{
-  body>*{display:none!important;}
-  #ticket-print{display:block!important;position:fixed;inset:0;background:#fff;z-index:99999;padding:8px;}
+  @page{
+    size:80mm auto;
+    margin:0;
+  }
+  *{-webkit-print-color-adjust:exact!important;color-adjust:exact!important;print-color-adjust:exact!important;}
+  body>*:not(#ticket-print){display:none!important;}
+  #ticket-print{
+    display:block!important;
+    position:fixed;inset:0;
+    background:#fff;
+    z-index:99999;
+  }
 }
-.ticket-wrap{width:80mm;max-width:310px;margin:0 auto;font-family:'Courier New',monospace;font-size:12px;color:#000;background:#fff;padding:8px 6px;}
-.ticket-title{text-align:center;font-size:18px;font-weight:900;letter-spacing:2px;margin-bottom:1px;}
-.ticket-sub{text-align:center;font-size:10px;margin-bottom:6px;color:#444;}
-.ticket-div{border-top:1px dashed #000;margin:5px 0;}
-.ticket-row{display:flex;justify-content:space-between;margin:2px 0;font-size:11px;}
+.ticket-wrap{
+  width:72mm;          /* área imprimible = 80mm - 4mm márgenes c/lado */
+  max-width:302px;     /* fallback pantalla */
+  margin:0 auto;
+  font-family:'Courier New',Courier,monospace;
+  font-size:11pt;      /* ~14.67px */
+  line-height:1.45;
+  color:#000;
+  background:#fff;
+  padding:3mm 4mm;     /* margen interno estándar TPV */
+}
+.ticket-title{text-align:center;font-size:15pt;font-weight:900;letter-spacing:2px;margin-bottom:0;}
+.ticket-sub{text-align:center;font-size:9pt;margin-bottom:4mm;color:#444;}
+.ticket-div{
+  border:none;
+  border-top:1px dashed #000;
+  margin:3mm 0;
+  width:100%;
+}
+.ticket-row{
+  display:flex;
+  justify-content:space-between;
+  margin:1mm 0;
+  font-size:10pt;
+}
 .ticket-row.bold{font-weight:700;}
-.ticket-row.total{font-weight:900;font-size:14px;border-top:2px solid #000;margin-top:4px;padding-top:4px;}
-.ticket-center{text-align:center;font-size:10px;margin-top:6px;color:#555;}
-.ticket-cat-hdr{font-size:10px;font-weight:700;margin-top:6px;margin-bottom:1px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #ccc;padding-bottom:1px;}
+.ticket-row.total{
+  font-weight:900;
+  font-size:13pt;
+  border-top:2px solid #000;
+  margin-top:3mm;
+  padding-top:2mm;
+}
+.ticket-center{text-align:center;font-size:9pt;margin-top:4mm;color:#555;}
+.ticket-cat-hdr{
+  font-size:9pt;
+  font-weight:700;
+  margin-top:4mm;
+  margin-bottom:1mm;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  border-bottom:1px solid #ccc;
+  padding-bottom:1mm;
+}
+.ticket-item-name{flex:1;padding-right:4mm;word-break:break-word;}
+.ticket-item-price{white-space:nowrap;text-align:right;font-weight:700;}
+.ticket-corte{
+  border:none;
+  border-top:2px dashed #000;
+  margin:6mm 0 0;
+  width:100%;
+}
 
-/* TOAST */
+/* ═══ VISTA COCINERO ══════════════════════════════════════════ */
+#cocina-app{display:none;}
+#cocina-app.show{display:flex;flex-direction:column;min-height:100vh;background:var(--cook-bg);}
+.cocina-header{background:var(--cook-surface);border-bottom:2px solid var(--cook-border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.cocina-brand{display:flex;align-items:center;gap:12px;}
+.cocina-logo{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--cook-accent);}
+.cocina-subtitle{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cook-text2);}
+.cocina-user-pill{background:rgba(233,69,96,.15);border:1px solid rgba(233,69,96,.3);border-radius:20px;padding:5px 14px;font-size:.8rem;color:var(--cook-accent);font-weight:600;}
+.cocina-salir{padding:8px 14px;background:transparent;border:1.5px solid var(--cook-border);border-radius:8px;color:var(--cook-text2);font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer;transition:all .2s;}
+.cocina-salir:hover{border-color:var(--cook-accent);color:var(--cook-accent);}
+.cocina-main{padding:18px;flex:1;}
+@media(min-width:768px){.cocina-main{padding:24px 28px;}}
+.cocina-titulo{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--cook-text);margin-bottom:20px;display:flex;align-items:center;gap:12px;}
+.cocina-badge{background:var(--cook-accent);color:#fff;font-size:.78rem;font-weight:700;padding:3px 12px;border-radius:20px;}
+.cocina-grid{display:grid;grid-template-columns:1fr;gap:16px;}
+@media(min-width:600px){.cocina-grid{grid-template-columns:repeat(2,1fr);gap:18px;}}
+@media(min-width:1000px){.cocina-grid{grid-template-columns:repeat(3,1fr);gap:22px;}}
+@media(min-width:1400px){.cocina-grid{grid-template-columns:repeat(4,1fr);gap:24px;}}
+
+/* Tarjeta cocina */
+.cocina-card{background:var(--cook-surface);border:2px solid var(--cook-border);border-radius:14px;overflow:hidden;transition:all .25s;position:relative;}
+.cocina-card.nueva{border-color:var(--cook-accent);box-shadow:0 0 24px rgba(233,69,96,.25);animation:pulseCard 2s ease-in-out infinite;}
+@keyframes pulseCard{0%,100%{box-shadow:0 0 24px rgba(233,69,96,.25)}50%{box-shadow:0 0 40px rgba(233,69,96,.45)}}
+.cocina-card-header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.04);}
+.cocina-mesa-num{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;color:var(--cook-text);line-height:1;}
+.cocina-mesa-lbl{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cook-text2);margin-bottom:2px;}
+.cocina-timer-big{font-size:1rem;font-weight:700;color:var(--cook-green);font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:5px;}
+.cocina-timer-big.alerta{color:var(--cook-accent);}
+.cocina-card-body{padding:14px 20px 20px;}
+.cocina-items-list{display:flex;flex-direction:column;gap:8px;}
+.cocina-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(255,255,255,.05);border-radius:8px;border-left:3px solid var(--cook-green);}
+.cocina-item-qty{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--cook-accent);min-width:42px;text-align:center;line-height:1;}
+.cocina-item-name{font-size:1.05rem;font-weight:600;color:var(--cook-text);}
+.cocina-item-cat{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--cook-text2);margin-top:1px;}
+.cocina-card-footer{padding:12px 20px 16px;border-top:1px solid var(--cook-border);}
+.cocina-mesero{font-size:.8rem;color:var(--cook-text2);}
+
+.cocina-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;color:var(--cook-text2);text-align:center;}
+.cocina-empty-icon{font-size:4rem;margin-bottom:16px;opacity:.4;}
+.cocina-empty-txt{font-size:1.1rem;opacity:.6;}
+
+/* ═══ TOAST ═══════════════════════════════════════════════════ */
 .toast{position:fixed;bottom:80px;right:16px;background:var(--text);color:#fff;padding:10px 16px;border-radius:var(--radius-sm);font-size:.84rem;z-index:9999;animation:toastIn .3s ease;box-shadow:var(--shadow-lg);max-width:300px;}
 @media(min-width:768px){.toast{bottom:24px;right:24px;}}
 @keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -314,7 +409,9 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 <!-- TICKET (solo impresión) -->
 <div id="ticket-print"></div>
 
-<!-- APP -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- APP NORMAL (Admin / Mesero)                               -->
+<!-- ══════════════════════════════════════════════════════════ -->
 <div id="app" class="hidden">
   <header>
     <div class="header-brand">
@@ -398,6 +495,13 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
                 <div class="field" style="margin:0"><label>Usuario</label><input type="text" id="nu-user" placeholder="juanp"/></div>
                 <div class="field" style="margin:0"><label>Contraseña</label><input type="password" id="nu-pass" placeholder="••••••"/></div>
                 <div class="field" style="margin:0"><label>Confirmar</label><input type="password" id="nu-pass2" placeholder="••••••"/></div>
+                <div class="field" style="margin:0;grid-column:1/-1">
+                  <label>Rol</label>
+                  <select id="nu-role" style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.92rem;background:var(--surface2);color:var(--text);">
+                    <option value="mesero">🍽 Mesero</option>
+                    <option value="cocinero">👨‍🍳 Cocinero/a</option>
+                  </select>
+                </div>
               </div>
               <div style="display:flex;gap:7px;margin-bottom:12px;">
                 <button class="btn-success" onclick="crearUsuario()">✅ Crear</button>
@@ -430,6 +534,38 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
     <button class="bnav-btn" id="bnav-productos" onclick="setTabMobile('productos',this)"><span class="bnav-icon">🛒</span>Productos</button>
     <button class="bnav-btn" id="bnav-historial" onclick="setTabMobile('historial',this)"><span class="bnav-icon">📋</span>Historial</button>
     <button class="bnav-btn admin-nav hidden" id="bnav-admin" onclick="setTabMobile('admin',this)"><span class="bnav-icon">⚙️</span>Admin</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- APP COCINA (Cocinero/a)                                   -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="cocina-app">
+  <div class="cocina-header">
+    <div class="cocina-brand">
+      <div>
+        <div class="cocina-logo">🍳 Cocina</div>
+        <div class="cocina-subtitle">Delicias — Pedidos activos</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span><span class="sync-dot" id="sync-dot-cocina"></span><span id="sync-txt-cocina" style="font-size:.74rem;color:var(--cook-text2)">En línea</span></span>
+      <div class="cocina-user-pill" id="cocina-user-lbl">👨‍🍳 —</div>
+      <button class="cocina-salir" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="cocina-main">
+    <div class="cocina-titulo">
+      Pedidos de Comida
+      <span class="cocina-badge" id="cocina-badge">0 mesas</span>
+    </div>
+    <div class="cocina-grid" id="cocina-grid">
+      <div class="cocina-empty">
+        <div class="cocina-empty-icon">🍽</div>
+        <div class="cocina-empty-txt">Sin pedidos activos</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -547,11 +683,10 @@ const db    = getDatabase(fbApp);
 // ── CONSTANTES ────────────────────────────────────────────────
 const CURRENCY    = 'Gs.';
 const TOTAL_MESAS = 12;
-const SESSION_KEY = 'delicias_sess_v3';
+const SESSION_KEY = 'delicias_sess_v4';
 const TZ          = 'America/Asuncion';
 const MASTER      = {id:'admin',username:'ADMIN',nombre:'Administrador',role:'admin'};
 
-// Categorías por defecto de los productos originales
 const CAT_DEFAULT = {
   'Coca Cola':'bebida','Pizza':'comida','Lomito':'comida','Jugos':'bebida',
   'Cerveza':'bebida','Agua':'bebida','Hamburguesa':'comida','Papas fritas':'comida',
@@ -567,7 +702,8 @@ let sesion = null;
 let mesaAbierta = null;
 let pedidoActual = {};
 let catActiva = 'todos';
-let timerInterval = null; // intervalo global para actualizar timers
+let timerInterval = null;
+let cocinaTimerInterval = null;
 
 // ── DOM ───────────────────────────────────────────────────────
 window.$ = id => document.getElementById(id);
@@ -596,7 +732,7 @@ async function boot(){
     $('loading-screen').style.display='none';
     const saved=loadSession();
     if(saved && (saved.id==='admin'||state.usuarios.find(u=>u.id===saved.id))){
-      sesion=saved; mostrarApp();
+      sesion=saved; mostrarSegunRol();
     } else { clearSession(); mostrarLogin(); }
   }catch(err){
     console.error(err);
@@ -606,11 +742,27 @@ async function boot(){
   }
 }
 
-function mostrarLogin(){ $('login-screen').classList.add('show'); }
+function mostrarLogin(){
+  $('login-screen').classList.add('show');
+  $('app').classList.add('hidden');
+  $('cocina-app').classList.remove('show');
+}
 function ocultarLogin(){ $('login-screen').classList.remove('show'); }
 
+function mostrarSegunRol(){
+  if(sesion.role==='cocinero'){
+    ocultarLogin();
+    $('app').classList.add('hidden');
+    mostrarCocina();
+  } else {
+    ocultarLogin();
+    $('cocina-app').classList.remove('show');
+    mostrarApp();
+  }
+}
+
+// ── VISTA NORMAL (Admin / Mesero) ─────────────────────────────
 function mostrarApp(){
-  ocultarLogin();
   $('app').classList.remove('hidden');
   $('header-username').textContent = sesion.nombre||sesion.username;
   $('header-role').textContent     = sesion.role==='admin'?'Admin':'Mesero';
@@ -620,6 +772,7 @@ function mostrarApp(){
     $('tab-admin-btn').classList.remove('hidden');
     $('btn-limpiar-wrap').style.display='block';
     $('btn-cierre').style.display='flex';
+    $('add-prod-wrap').style.display='';
     const ba=$('bnav-admin'); if(ba) ba.classList.remove('hidden');
   } else {
     $('tab-admin-btn').classList.add('hidden');
@@ -631,8 +784,98 @@ function mostrarApp(){
   $('inp-mesero').value = sesion.nombre||sesion.username;
   renderMesas();
   renderProductosAdmin();
+  renderHistorial();
   iniciarTimers();
   registrarActividad('accion-login','Ingresó al sistema');
+}
+
+// ── VISTA COCINA ──────────────────────────────────────────────
+function mostrarCocina(){
+  $('cocina-app').classList.add('show');
+  $('cocina-user-lbl').textContent = '👨‍🍳 '+(sesion.nombre||sesion.username);
+  renderCocina();
+  iniciarTimersCocina();
+  registrarActividad('accion-login','Ingresó como Cocinero/a');
+}
+
+function iniciarTimersCocina(){
+  detenerTimersCocina();
+  cocinaTimerInterval = setInterval(actualizarTimersCocina, 1000);
+}
+function detenerTimersCocina(){
+  if(cocinaTimerInterval){ clearInterval(cocinaTimerInterval); cocinaTimerInterval=null; }
+}
+function actualizarTimersCocina(){
+  const ahora = Date.now();
+  for(let i=1;i<=TOTAL_MESAS;i++){
+    const el = document.getElementById(`cocina-timer-${i}`);
+    if(!el) continue;
+    const m = state.mesas[i];
+    if(!m||!m.ocupada||!m.tsOcupada){ el.textContent=''; el.className='cocina-timer-big'; continue; }
+    const diff = Math.floor((ahora - m.tsOcupada)/1000);
+    const h2=Math.floor(diff/3600), mn=Math.floor((diff%3600)/60), s=diff%60;
+    el.textContent = h2>0
+      ? `⏱ ${h2}h ${String(mn).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`
+      : `⏱ ${String(mn).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+    el.className = 'cocina-timer-big'+(diff>=5400?' alerta':'');
+  }
+}
+
+function renderCocina(){
+  // Solo mesas ocupadas con ítems de categoría "comida"
+  const mesasConComida = [];
+  for(let i=1;i<=TOTAL_MESAS;i++){
+    const m=state.mesas[i];
+    if(!m||!m.ocupada||!m.pedidoActual) continue;
+    const itemsComida = Object.entries(m.pedidoActual).filter(([pid,qty])=>{
+      const p=state.productos.find(p=>String(p.id)===String(pid));
+      return p && (p.cat||'comida')==='comida' && qty>0;
+    });
+    if(itemsComida.length>0) mesasConComida.push({num:i,mesa:m,items:itemsComida});
+  }
+
+  const badge=$('cocina-badge');
+  if(badge) badge.textContent=`${mesasConComida.length} mesa${mesasConComida.length!==1?'s':''}`;
+
+  const syncDot=$('sync-dot-cocina'), syncTxt=$('sync-txt-cocina');
+
+  if(!mesasConComida.length){
+    html('cocina-grid',`<div class="cocina-empty">
+      <div class="cocina-empty-icon">🍽</div>
+      <div class="cocina-empty-txt">Sin pedidos de comida activos</div>
+    </div>`);
+    return;
+  }
+
+  html('cocina-grid', mesasConComida.map(({num,mesa,items})=>{
+    const itemsHtml = items.map(([pid,qty])=>{
+      const p=state.productos.find(p=>String(p.id)===String(pid));
+      if(!p) return '';
+      return `<div class="cocina-item">
+        <div class="cocina-item-qty">${qty}</div>
+        <div>
+          <div class="cocina-item-name">${p.nombre}</div>
+          <div class="cocina-item-cat">🍕 Comida</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="cocina-card nueva">
+      <div class="cocina-card-header">
+        <div>
+          <div class="cocina-mesa-lbl">Mesa</div>
+          <div class="cocina-mesa-num">${num}</div>
+        </div>
+        <div id="cocina-timer-${num}" class="cocina-timer-big"></div>
+      </div>
+      <div class="cocina-card-body">
+        <div class="cocina-items-list">${itemsHtml}</div>
+      </div>
+      ${mesa.mesero?`<div class="cocina-card-footer"><div class="cocina-mesero">👤 Mesero: ${mesa.mesero}</div></div>`:''}
+    </div>`;
+  }).join(''));
+
+  actualizarTimersCocina();
 }
 
 // ── AUTH ──────────────────────────────────────────────────────
@@ -640,17 +883,22 @@ window.doLogin = function(){
   const u=$('inp-user').value.trim().toUpperCase();
   const p=$('inp-pass').value.trim();
   $('login-err').textContent='';
-  if(u==='ADMIN'&&p==='1234RD'){ sesion={...MASTER}; saveSession(sesion); mostrarApp(); return; }
+  if(u==='ADMIN'&&p==='1234RD'){ sesion={...MASTER}; saveSession(sesion); mostrarSegunRol(); return; }
   const found=state.usuarios.find(x=>x.username.toUpperCase()===u&&x.password===p);
-  if(found){ sesion={id:found.id,username:found.username,nombre:found.nombre,role:'mesero'}; saveSession(sesion); mostrarApp(); }
-  else $('login-err').textContent='Usuario o contraseña incorrectos.';
+  if(found){
+    sesion={id:found.id,username:found.username,nombre:found.nombre,role:found.role||'mesero'};
+    saveSession(sesion);
+    mostrarSegunRol();
+  } else $('login-err').textContent='Usuario o contraseña incorrectos.';
 };
 
 window.doLogout = function(){
   if(sesion) registrarActividad('accion-login','Cerró sesión');
   clearSession(); sesion=null;
   detenerTimers();
+  detenerTimersCocina();
   $('app').classList.add('hidden');
+  $('cocina-app').classList.remove('show');
   mostrarLogin();
   $('inp-user').value=''; $('inp-pass').value=''; $('login-err').textContent='';
   setTabDirect('mesas');
@@ -690,7 +938,6 @@ async function cargarDatos(){
     await set(ref(db,'mesas'),state.mesas);
   }
   if(prSnap.exists()){ const r=prSnap.val(); state.productos=Array.isArray(r)?r:Object.values(r);
-    // Migrar productos sin categoría
     let migrado=false;
     state.productos.forEach(p=>{ if(!p.cat){ p.cat=CAT_DEFAULT[p.nombre]||'comida'; migrado=true; } });
     if(migrado) await set(ref(db,'productos'),state.productos);
@@ -701,7 +948,16 @@ async function cargarDatos(){
 }
 
 function suscribirCambios(){
-  onValue(ref(db,'mesas'),snap=>{ if(snap.exists()){state.mesas=snap.val();renderMesas();if(mesaAbierta)renderClientesMesa(mesaAbierta);}setSyncOk(true); },()=>setSyncOk(false));
+  onValue(ref(db,'mesas'),snap=>{
+    if(snap.exists()){
+      state.mesas=snap.val();
+      renderMesas();
+      if(mesaAbierta) renderClientesMesa(mesaAbierta);
+      // Actualizar vista cocina si aplica
+      if(sesion?.role==='cocinero') renderCocina();
+    }
+    setSyncOk(true);
+  },()=>setSyncOk(false));
   onValue(ref(db,'productos'),snap=>{ if(snap.exists()){const r=snap.val();state.productos=Array.isArray(r)?r:Object.values(r);}renderProductosAdmin();if(mesaAbierta)renderProductosGrid(); });
   onValue(ref(db,'historial'),snap=>{ if(snap.exists()){const r=snap.val();state.historial=Array.isArray(r)?r:Object.values(r);}else state.historial=[];renderHistorial(); });
   onValue(ref(db,'usuarios'),snap=>{ if(snap.exists()){const r=snap.val();state.usuarios=Array.isArray(r)?r:Object.values(r);}else state.usuarios=[];renderUsersList(); });
@@ -709,37 +965,31 @@ function suscribirCambios(){
 }
 
 function setSyncOk(ok){
-  const dot=$('sync-dot'),txt=$('sync-txt'); if(!dot)return;
-  dot.className='sync-dot'+(ok?'':' offline');
-  txt.textContent=ok?'En línea':'Sin conexión';
+  // App normal
+  const dot=$('sync-dot'),txt=$('sync-txt'); if(dot){ dot.className='sync-dot'+(ok?'':' offline'); txt.textContent=ok?'En línea':'Sin conexión'; }
+  // Cocina
+  const dotC=$('sync-dot-cocina'),txtC=$('sync-txt-cocina'); if(dotC){ dotC.className='sync-dot'+(ok?'':' offline'); txtC.textContent=ok?'En línea':'Sin conexión'; }
 }
+
 const saveMesa      = num => set(ref(db,`mesas/${num}`),state.mesas[num]);
 const saveProductos = ()  => set(ref(db,'productos'),state.productos);
 const saveHistorial = ()  => set(ref(db,'historial'),state.historial);
 const saveUsuarios  = ()  => set(ref(db,'usuarios'),state.usuarios);
 
-// ── TIMERS ────────────────────────────────────────────────────
-function iniciarTimers(){
-  detenerTimers();
-  timerInterval = setInterval(actualizarTimers, 1000);
-}
-function detenerTimers(){
-  if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
-}
+// ── TIMERS NORMAL ─────────────────────────────────────────────
+function iniciarTimers(){ detenerTimers(); timerInterval=setInterval(actualizarTimers,1000); }
+function detenerTimers(){ if(timerInterval){ clearInterval(timerInterval); timerInterval=null; } }
 
 function actualizarTimers(){
-  const ahora = Date.now();
+  const ahora=Date.now();
   for(let i=1;i<=TOTAL_MESAS;i++){
-    const el = document.getElementById(`timer-mesa-${i}`);
-    if(!el) continue;
-    const m = state.mesas[i];
+    const el=document.getElementById(`timer-mesa-${i}`); if(!el) continue;
+    const m=state.mesas[i];
     if(!m||!m.ocupada||!m.tsOcupada){ el.textContent=''; el.className='mesa-timer'; continue; }
-    const diff = Math.floor((ahora - m.tsOcupada)/1000);
-    const h=Math.floor(diff/3600), mn=Math.floor((diff%3600)/60), s=diff%60;
-    el.textContent = h>0
-      ? `⏱ ${h}h ${String(mn).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`
-      : `⏱ ${String(mn).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
-    el.className = 'mesa-timer'+(diff>=5400?' alerta':''); // rojo >90min
+    const diff=Math.floor((ahora-m.tsOcupada)/1000);
+    const h2=Math.floor(diff/3600),mn=Math.floor((diff%3600)/60),s=diff%60;
+    el.textContent=h2>0?`⏱ ${h2}h ${String(mn).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`:`⏱ ${String(mn).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+    el.className='mesa-timer'+(diff>=5400?' alerta':'');
   }
 }
 
@@ -770,6 +1020,7 @@ function calcTotal(pedido){
 }
 
 function renderMesas(){
+  if(sesion?.role==='cocinero') return; // no aplica
   let h='',ocp=0;
   for(let i=1;i<=TOTAL_MESAS;i++){
     const m=state.mesas[i]||mesaDefault();
@@ -817,9 +1068,7 @@ window.filtrarCat = function(cat,el){
 };
 
 function renderProductosGrid(){
-  const prods = catActiva==='todos'
-    ? state.productos
-    : state.productos.filter(p=>(p.cat||'comida')===catActiva);
+  const prods=catActiva==='todos'?state.productos:state.productos.filter(p=>(p.cat||'comida')===catActiva);
   if(!prods.length){ html('productos-grid','<div style="color:var(--text3);grid-column:1/-1;font-size:.82rem;padding:10px 0">Sin productos en esta categoría.</div>'); return; }
   html('productos-grid',prods.map(p=>
     `<button class="producto-btn" onclick="addProd(${p.id})">
@@ -860,10 +1109,10 @@ window.confirmarPedido = async function(){
   if(!Object.keys(pedidoActual).length){ toast('Añade al menos un producto.'); return; }
   const mesero=sesion?sesion.nombre||sesion.username:'';
   const m=state.mesas[mesaAbierta];
-  const yaOcupada = m.ocupada;
+  const yaOcupada=m.ocupada;
   m.pedidoActual={...pedidoActual};
   m.mesero=mesero; m.ocupada=true; m.ultimoUsuario=sesion?.username||'';
-  if(!yaOcupada) m.tsOcupada=Date.now(); // solo pone timestamp la 1era vez
+  if(!yaOcupada) m.tsOcupada=Date.now();
   await saveMesa(mesaAbierta);
   $('modal-subtitle').textContent='🔴 Ocupada';
   await registrarActividad('accion-pedido',`Confirmó pedido en Mesa ${mesaAbierta} (${fmt(calcTotal(pedidoActual))})`);
@@ -882,7 +1131,7 @@ window.marcarPagado = async function(){
       return p?{nombre:p.nombre,qty,precio:p.precio,sub:p.precio*qty,cat:p.cat||'comida'}:null;
     }).filter(Boolean);
     const total=calcTotal(pedidoActual);
-    const tiempoOcupada = m.tsOcupada ? Math.floor((Date.now()-m.tsOcupada)/60000) : null;
+    const tiempoOcupada=m.tsOcupada?Math.floor((Date.now()-m.tsOcupada)/60000):null;
     cn.push({num:cn.length+1,detalles,total,mesero,usuario:sesion?.username||'',hora:hora(),tiempoMin:tiempoOcupada});
     m.clientesNoche=cn;
     state.historial.push({mesa:mesaAbierta,clienteNum:cn.length,detalles,total,mesero,usuario:sesion?.username||'',hora:hora()});
@@ -934,37 +1183,41 @@ window.verHistorialMesa = function(){
   $('modal-hist-mesa').classList.add('open');
 };
 
-// ── TICKET DE IMPRESIÓN ───────────────────────────────────────
+// ── TICKET 80mm ───────────────────────────────────────────────
 function imprimirTicket(t){
+  // Agrupar por categoría
   const cats={bebida:[],comida:[],postre:[]};
   t.detalles.forEach(d=>{ const c=d.cat||'comida'; (cats[c]=cats[c]||[]).push(d); });
 
+  const catNames={comida:'COMIDAS',bebida:'BEBIDAS',postre:'POSTRES'};
   let itemsHtml='';
-  const catNames={bebida:'🥤 Bebidas',comida:'🍕 Comidas',postre:'🍨 Postres'};
   ['comida','bebida','postre'].forEach(cat=>{
     if(!cats[cat]||!cats[cat].length) return;
     itemsHtml+=`<div class="ticket-cat-hdr">${catNames[cat]}</div>`;
     cats[cat].forEach(d=>{
+      // Truncar nombre si es muy largo para 80mm
+      const nombre = d.nombre.length>20 ? d.nombre.slice(0,19)+'…' : d.nombre;
       itemsHtml+=`<div class="ticket-row">
-        <span>${d.qty}x ${d.nombre}</span>
-        <span>${fmt(d.sub)}</span>
+        <span class="ticket-item-name">${d.qty}x ${nombre}</span>
+        <span class="ticket-item-price">${fmt(d.sub)}</span>
       </div>`;
     });
   });
 
   const now=new Date();
   const fechaTk=now.toLocaleDateString('es-PY',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:TZ});
+  const horaTk=now.toLocaleTimeString('es-PY',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:TZ});
 
   $('ticket-print').innerHTML=`
   <div class="ticket-wrap">
     <div class="ticket-title">RESTAURANTE</div>
-    <div class="ticket-title" style="font-size:22px;letter-spacing:3px;">DELICIAS</div>
-    <div class="ticket-sub">═══════════════════════</div>
-    <div class="ticket-row"><span>Mesa:</span><span>${t.mesa}</span></div>
-    <div class="ticket-row"><span>Cliente:</span><span>${t.clienteNum}°</span></div>
+    <div class="ticket-title" style="font-size:17pt;letter-spacing:4px;">DELICIAS</div>
+    <div class="ticket-div"></div>
+    <div class="ticket-row bold"><span>Mesa:</span><span>${t.mesa}</span></div>
+    <div class="ticket-row bold"><span>Cliente:</span><span>${t.clienteNum}°</span></div>
     <div class="ticket-row"><span>Mesero:</span><span>${t.mesero||'—'}</span></div>
     <div class="ticket-row"><span>Fecha:</span><span>${fechaTk}</span></div>
-    <div class="ticket-row"><span>Hora:</span><span>${t.hora}</span></div>
+    <div class="ticket-row"><span>Hora:</span><span>${horaTk}</span></div>
     <div class="ticket-div"></div>
     ${itemsHtml}
     <div class="ticket-div"></div>
@@ -972,7 +1225,7 @@ function imprimirTicket(t){
     <div class="ticket-div"></div>
     <div class="ticket-center">¡Gracias por su visita!</div>
     <div class="ticket-center">Vuelva pronto 🍽</div>
-    <div style="margin-top:30px"></div>
+    <hr class="ticket-corte"/>
   </div>`;
 
   window.print();
@@ -980,6 +1233,7 @@ function imprimirTicket(t){
 
 // ── PRODUCTOS ADMIN ───────────────────────────────────────────
 function renderProductosAdmin(){
+  if(sesion?.role==='cocinero') return;
   html('productos-admin-list',state.productos.length
     ? state.productos.map(p=>`
         <div class="prod-card">
@@ -1055,16 +1309,18 @@ window.crearUsuario = async function(){
   const nombre=$('nu-nombre').value.trim();
   const username=$('nu-user').value.trim().toUpperCase();
   const pass=$('nu-pass').value, pass2=$('nu-pass2').value;
+  const role=$('nu-role').value; // 'mesero' o 'cocinero'
   if(!nombre||!username||!pass){ toast('Completa todos los campos.'); return; }
   if(pass!==pass2){ toast('Las contraseñas no coinciden.'); return; }
   if(username==='ADMIN'){ toast('Nombre reservado.'); return; }
   if(state.usuarios.find(u=>u.username.toUpperCase()===username)){ toast('Usuario ya existe.'); return; }
-  const nu={id:'u_'+Date.now(),nombre,username,password:pass,role:'mesero',creadoPor:sesion?.username||'admin',creadoEn:fechaHora()};
+  const nu={id:'u_'+Date.now(),nombre,username,password:pass,role,creadoPor:sesion?.username||'admin',creadoEn:fechaHora()};
   state.usuarios.push(nu);
   await saveUsuarios();
   toggleAddUser();
-  await registrarActividad('accion-admin',`Creó usuario mesero "${nombre}" (${username})`);
-  toast(`✅ Usuario "${nombre}" creado.`);
+  const roleLbl = role==='cocinero'?'Cocinero/a':'Mesero';
+  await registrarActividad('accion-admin',`Creó usuario ${roleLbl}: "${nombre}" (${username})`);
+  toast(`✅ Usuario "${nombre}" (${roleLbl}) creado.`);
 };
 
 window.eliminarUsuario = async function(id){
@@ -1100,16 +1356,21 @@ function renderUsersList(){
     <div class="user-info"><div class="uname">👑 Administrador</div><div class="ufull">ADMIN · <span style="color:var(--accent);font-weight:600">Admin Principal</span></div></div>
     <span class="role-badge admin">Admin</span>
   </div>`;
-  if(!state.usuarios.length) h+='<div style="color:var(--text3);font-size:.82rem;text-align:center;padding:12px;">Sin meseros creados.</div>';
-  else h+=state.usuarios.map(u=>`
-    <div class="user-item">
-      <div class="user-info"><div class="uname">👤 ${u.nombre}</div><div class="ufull">${u.username} · ${u.creadoEn||'—'}</div></div>
+  if(!state.usuarios.length) h+='<div style="color:var(--text3);font-size:.82rem;text-align:center;padding:12px;">Sin usuarios creados.</div>';
+  else h+=state.usuarios.map(u=>{
+    const isCocinero=u.role==='cocinero';
+    const badgeClass=isCocinero?'cocinero':'mesero';
+    const badgeLabel=isCocinero?'Cocinero/a':'Mesero';
+    const icon=isCocinero?'👨‍🍳':'👤';
+    return `<div class="user-item">
+      <div class="user-info"><div class="uname">${icon} ${u.nombre}</div><div class="ufull">${u.username} · ${u.creadoEn||'—'}</div></div>
       <div class="user-item-actions">
-        <span class="role-badge mesero">Mesero</span>
+        <span class="role-badge ${badgeClass}">${badgeLabel}</span>
         <button class="icon-btn" onclick="abrirCambiarPass('${u.id}')">🔑</button>
         <button class="icon-btn" onclick="eliminarUsuario('${u.id}')">🗑️</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   list.innerHTML=h;
 }
 
@@ -1124,14 +1385,16 @@ async function registrarActividad(tipo,msg){
 function renderActividad(){
   const list=$('activity-list'); if(!list) return;
   if(!state.actividad.length){ list.innerHTML='<div class="empty-state"><div class="icon">📝</div><p>Sin actividad.</p></div>'; return; }
-  list.innerHTML=state.actividad.slice(0,80).map(a=>`
-    <div class="activity-item">
+  list.innerHTML=state.actividad.slice(0,80).map(a=>{
+    const roleLabel={admin:'👑 Admin',mesero:'👤 Mesero',cocinero:'👨‍🍳 Cocinero/a'}[a.role]||a.role;
+    return `<div class="activity-item">
       <div class="activity-dot ${a.tipo}"></div>
       <div class="activity-content">
         <div class="activity-msg"><span class="activity-user">${a.usuario}</span> — ${a.msg}</div>
-        <div class="activity-meta">${a.fechaHora} · ${a.role==='admin'?'👑 Admin':'👤 Mesero'}</div>
+        <div class="activity-meta">${a.fechaHora} · ${roleLabel}</div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 window.limpiarActividad = async function(){
   if(!confirm('¿Limpiar el registro de actividad?')) return;
@@ -1140,6 +1403,7 @@ window.limpiarActividad = async function(){
 
 // ── HISTORIAL ─────────────────────────────────────────────────
 function renderHistorial(){
+  if(sesion?.role==='cocinero') return;
   const h=state.historial||[];
   let total=0; const mesasSet=new Set(); const byMesa={};
   h.forEach(r=>{ if(!byMesa[r.mesa]) byMesa[r.mesa]=[]; byMesa[r.mesa].push(r); total+=r.total; mesasSet.add(r.mesa); });
@@ -1179,7 +1443,6 @@ window.cierreCaja = function(){
   cargarYExportar(h, true);
 };
 
-// ── EXPORT XLSX ───────────────────────────────────────────────
 window.exportCSV = function(){
   const h=state.historial||[];
   if(!h.length){ toast('No hay ventas para exportar.'); return; }
@@ -1214,7 +1477,6 @@ function generarXLSX(hist, esCierre){
   });
   const sc=(r,c)=>XLSX.utils.encode_cell({r,c});
 
-  // ── HOJA 1: Detalle ──────────────────────────────────────
   const byMesa={};let totalGlobal=0;
   hist.forEach(r=>{ if(!byMesa[r.mesa]) byMesa[r.mesa]=[]; byMesa[r.mesa].push(r); totalGlobal+=r.total; });
 
@@ -1224,8 +1486,9 @@ function generarXLSX(hist, esCierre){
   ws1d.push(['']);
   ws1d.push(['Mesa','Cliente','Hora','Categoría','Producto','Cant.','Precio Unit.','Subtotal','Mesero','Usuario']);
 
+  const mesaKeys=Object.keys(byMesa).sort((a,b)=>+a-+b);
   let altRow=false;
-  Object.keys(byMesa).sort((a,b)=>+a-+b).forEach(mesa=>{
+  mesaKeys.forEach(mesa=>{
     byMesa[mesa].forEach(r=>{
       r.detalles.forEach(d=>{
         ws1d.push([`Mesa ${mesa}`,`${r.clienteNum}°`,r.hora,CAT_LABELS[d.cat||'comida']||d.cat||'',
@@ -1244,8 +1507,7 @@ function generarXLSX(hist, esCierre){
   ws1['!cols']=[{wch:13},{wch:9},{wch:7},{wch:11},{wch:20},{wch:7},{wch:16},{wch:15},{wch:16},{wch:14}];
   const ms1=[{s:{r:0,c:0},e:{r:0,c:9}},{s:{r:1,c:0},e:{r:1,c:9}}];
 
-  // Merge subtotales
-  let ri=4; const mesaKeys=Object.keys(byMesa).sort((a,b)=>+a-+b);
+  let ri=4;
   mesaKeys.forEach(mesa=>{
     const lineas=byMesa[mesa].reduce((s,r)=>s+r.detalles.length,0);
     ri+=lineas;
@@ -1256,11 +1518,10 @@ function generarXLSX(hist, esCierre){
   ms1.push({s:{r:lastR,c:0},e:{r:lastR,c:6}});
   ws1['!merges']=ms1;
 
-  // Estilos hoja 1
   ws1[sc(0,0)]={v:ws1d[0][0],t:'s',s:st(C.rojo,C.blanco,true,14,false,'center')};
   ws1[sc(1,0)]={v:ws1d[1][0],t:'s',s:st(C.rojoMedio,C.blanco,false,9,false,'center')};
-  ['Mesa','Cliente','Hora','Categoría','Producto','Cant.','Precio Unit.','Subtotal','Mesero','Usuario'].forEach((h,ci)=>{
-    ws1[sc(3,ci)]={v:h,t:'s',s:st(C.grisOscuro,C.blanco,true,10,true,'center')};
+  ['Mesa','Cliente','Hora','Categoría','Producto','Cant.','Precio Unit.','Subtotal','Mesero','Usuario'].forEach((h2,ci)=>{
+    ws1[sc(3,ci)]={v:h2,t:'s',s:st(C.grisOscuro,C.blanco,true,10,true,'center')};
   });
 
   let ri2=4; let alt=false;
@@ -1278,7 +1539,7 @@ function generarXLSX(hist, esCierre){
       });
       alt=!alt;
     });
-    const stRow=ws1d[ri2]; // subtotal
+    const stRow=ws1d[ri2];
     ws1[sc(ri2,0)]={v:stRow[0],t:'s',s:st(C.naranjaClr,C.naranja,true,10,true,'left')};
     for(let ci=1;ci<=6;ci++) ws1[sc(ri2,ci)]={v:'',t:'s',s:st(C.naranjaClr,C.naranja,true,10,true)};
     ws1[sc(ri2,7)]={v:Number(stRow[7]),t:'n',s:st(C.naranjaClr,C.naranja,true,10,true,'right','#,##0')};
@@ -1294,15 +1555,14 @@ function generarXLSX(hist, esCierre){
   ws1['!rows']=[]; ws1['!rows'][0]={hpt:26}; ws1['!rows'][1]={hpt:15}; ws1['!rows'][3]={hpt:18};
   XLSX.utils.book_append_sheet(wb,ws1,'Detalle de Ventas');
 
-  // ── HOJA 2: Resumen por Mesa ─────────────────────────────
+  // Hoja 2: Resumen por Mesa
   const ws2d=[
     ['🍽 RESTAURANTE DELICIAS — RESUMEN POR MESA','','','',''],
     [`Fecha: ${fecha}`,'','','',''],[''],
     ['Mesa','Clientes','Bebidas (Gs.)','Comidas (Gs.)','Postres (Gs.)','Total (Gs.)','% del Total']
   ];
   mesaKeys.forEach(mesa=>{
-    const rs=byMesa[mesa];
-    const cl=rs.length;
+    const rs=byMesa[mesa]; const cl=rs.length;
     const tot=rs.reduce((s,r)=>s+r.total,0);
     const beb=rs.reduce((s,r)=>s+r.detalles.filter(d=>(d.cat||'comida')==='bebida').reduce((a,d)=>a+d.sub,0),0);
     const com=rs.reduce((s,r)=>s+r.detalles.filter(d=>(d.cat||'comida')==='comida').reduce((a,d)=>a+d.sub,0),0);
@@ -1316,14 +1576,13 @@ function generarXLSX(hist, esCierre){
     Math.round(mesaKeys.reduce((s,m)=>s+byMesa[m].reduce((a,r)=>a+r.detalles.filter(d=>(d.cat||'comida')==='postre').reduce((x,d)=>x+d.sub,0),0),0)),
     Math.round(totalGlobal),1
   ]);
-
   const ws2=XLSX.utils.aoa_to_sheet(ws2d);
   ws2['!cols']=[{wch:12},{wch:10},{wch:16},{wch:16},{wch:16},{wch:16},{wch:12}];
   ws2['!merges']=[{s:{r:0,c:0},e:{r:0,c:6}},{s:{r:1,c:0},e:{r:1,c:6}}];
   ws2[sc(0,0)]={v:ws2d[0][0],t:'s',s:st(C.rojo,C.blanco,true,13,false,'center')};
   ws2[sc(1,0)]={v:ws2d[1][0],t:'s',s:st(C.rojoMedio,C.blanco,false,9,false,'center')};
-  ['Mesa','Clientes','Bebidas (Gs.)','Comidas (Gs.)','Postres (Gs.)','Total (Gs.)','% del Total'].forEach((h,ci)=>{
-    ws2[sc(3,ci)]={v:h,t:'s',s:st(C.grisOscuro,C.blanco,true,10,true,'center')};
+  ['Mesa','Clientes','Bebidas (Gs.)','Comidas (Gs.)','Postres (Gs.)','Total (Gs.)','% del Total'].forEach((h2,ci)=>{
+    ws2[sc(3,ci)]={v:h2,t:'s',s:st(C.grisOscuro,C.blanco,true,10,true,'center')};
   });
   mesaKeys.forEach((mesa,idx)=>{
     const ri3=4+idx; const bg=idx%2===0?C.azulClr:C.blanco; const row=ws2d[ri3];
@@ -1340,7 +1599,7 @@ function generarXLSX(hist, esCierre){
   ws2['!rows']=[]; ws2['!rows'][0]={hpt:24}; ws2['!rows'][3]={hpt:17};
   XLSX.utils.book_append_sheet(wb,ws2,'Resumen por Mesa');
 
-  // ── HOJA 3: Por Categoría ────────────────────────────────
+  // Hoja 3: Por Categoría
   const catTotals={bebida:0,comida:0,postre:0};
   hist.forEach(r=>r.detalles.forEach(d=>{ catTotals[d.cat||'comida']=(catTotals[d.cat||'comida']||0)+d.sub; }));
   const ws3d=[
@@ -1350,15 +1609,14 @@ function generarXLSX(hist, esCierre){
     ['🥤 Bebidas',Math.round(catTotals.bebida),totalGlobal>0?catTotals.bebida/totalGlobal:0],
     ['🍕 Comidas',Math.round(catTotals.comida),totalGlobal>0?catTotals.comida/totalGlobal:0],
     ['🍨 Postres',Math.round(catTotals.postre),totalGlobal>0?catTotals.postre/totalGlobal:0],
-    [''],
-    ['TOTAL',Math.round(totalGlobal),1]
+    [''],['TOTAL',Math.round(totalGlobal),1]
   ];
   const ws3=XLSX.utils.aoa_to_sheet(ws3d);
   ws3['!cols']=[{wch:16},{wch:20},{wch:14}];
   ws3['!merges']=[{s:{r:0,c:0},e:{r:0,c:2}},{s:{r:1,c:0},e:{r:1,c:2}}];
   ws3[sc(0,0)]={v:ws3d[0][0],t:'s',s:st(C.rojo,C.blanco,true,13,false,'center')};
   ws3[sc(1,0)]={v:ws3d[1][0],t:'s',s:st(C.rojoMedio,C.blanco,false,9,false,'center')};
-  ['Categoría','Total Vendido (Gs.)','% del Total'].forEach((h,ci)=>{ ws3[sc(3,ci)]={v:h,t:'s',s:st(C.grisOscuro,C.blanco,true,10,true,'center')}; });
+  ['Categoría','Total Vendido (Gs.)','% del Total'].forEach((h2,ci)=>{ ws3[sc(3,ci)]={v:h2,t:'s',s:st(C.grisOscuro,C.blanco,true,10,true,'center')}; });
   const catColors={4:C.azulClr,5:C.grisClaro,6:C.moradoClr};
   [4,5,6].forEach(ri=>{
     const row=ws3d[ri]; const bg=catColors[ri];
@@ -1372,26 +1630,29 @@ function generarXLSX(hist, esCierre){
   ws3['!rows']=[]; ws3['!rows'][0]={hpt:24}; ws3['!rows'][3]={hpt:18};
   XLSX.utils.book_append_sheet(wb,ws3,'Ventas por Categoría');
 
-  // ── HOJA 4: Actividad ────────────────────────────────────
+  // Hoja 4: Actividad
   const ws4d=[['🍽 RESTAURANTE DELICIAS — ACTIVIDAD DE USUARIOS','','',''],
     [`Fecha: ${fecha}`,'','',''],[''],['Fecha/Hora','Usuario','Rol','Acción']];
-  (state.actividad||[]).slice(0,500).forEach(a=>ws4d.push([a.fechaHora||'—',a.usuario||'—',a.role==='admin'?'Admin':'Mesero',a.msg||'—']));
+  (state.actividad||[]).slice(0,500).forEach(a=>{
+    const roleLbl={admin:'Admin',mesero:'Mesero',cocinero:'Cocinero/a'}[a.role]||a.role;
+    ws4d.push([a.fechaHora||'—',a.usuario||'—',roleLbl,a.msg||'—']);
+  });
   const ws4=XLSX.utils.aoa_to_sheet(ws4d);
-  ws4['!cols']=[{wch:17},{wch:18},{wch:9},{wch:52}];
+  ws4['!cols']=[{wch:17},{wch:18},{wch:12},{wch:52}];
   ws4['!merges']=[{s:{r:0,c:0},e:{r:0,c:3}},{s:{r:1,c:0},e:{r:1,c:3}}];
   ws4[sc(0,0)]={v:ws4d[0][0],t:'s',s:st(C.rojo,C.blanco,true,13,false,'center')};
   ws4[sc(1,0)]={v:ws4d[1][0],t:'s',s:st(C.rojoMedio,C.blanco,false,9,false,'center')};
-  ['Fecha/Hora','Usuario','Rol','Acción'].forEach((h,ci)=>{ ws4[sc(3,ci)]={v:h,t:'s',s:st(C.grisOscuro,C.blanco,true,10,true,'center')}; });
+  ['Fecha/Hora','Usuario','Rol','Acción'].forEach((h2,ci)=>{ ws4[sc(3,ci)]={v:h2,t:'s',s:st(C.grisOscuro,C.blanco,true,10,true,'center')}; });
   (state.actividad||[]).slice(0,500).forEach((a,idx)=>{
     const ri=4+idx; const bg=idx%2===0?C.grisClaro:C.blanco;
-    [a.fechaHora,a.usuario,a.role==='admin'?'Admin':'Mesero',a.msg].forEach((v,ci)=>{
+    const roleLbl={admin:'Admin',mesero:'Mesero',cocinero:'Cocinero/a'}[a.role]||a.role;
+    [a.fechaHora,a.usuario,roleLbl,a.msg].forEach((v,ci)=>{
       ws4[sc(ri,ci)]={v:v||'',t:'s',s:st(bg,ci===2&&a.role==='admin'?C.rojo:'000000',ci===2&&a.role==='admin',9,true,'left')};
     });
   });
   ws4['!rows']=[]; ws4['!rows'][0]={hpt:24}; ws4['!rows'][3]={hpt:17};
   XLSX.utils.book_append_sheet(wb,ws4,'Actividad de Usuarios');
 
-  // ── Descarga ──────────────────────────────────────────────
   const fechaArch=new Date().toISOString().slice(0,10);
   const nombre=esCierre?`Cierre_Caja_Delicias_${fechaArch}.xlsx`:`Restaurante_Delicias_${fechaArch}.xlsx`;
   XLSX.writeFile(wb,nombre);
