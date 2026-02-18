@@ -387,33 +387,6 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 @keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
 .hidden{display:none!important;}
-
-
-/* ═══ CLIENTE WEB ═══════════════════════════════════════════ */
-#cliente-app{display:none;min-height:100vh;padding:20px 14px;background:var(--bg);}
-#cliente-app.show{display:block;}
-.cliente-shell{max-width:780px;margin:0 auto;}
-.cliente-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:var(--shadow);}
-.cliente-title{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--accent);margin-bottom:6px;}
-.cliente-subtitle{color:var(--text3);margin-bottom:18px;font-size:.92rem;}
-.cliente-actions{display:grid;grid-template-columns:1fr;gap:10px;}
-@media(min-width:560px){.cliente-actions{grid-template-columns:1fr 1fr;}}
-.cliente-btn{border:1.5px solid var(--border);background:var(--surface2);color:var(--text);border-radius:12px;padding:14px 16px;font-size:1rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;text-align:left;}
-.cliente-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(192,57,43,.05);}
-.cliente-view{display:none;margin-top:14px;}
-.cliente-view.show{display:block;}
-.cliente-menu-list{display:grid;grid-template-columns:1fr;gap:8px;}
-@media(min-width:560px){.cliente-menu-list{grid-template-columns:1fr 1fr;}}
-.cliente-menu-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.cliente-pill{display:inline-block;background:rgba(41,128,185,.12);color:var(--blue);font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:12px;text-transform:uppercase;letter-spacing:.05em;}
-.cliente-result{margin-top:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);padding:12px;}
-.cliente-result-item{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:.9rem;}
-.cliente-result-item:last-child{border-bottom:none;}
-.cliente-result-total{display:flex;justify-content:space-between;align-items:center;border-top:2px solid var(--border);margin-top:8px;padding-top:8px;font-weight:700;color:var(--accent);}
-.cliente-back{margin-top:12px;}
-.cliente-mini-link{margin-top:14px;font-size:.84rem;color:var(--text3);}
-.cliente-mini-link button{border:none;background:transparent;color:var(--accent);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
-
 </style>
 </head>
 <body>
@@ -422,40 +395,6 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:8
 <div id="loading-screen">
   <div class="spinner"></div>
   <div class="loading-txt">Conectando con Firebase...</div>
-</div>
-
-<!-- CLIENTE WEB -->
-<div id="cliente-app">
-  <div class="cliente-shell">
-    <div class="cliente-card">
-      <div class="cliente-title">🍽 Delicias</div>
-      <div class="cliente-subtitle">Bienvenido. Selecciona una opción para revisar el menú o consultar tu pedido.</div>
-      <div id="cliente-home" class="cliente-view show">
-        <div class="cliente-actions">
-          <button class="cliente-btn" onclick="abrirClienteMenu()">📖 Revisar menú</button>
-          <button class="cliente-btn" onclick="abrirConsultaPedido()">🔎 Consultar pedido</button>
-        </div>
-      </div>
-
-      <div id="cliente-menu-view" class="cliente-view">
-        <div class="section-title" style="margin-bottom:12px;font-size:1.1rem;">Menú disponible</div>
-        <div class="cliente-menu-list" id="cliente-menu-list"></div>
-        <div class="cliente-back"><button class="btn-ghost" onclick="volverInicioCliente()">← Volver</button></div>
-      </div>
-
-      <div id="cliente-consulta-view" class="cliente-view">
-        <div class="field" style="margin-bottom:8px;">
-          <label>Número de mesa</label>
-          <input type="number" id="cliente-mesa-input" min="1" step="1" placeholder="Ej: 4"/>
-        </div>
-        <button class="btn-primary" onclick="consultarPedidoCliente()">Consultar</button>
-        <div id="cliente-pedido-resultado"></div>
-        <div class="cliente-back"><button class="btn-ghost" onclick="volverInicioCliente()">← Volver</button></div>
-      </div>
-
-      <div class="cliente-mini-link">¿Eres del personal? <button onclick="mostrarLogin()">Ingresar aquí</button></div>
-    </div>
-  </div>
 </div>
 
 <!-- LOGIN -->
@@ -781,8 +720,6 @@ let pedidoActual = {};
 let catActiva = 'todos';
 let timerInterval = null;
 let cocinaTimerInterval = null;
-let clienteConsultaMesaActual = null;
-let clienteTimerInterval = null;
 
 // ── DOM ───────────────────────────────────────────────────────
 window.$ = id => document.getElementById(id);
@@ -808,112 +745,27 @@ async function boot(){
   try{
     await cargarDatos();
     suscribirCambios();
-    if(!clienteTimerInterval){
-      clienteTimerInterval=setInterval(()=>{
-        if($('cliente-app')?.classList.contains('show')) renderConsultaPedidoCliente();
-      },1000);
-    }
     $('loading-screen').style.display='none';
     const saved=loadSession();
     if(saved && (saved.id==='admin'||state.usuarios.find(u=>u.id===saved.id))){
       sesion=saved; mostrarSegunRol();
-    } else { clearSession(); mostrarClienteApp(); }
+    } else { clearSession(); mostrarLogin(); }
   }catch(err){
     console.error(err);
     $('loading-screen').style.display='none';
-    mostrarClienteApp();
+    mostrarLogin();
     toast('⚠️ Error de conexión.');
   }
 }
 
 function mostrarLogin(){
-  $('cliente-app').classList.remove('show');
   $('login-screen').classList.add('show');
   $('app').classList.add('hidden');
   $('cocina-app').classList.remove('show');
 }
 function ocultarLogin(){ $('login-screen').classList.remove('show'); }
 
-function mostrarClienteApp(){
-  ocultarLogin();
-  detenerTimers();
-  detenerTimersCocina();
-  $('app').classList.add('hidden');
-  $('cocina-app').classList.remove('show');
-  $('cliente-app').classList.add('show');
-  volverInicioCliente();
-  renderClienteMenu();
-}
-
-function mostrarClienteView(viewId){
-  ['cliente-home','cliente-menu-view','cliente-consulta-view'].forEach(id=>$(id).classList.remove('show'));
-  $(viewId).classList.add('show');
-}
-
-function formatearTiempo(ms){
-  if(!ms||ms<0) return '00m 00s';
-  const sec=Math.floor(ms/1000);
-  const h2=Math.floor(sec/3600),mn=Math.floor((sec%3600)/60),s=sec%60;
-  return h2>0 ? `${h2}h ${String(mn).padStart(2,'0')}m ${String(s).padStart(2,'0')}s` : `${String(mn).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
-}
-
-function renderClienteMenu(){
-  const prods=[...state.productos].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
-  if(!prods.length){ html('cliente-menu-list','<div style="color:var(--text3);font-size:.9rem;">Sin productos disponibles por ahora.</div>'); return; }
-  html('cliente-menu-list',prods.map(p=>`<div class="cliente-menu-item"><div><div style="font-weight:600;color:var(--text);">${p.nombre}</div><span class="cliente-pill">${CAT_LABELS[p.cat||'comida']||p.cat||'Comida'}</span></div><div style="font-weight:700;color:var(--accent);">${fmt(p.precio)}</div></div>`).join(''));
-}
-
-function renderConsultaPedidoCliente(){
-  if(!clienteConsultaMesaActual) return;
-  const mesa=state.mesas[clienteConsultaMesaActual];
-  const box=$('cliente-pedido-resultado');
-  if(!mesa||!mesa.ocupada||!mesa.pedidoActual||!Object.keys(mesa.pedidoActual).length){
-    box.innerHTML='<div class="cliente-result" style="color:var(--text3);">No hay un pedido activo para esa mesa.</div>';
-    clienteConsultaMesaActual=null;
-    return;
-  }
-
-  const items=Object.entries(mesa.pedidoActual)
-    .map(([pid,qty])=>{
-      const p=state.productos.find(x=>String(x.id)===String(pid));
-      if(!p||qty<=0) return null;
-      return {nombre:p.nombre,qty,sub:p.precio*qty};
-    })
-    .filter(Boolean);
-
-  if(!items.length){
-    box.innerHTML='<div class="cliente-result" style="color:var(--text3);">No hay productos cargados para esa mesa.</div>';
-    return;
-  }
-
-  const total=items.reduce((acc,it)=>acc+it.sub,0);
-  const inicio=mesa.tsOcupada||Date.now();
-  const horaSolicitud=new Date(inicio).toLocaleTimeString('es-PY',{hour:'2-digit',minute:'2-digit',timeZone:TZ});
-  const tiempo=formatearTiempo(Date.now()-inicio);
-
-  box.innerHTML=`<div class="cliente-result">
-    <div style="font-weight:700;color:var(--text);margin-bottom:4px;">Mesa ${clienteConsultaMesaActual}</div>
-    <div style="font-size:.86rem;color:var(--text2);margin-bottom:8px;">🕐 Hora de solicitud: ${horaSolicitud} · ⏱ Tiempo: ${tiempo}</div>
-    ${items.map(it=>`<div class="cliente-result-item"><span>${it.qty}× ${it.nombre}</span><strong>${fmt(it.sub)}</strong></div>`).join('')}
-    <div class="cliente-result-total"><span>Total a pagar</span><span>${fmt(total)}</span></div>
-  </div>`;
-}
-
-window.abrirClienteMenu = function(){ renderClienteMenu(); mostrarClienteView('cliente-menu-view'); };
-window.abrirConsultaPedido = function(){ clienteConsultaMesaActual=null; $('cliente-mesa-input').value=''; $('cliente-pedido-resultado').innerHTML=''; mostrarClienteView('cliente-consulta-view'); $('cliente-mesa-input').focus(); };
-window.volverInicioCliente = function(){ clienteConsultaMesaActual=null; $('cliente-pedido-resultado').innerHTML=''; mostrarClienteView('cliente-home'); };
-window.consultarPedidoCliente = function(){
-  const mesaNum=Number($('cliente-mesa-input').value);
-  if(!Number.isInteger(mesaNum)||mesaNum<1||mesaNum>TOTAL_MESAS){
-    $('cliente-pedido-resultado').innerHTML=`<div class="cliente-result" style="color:var(--red);">Ingresa un número de mesa válido (1 a ${TOTAL_MESAS}).</div>`;
-    return;
-  }
-  clienteConsultaMesaActual=mesaNum;
-  renderConsultaPedidoCliente();
-};
-
 function mostrarSegunRol(){
-  $('cliente-app').classList.remove('show');
   if(sesion.role==='cocinero'){
     ocultarLogin();
     $('app').classList.add('hidden');
@@ -1168,14 +1020,13 @@ window.doLogout = function(){
   detenerTimersCocina();
   $('app').classList.add('hidden');
   $('cocina-app').classList.remove('show');
-  mostrarClienteApp();
+  mostrarLogin();
   $('inp-user').value=''; $('inp-pass').value=''; $('login-err').textContent='';
   setTabDirect('mesas');
 };
 
 $('inp-pass').addEventListener('keydown',e=>{ if(e.key==='Enter') window.doLogin(); });
 $('inp-user').addEventListener('keydown',e=>{ if(e.key==='Enter') window.doLogin(); });
-$('cliente-mesa-input').addEventListener('keydown',e=>{ if(e.key==='Enter') window.consultarPedidoCliente(); });
 
 // ── FIREBASE ──────────────────────────────────────────────────
 function mesaDefault(){ return {ocupada:false,mesero:'',pedidoActual:{},clientesNoche:[],tsOcupada:null}; }
@@ -1236,11 +1087,10 @@ function suscribirCambios(){
       renderMesas();
       if(mesaAbierta) renderClientesMesa(mesaAbierta);
       if(sesion?.role==='cocinero') renderCocina();
-      renderConsultaPedidoCliente();
     }
     setSyncOk(true);
   },()=>setSyncOk(false));
-  onValue(ref(db,'productos'),snap=>{ if(snap.exists()){const r=snap.val();state.productos=Array.isArray(r)?r:Object.values(r);}renderProductosAdmin();if(mesaAbierta)renderProductosGrid();renderClienteMenu();renderConsultaPedidoCliente(); });
+  onValue(ref(db,'productos'),snap=>{ if(snap.exists()){const r=snap.val();state.productos=Array.isArray(r)?r:Object.values(r);}renderProductosAdmin();if(mesaAbierta)renderProductosGrid(); });
   onValue(ref(db,'historial'),snap=>{ if(snap.exists()){const r=snap.val();state.historial=Array.isArray(r)?r:Object.values(r);}else state.historial=[];renderHistorial(); });
   onValue(ref(db,'usuarios'),snap=>{ if(snap.exists()){const r=snap.val();state.usuarios=Array.isArray(r)?r:Object.values(r);}else state.usuarios=[];renderUsersList(); });
   onValue(ref(db,'actividad'),snap=>{ if(snap.exists()){const r=snap.val();state.actividad=Array.isArray(r)?r:Object.values(r);}else state.actividad=[];renderActividad(); });
