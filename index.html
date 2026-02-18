@@ -1497,7 +1497,7 @@ body::before{
     </div>
 
     <div class="mesa-input-wrap">
-      <div class="mesa-input-label">¿Cuál es tu mesa?</div>
+      <div class="mesa-input-label">Ingresá el número de tu mesa/div>
       <div class="mesa-input-hint">El mesero te indicó el número al sentarte</div>
       <div class="mesa-input-row">
         <input class="mesa-number-input" type="number" id="inp-mesa-num"
@@ -1508,7 +1508,7 @@ body::before{
           Consultar
         </button>
       </div>
-      <div class="error-msg" id="pedido-error">
+      <div class="error-msg" id="pedido-error" style="display:none;">
         <span class="icon icon-alert icon-sm"></span>
         <span id="error-text"></span>
       </div>
@@ -1614,6 +1614,7 @@ window.irA = function(screen) {
     $('timer-card').style.display = 'none';
     $('pedido-result').innerHTML = '';
     $('pedido-result').classList.remove('visible');
+    $('pedido-error').style.display = 'none';
     $('pedido-error').classList.remove('visible');
     $('inp-mesa-num').value = '';
   }
@@ -1676,13 +1677,30 @@ window.consultarPedido = function(){
   const num = parseInt($('inp-mesa-num').value);
   const errEl = $('pedido-error');
   const errText = $('error-text');
+  
+  // Ocultar error inicialmente
+  errEl.style.display = 'none';
   errEl.classList.remove('visible');
 
-  if(isNaN(num) || num < 1 || num > 12){
-    errText.textContent = 'Ingresá un número de mesa válido (1 al 12).';
+  // Validar que se haya ingresado algo
+  if(isNaN(num) || $('inp-mesa-num').value === ''){
+    errText.textContent = 'Ingresá un número de mesa para consultar.';
+    errEl.style.display = 'flex';
     errEl.classList.add('visible');
     return;
   }
+
+  // Validar rango
+  if(num < 1 || num > 12){
+    errText.textContent = 'Ingresá un número de mesa válido (1 al 12).';
+    errEl.style.display = 'flex';
+    errEl.classList.add('visible');
+    return;
+  }
+
+  // Si es válido, ocultar error y consultar
+  errEl.style.display = 'none';
+  errEl.classList.remove('visible');
   consultarMesa(num, true);
 };
 
@@ -1777,6 +1795,7 @@ function consultarMesa(num, animate){
     </div>`;
 
   result.classList.add('visible');
+  errEl.style.display = 'none';
   errEl.classList.remove('visible');
 
   timerCard.style.display = 'flex';
