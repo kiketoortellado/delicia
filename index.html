@@ -1270,14 +1270,13 @@ body::before{
   color:var(--error);
   margin-top:16px;
   display:none;
-  animation:shake 0.5s ease-out;
-  display:flex;
   align-items:center;
   gap:8px;
 }
 
 .error-msg.visible{
   display:flex;
+  animation:shake 0.5s ease-out;
 }
 
 @keyframes shake{
@@ -1372,6 +1371,44 @@ body::before{
   }
 }
 
+/* ════════════════════════════════════════════════════════════ */
+/* BÚSQUEDA EN MENÚ */
+/* ════════════════════════════════════════════════════════════ */
+.menu-search-wrap{
+  position:relative;
+  margin:16px 0 4px;
+}
+
+.menu-search-icon{
+  position:absolute;
+  left:16px;
+  top:50%;
+  transform:translateY(-50%);
+  pointer-events:none;
+}
+
+.menu-search-input{
+  width:100%;
+  padding:14px 16px 14px 46px;
+  border:2px solid var(--border-subtle);
+  border-radius:14px;
+  background:var(--bg-secondary);
+  color:var(--text-primary);
+  font-family:'DM Sans',sans-serif;
+  font-size:1rem;
+  transition:all var(--transition-base);
+}
+
+.menu-search-input::placeholder{
+  color:var(--text-subtle);
+}
+
+.menu-search-input:focus{
+  outline:none;
+  border-color:var(--gold-primary);
+  box-shadow:0 0 0 4px var(--gold-glow);
+}
+
 /* Scrollbar personalizado */
 ::-webkit-scrollbar{
   width:8px;
@@ -1454,6 +1491,10 @@ body::before{
     </div>
   </div>
   <div class="main">
+    <div class="menu-search-wrap">
+      <span class="icon icon-search icon-sm menu-search-icon"></span>
+      <input class="menu-search-input" type="text" id="search-input" placeholder="Buscar plato..." oninput="buscarMenu(this.value)" autocomplete="off"/>
+    </div>
     <div class="cat-filter" id="cat-filter">
       <button class="cat-pill active" data-cat="todos" onclick="filtrarMenu('todos',this)">
         <span class="icon icon-utensils icon-sm"></span>
@@ -1529,10 +1570,9 @@ body::before{
   </div>
 </div>
 
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, onValue, onChildChanged, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey:"AIzaSyCdKSf2g1cIyXrD6k_u1aR9TMln9HaPJro",
@@ -1547,6 +1587,7 @@ const firebaseConfig = {
 const CURRENCY = 'Gs.';
 const TZ = 'America/Asuncion';
 const fmt = n => CURRENCY + ' ' + Math.round(n).toLocaleString('es-PY');
+const MESA_KEY = 'delicias_last_mesa';
 
 const CAT_ICONS = { 
   comida:'icon-food', 
@@ -1566,36 +1607,68 @@ let catMenuActiva = 'todos';
 let timerInterval = null;
 let currentMesaTs = null;
 let currentMesaNum = null;
+let searchQuery = '';
+
+// ── UTILS (definidas primero para que estén disponibles en todo el script) ──
+window.$ = id => document.getElementById(id);
+
+function toast(msg){
+  const el = document.createElement('div');
+  el.className = 'toast'; 
+  el.innerHTML = `<span>${msg}</span>`;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'toastSlide 0.3s ease reverse';
+    setTimeout(() => el.remove(), 300);
+  }, 3000);
+}
 
 // ── INIT ──
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
-// Cargar productos en tiempo real
+// Cargar productos - usando onChildChanged para actualizaciones granulares
 onValue(ref(db,'productos'), snap => {
   const r = snap.val();
-  productos = r ? (Array.isArray(r) ? r : Object.values(r)) : [];
-  renderMenu();
+  const nuevos = r ? (Array.isArray(r) ? r : Object.values(r)) : [];
+  const cambio = JSON.stringify(nuevos) !== JSON.stringify(productos);
+  productos = nuevos;
+  if(cambio) renderMenu();
   $('loading').style.display = 'none';
   if(currentMesaNum) consultarMesa(currentMesaNum, false);
 });
 
-// Cargar mesas en tiempo real
-onValue(ref(db,'mesas'), snap => {
-  if(snap.exists()) mesas = snap.val();
-  if(currentMesaNum) consultarMesa(currentMesaNum, false);
-});
+// Cargar cada mesa individualmente para mayor eficiencia
+for(let i = 1; i <= 12; i++){
+  onValue(ref(db, `mesas/${i}`), snap => {
+    const data = snap.val();
+    if(data !== null){
+      const prevOcupada = mesas[i]?.ocupada;
+      mesas[i] = data;
+      // Notificar actualización si el usuario está viendo esta mesa
+      if(currentMesaNum === i){
+        consultarMesa(i, false);
+        // Badge de "actualizado" si ya había pedido visible
+        if(prevOcupada && data.ocupada){
+          mostrarBadgeActualizado();
+        }
+      }
+    }
+  });
+}
 
-// ── QR: detectar ?mesa=X en URL ──
+// ── QR: detectar ?mesa=X en URL (fix: sin DOMContentLoaded en módulos) ──
 const urlParams = new URLSearchParams(window.location.search);
 const mesaQR = urlParams.get('mesa');
 if(mesaQR && parseInt(mesaQR) >= 1 && parseInt(mesaQR) <= 12){
-  window.addEventListener('DOMContentLoaded', () => {
-    irA('pedido');
-    $('inp-mesa-num').value = parseInt(mesaQR);
-    $('qr-chip-wrap').style.display = 'block';
-    setTimeout(() => consultarPedido(), 1000);
-  });
+  irA('pedido');
+  $('inp-mesa-num').value = parseInt(mesaQR);
+  $('qr-chip-wrap').style.display = 'block';
+  setTimeout(() => consultarPedido(), 800);
+} else {
+  // Recordar última mesa usada
+  const lastMesa = localStorage.getItem(MESA_KEY);
+  if(lastMesa) $('inp-mesa-num').value = lastMesa;
 }
 
 // ── NAVEGACIÓN ──
@@ -1618,7 +1691,33 @@ window.irA = function(screen) {
     $('pedido-error').classList.remove('visible');
     $('inp-mesa-num').value = '';
   }
+  if(screen === 'menu'){
+    searchQuery = '';
+    const si = $('search-input');
+    if(si) si.value = '';
+    renderMenuFiltrado();
+  }
   window.scrollTo(0,0);
+};
+
+// ── BADGE DE ACTUALIZACIÓN EN TIEMPO REAL ──
+function mostrarBadgeActualizado(){
+  let badge = $('pedido-update-badge');
+  if(!badge){
+    badge = document.createElement('div');
+    badge.id = 'pedido-update-badge';
+    badge.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--gold-primary);color:var(--bg-deep);padding:10px 20px;border-radius:100px;font-size:0.85rem;font-weight:700;z-index:9998;animation:fadeIn 0.3s ease;letter-spacing:0.05em;';
+    badge.textContent = '↻ Pedido actualizado';
+    document.body.appendChild(badge);
+  }
+  clearTimeout(badge._timeout);
+  badge._timeout = setTimeout(() => badge.remove(), 3000);
+}
+
+// ── BÚSQUEDA EN MENÚ ──
+window.buscarMenu = function(val){
+  searchQuery = val.trim().toLowerCase();
+  renderMenuFiltrado();
 };
 
 // ── RENDER MENÚ ──
@@ -1640,7 +1739,8 @@ function renderMenuFiltrado(){
   let html = '';
 
   catsToShow.forEach((c, idx) => {
-    const items = productos.filter(p => (p.cat || 'comida') === c);
+    let items = productos.filter(p => (p.cat || 'comida') === c);
+    if(searchQuery) items = items.filter(p => p.nombre.toLowerCase().includes(searchQuery));
     if(!items.length) return;
     html += `<div class="menu-section" style="animation-delay:${idx * 0.1}s">
       <div class="menu-section-title">
@@ -1663,6 +1763,11 @@ function renderMenuFiltrado(){
     </div>`;
   });
 
+  if(!html && searchQuery){
+    body.innerHTML = `<div style="text-align:center;padding:48px;color:var(--text-muted);">Sin resultados para "<strong>${searchQuery}</strong>".</div>`;
+    return;
+  }
+
   body.innerHTML = html || '<div style="text-align:center;padding:48px;color:var(--text-muted);">Sin productos en esta categoría.</div>';
 }
 
@@ -1678,11 +1783,9 @@ window.consultarPedido = function(){
   const errEl = $('pedido-error');
   const errText = $('error-text');
   
-  // Ocultar error inicialmente
   errEl.style.display = 'none';
   errEl.classList.remove('visible');
 
-  // Validar que se haya ingresado algo
   if(isNaN(num) || $('inp-mesa-num').value === ''){
     errText.textContent = 'Ingresá un número de mesa para consultar.';
     errEl.style.display = 'flex';
@@ -1690,7 +1793,6 @@ window.consultarPedido = function(){
     return;
   }
 
-  // Validar rango
   if(num < 1 || num > 12){
     errText.textContent = 'Ingresá un número de mesa válido (1 al 12).';
     errEl.style.display = 'flex';
@@ -1698,7 +1800,9 @@ window.consultarPedido = function(){
     return;
   }
 
-  // Si es válido, ocultar error y consultar
+  // Guardar última mesa usada en localStorage
+  localStorage.setItem(MESA_KEY, num);
+
   errEl.style.display = 'none';
   errEl.classList.remove('visible');
   consultarMesa(num, true);
@@ -1819,20 +1923,6 @@ function consultarMesa(num, animate){
   
   actualizarTimer();
   timerInterval = setInterval(actualizarTimer, 1000);
-}
-
-// ── UTILS ──
-window.$ = id => document.getElementById(id);
-
-function toast(msg){
-  const el = document.createElement('div');
-  el.className = 'toast'; 
-  el.innerHTML = `<span>${msg}</span>`;
-  document.body.appendChild(el);
-  setTimeout(() => {
-    el.style.animation = 'toastSlide 0.3s ease reverse';
-    setTimeout(() => el.remove(), 300);
-  }, 3000);
 }
 
 // ── INIT HOME ──
