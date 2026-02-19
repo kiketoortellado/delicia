@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Delicias — Administración</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#12100e"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-title" content="Delicias Admin"/>
+  <link rel="stylesheet" href="css/variables.css"/>
+  <link rel="stylesheet" href="css/base.css"/>
+  <link rel="stylesheet" href="css/components.css"/>
+  <link rel="stylesheet" href="css/layout.css"/>
+  <!-- ⚠️ CREA js/env.js con tus credenciales (copia js/env.example.js) -->
+  <script src="js/env.js"></script>
+</head>
+<body>
+
+<!-- SVG Sprite inline (evita CORS al usar <use href="#id">) -->
+<div style="display:none" aria-hidden="true">
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="icon-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/></symbol>
+  <symbol id="icon-table" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 7V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/><path d="M12 7v12M8 7V4M16 7V4"/></symbol>
+  <symbol id="icon-products" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></symbol>
+  <symbol id="icon-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></symbol>
+  <symbol id="icon-admin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="icon-chef" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" x2="18" y1="17" y2="17"/></symbol>
+  <symbol id="icon-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></symbol>
+  <symbol id="icon-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6m-3.5-3.5 3 3L22 7l-3-3"/></symbol>
+  <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></symbol>
+  <symbol id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+  <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></symbol>
+  <symbol id="icon-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18m0-12 12 12"/></symbol>
+  <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="icon-dollar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+  <symbol id="icon-receipt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6M16 12h-6M16 16h-6"/></symbol>
+  <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="icon-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></symbol>
+  <symbol id="icon-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="icon-food" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/></symbol>
+  <symbol id="icon-drink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6.01" y1="2" y2="2"/><line x1="10" x2="10.01" y1="2" y2="2"/><line x1="14" x2="14.01" y1="2" y2="2"/></symbol>
+  <symbol id="icon-dessert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="7"/><path d="M12 16v7M9 23h6"/></symbol>
+  <symbol id="icon-fire" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-2-2.143-2-4.286A5 5 0 0 0 12 2a5 5 0 0 0 5 5c0 2.143-1 2.143-2 4.286-.5 1-1 1.62-1 3a2.5 2.5 0 0 0 2.5 2.5"/><path d="M8.5 14.5c-1.5 1-2.5 2.5-2.5 4.5 0 3.5 3 6.5 6 7 3-.5 6-3.5 6-7 0-2-1-3.5-2.5-4.5"/></symbol>
+  <symbol id="icon-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+  <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
+  <symbol id="icon-utensils" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/></symbol>
+</svg>
+</div>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <div class="loading-txt">Conectando con Firebase...</div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg class="icon" style="width:36px;height:36px;stroke:#c9a84c"><use href="#icon-logo"/></svg>
+      Delicias
+    </div>
+    <div class="login-sub">Administrador de Mesas</div>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="inp-user" placeholder="usuario" autocomplete="username"/>
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="inp-pass" placeholder="••••••" autocomplete="current-password"/>
+    </div>
+    <button class="login-btn" onclick="doLogin()">
+      <svg class="icon icon-sm"><use href="#icon-check"/></svg>
+      Ingresar
+    </button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- TICKET (solo impresión) -->
+<div id="ticket-print"></div>
+
+<!-- APP NORMAL (Admin / Mesero) -->
+<div id="app" class="hidden">
+  <header>
+    <div class="header-brand">
+      <h1>
+        <svg class="icon"><use href="#icon-logo"/></svg>
+        Delicias
+      </h1>
+      <span>Administrador de Mesas</span>
+    </div>
+    <div class="header-actions">
+      <span>
+        <span class="sync-dot" id="sync-dot"></span>
+        <span id="sync-txt" style="font-size:0.8rem;color:var(--text-muted)">En línea</span>
+      </span>
+      <span id="fecha-lbl"></span>
+      <div class="user-pill">
+        <svg class="icon icon-sm"><use href="#icon-user"/></svg>
+        <span id="header-username">—</span>
+        <span class="role-badge" id="header-role">—</span>
+      </div>
+      <button class="btn-ghost" id="btn-cierre" onclick="cierreCaja()" style="display:none">
+        <svg class="icon"><use href="#icon-dollar"/></svg>
+        Cierre de Caja
+      </button>
+      <button class="btn-ghost" onclick="doLogout()">
+        <svg class="icon"><use href="#icon-logout"/></svg>
+        Salir
+      </button>
+    </div>
+  </header>
+
+  <!-- Tabs desktop -->
+  <div class="tabs" id="tabs-bar">
+    <button class="tab active" data-tab="mesas" onclick="setTab('mesas',this)">
+      <svg class="icon"><use href="#icon-table"/></svg> Mesas
+    </button>
+    <button class="tab" data-tab="productos" onclick="setTab('productos',this)">
+      <svg class="icon"><use href="#icon-products"/></svg> Productos
+    </button>
+    <button class="tab" data-tab="historial" onclick="setTab('historial',this)">
+      <svg class="icon"><use href="#icon-history"/></svg> Historial
+    </button>
+    <button class="tab admin-only hidden" id="tab-admin-btn" data-tab="admin" onclick="setTab('admin',this)">
+      <svg class="icon"><use href="#icon-admin"/></svg> Admin
+    </button>
+  </div>
+
+  <div class="main">
+
+    <!-- MESAS -->
+    <div id="tab-mesas">
+      <div class="section-title">
+        Mesas del Restaurante
+        <span class="badge" id="badge-mesas">0 ocupadas</span>
+      </div>
+      <div class="mesas-grid" id="mesas-grid"></div>
+    </div>
+
+    <!-- PRODUCTOS -->
+    <div id="tab-productos" class="hidden">
+      <div class="section-title">Gestión de Productos</div>
+      <div id="add-prod-wrap">
+        <div class="add-prod-form">
+          <div class="field" style="margin:0">
+            <label>Nombre</label>
+            <input type="text" id="prod-nombre" placeholder="Ej: Mojito"/>
+          </div>
+          <div class="field" style="margin:0">
+            <label>Precio (Gs.)</label>
+            <input type="number" id="prod-precio" placeholder="0" step="1" min="0"/>
+          </div>
+          <div class="field" style="margin:0">
+            <label>Categoría</label>
+            <select id="prod-cat">
+              <option value="comida">Comida</option>
+              <option value="bebida">Bebida</option>
+              <option value="postre">Postre</option>
+            </select>
+          </div>
+          <button class="btn-primary" onclick="agregarProducto()" style="height:46px;align-self:end">
+            <svg class="icon"><use href="#icon-plus"/></svg> Añadir
+          </button>
+        </div>
+      </div>
+      <div class="productos-admin" id="productos-admin-list"></div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div id="tab-historial" class="hidden">
+      <div class="section-title" style="justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <span id="hist-titulo-lbl">Historial de Ventas — Hoy</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input type="date" id="hist-fecha-input" onchange="cambiarFechaHistorial(this.value)"
+            style="padding:8px 12px;border:2px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer;"/>
+          <button class="btn-ghost" id="btn-hist-hoy" onclick="verHistorialHoy()" style="font-size:0.82rem;padding:8px 14px;display:none;">
+            <svg class="icon icon-sm"><use href="#icon-clock"/></svg> Hoy
+          </button>
+          <button class="btn-ghost" onclick="abrirHistorialDias()" style="font-size:0.82rem;padding:8px 14px;">
+            <svg class="icon icon-sm"><use href="#icon-history"/></svg> Días anteriores
+          </button>
+          <button class="btn-ghost" onclick="exportCSV()" style="font-size:0.82rem;padding:8px 14px;">
+            <svg class="icon icon-sm"><use href="#icon-download"/></svg> Exportar Excel
+          </button>
+        </div>
+      </div>
+      <div class="report-summary">
+        <div class="stat-card"><div class="stat-val" id="stat-clientes">0</div><div class="stat-lbl">Clientes Atendidos</div></div>
+        <div class="stat-card"><div class="stat-val" id="stat-mesas-h">0</div><div class="stat-lbl">Mesas Usadas</div></div>
+        <div class="stat-card"><div class="stat-val" id="stat-total">Gs. 0</div><div class="stat-lbl">Ingreso Total</div></div>
+      </div>
+      <div class="table-wrap"><div id="historial-container"></div></div>
+      <div id="btn-limpiar-wrap" style="margin-top:16px;text-align:right;display:none">
+        <button class="btn-danger" onclick="limpiarHistorial()">
+          <svg class="icon"><use href="#icon-trash"/></svg> Limpiar historial de hoy
+        </button>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="tab-admin" class="hidden">
+      <div class="section-title">
+        <svg class="icon"><use href="#icon-admin"/></svg> Panel de Administración
+      </div>
+      <div class="admin-grid">
+
+        <!-- Usuarios -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <span class="admin-card-title">
+              <svg class="icon"><use href="#icon-user"/></svg> Usuarios del Sistema
+            </span>
+            <button class="btn-primary" onclick="toggleAddUser()" style="font-size:0.8rem;padding:8px 14px">
+              <svg class="icon icon-sm"><use href="#icon-plus"/></svg> Nuevo
+            </button>
+          </div>
+          <div class="admin-card-body">
+            <div id="add-user-wrap-panel" class="hidden">
+              <div class="add-user-form">
+                <div class="field" style="margin:0"><label>Nombre completo</label><input type="text" id="nu-nombre" placeholder="Ej: Juan Pérez"/></div>
+                <div class="field" style="margin:0"><label>Usuario</label><input type="text" id="nu-user" placeholder="juanp"/></div>
+                <div class="field" style="margin:0"><label>Contraseña</label><input type="password" id="nu-pass" placeholder="••••••"/></div>
+                <div class="field" style="margin:0"><label>Confirmar</label><input type="password" id="nu-pass2" placeholder="••••••"/></div>
+                <div class="field" style="margin:0;grid-column:1/-1">
+                  <label>Rol</label>
+                  <select id="nu-role" style="width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--text);">
+                    <option value="mesero">Mesero</option>
+                    <option value="cocinero">Cocinero/a</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;margin-bottom:16px;">
+                <button class="btn-success" onclick="crearUsuario()"><svg class="icon icon-sm"><use href="#icon-check"/></svg> Crear</button>
+                <button class="btn-ghost" onclick="toggleAddUser()">Cancelar</button>
+              </div>
+            </div>
+            <div class="user-list" id="users-list"></div>
+          </div>
+        </div>
+
+        <!-- Columna derecha -->
+        <div>
+          <div class="admin-card" style="margin-bottom:24px;">
+            <div class="admin-card-header">
+              <span class="admin-card-title">
+                <span class="sync-dot" style="margin-right:4px;"></span> Usuarios Conectados
+              </span>
+            </div>
+            <div class="admin-card-body">
+              <div id="presencia-panel"><div style="color:var(--text-muted);font-size:0.85rem;">Cargando...</div></div>
+            </div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <span class="admin-card-title">
+                <svg class="icon"><use href="#icon-activity"/></svg> Registro de Actividad
+              </span>
+              <button class="btn-ghost" onclick="limpiarActividad()" style="font-size:0.8rem;padding:6px 12px">Limpiar</button>
+            </div>
+            <div class="admin-card-body">
+              <div class="activity-list" id="activity-list">
+                <div class="empty-state"><svg class="icon icon-xl"><use href="#icon-empty"/></svg><p>Sin actividad.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Nav Móvil -->
+<div class="bottom-nav" id="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bnav-btn active" data-tab="mesas" id="bnav-mesas" onclick="setTabMobile('mesas',this)">
+      <svg class="icon"><use href="#icon-table"/></svg> Mesas
+    </button>
+    <button class="bnav-btn" data-tab="productos" id="bnav-productos" onclick="setTabMobile('productos',this)">
+      <svg class="icon"><use href="#icon-products"/></svg> Productos
+    </button>
+    <button class="bnav-btn" data-tab="historial" id="bnav-historial" onclick="setTabMobile('historial',this)">
+      <svg class="icon"><use href="#icon-history"/></svg> Historial
+    </button>
+    <button class="bnav-btn admin-nav hidden" data-tab="admin" id="bnav-admin" onclick="setTabMobile('admin',this)">
+      <svg class="icon"><use href="#icon-admin"/></svg> Admin
+    </button>
+  </div>
+</div>
+
+<!-- APP COCINA -->
+<div id="cocina-app">
+  <div class="cocina-header">
+    <div class="cocina-brand">
+      <div>
+        <div class="cocina-logo">
+          <svg class="icon icon-lg" style="stroke:#e94560;width:28px;height:28px"><use href="#icon-fire"/></svg> Cocina
+        </div>
+        <div class="cocina-subtitle">Delicias — Pedidos activos</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div class="cocina-user-pill" id="cocina-user-lbl">
+        <svg class="icon icon-sm" style="stroke:#e94560"><use href="#icon-chef"/></svg> —
+      </div>
+      <button class="cocina-hist-btn" onclick="abrirHistCocina()">
+        <svg class="icon icon-sm"><use href="#icon-history"/></svg> Pedidos Anteriores
+      </button>
+      <button class="cocina-salir" onclick="doLogout()">
+        <svg class="icon icon-sm"><use href="#icon-logout"/></svg> Salir
+      </button>
+    </div>
+  </div>
+  <div class="cocina-main">
+    <div class="cocina-titulo">
+      Pedidos de Comida
+      <span class="cocina-badge" id="cocina-badge">Sin pedidos</span>
+    </div>
+    <div class="cocina-grid" id="cocina-grid">
+      <div class="cocina-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#a0a0b0" stroke-width="1" style="width:80px;height:80px;margin-bottom:24px;opacity:0.3"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/></svg>
+        <div class="cocina-empty-txt">Sin pedidos de comida activos</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MESA -->
+<div class="modal-overlay" id="modal-mesa">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title">
+          <svg class="icon"><use href="#icon-table"/></svg> Mesa 1
+        </div>
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-top:4px" id="modal-subtitle"></div>
+      </div>
+      <button class="modal-close" onclick="cerrarModal()">
+        <svg class="icon"><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Mesero responsable</label>
+        <input type="text" id="inp-mesero" readonly style="background:var(--bg);cursor:default"/>
+      </div>
+      <div class="pedido-layout">
+        <div>
+          <div style="font-size:0.8rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Productos</div>
+          <div class="cat-tabs" id="cat-tabs-modal">
+            <button class="cat-tab active" data-cat="todos" onclick="filtrarCat('todos',this)">
+              <svg class="icon icon-sm"><use href="#icon-utensils"/></svg> Todos
+            </button>
+            <button class="cat-tab" data-cat="bebida" onclick="filtrarCat('bebida',this)">
+              <svg class="icon icon-sm"><use href="#icon-drink"/></svg> Bebidas
+            </button>
+            <button class="cat-tab" data-cat="comida" onclick="filtrarCat('comida',this)">
+              <svg class="icon icon-sm"><use href="#icon-food"/></svg> Comidas
+            </button>
+            <button class="cat-tab" data-cat="postre" onclick="filtrarCat('postre',this)">
+              <svg class="icon icon-sm"><use href="#icon-dessert"/></svg> Postres
+            </button>
+          </div>
+          <div class="productos-grid" id="productos-grid"></div>
+        </div>
+        <div>
+          <div class="orden-panel">
+            <h4>
+              <svg class="icon icon-sm"><use href="#icon-receipt"/></svg> Pedido actual
+            </h4>
+            <div class="orden-items" id="orden-items">
+              <div style="color:var(--text-muted);font-size:0.9rem;padding:12px 0">Sin productos</div>
+            </div>
+            <div class="orden-total">
+              <span style="font-weight:600;color:var(--text-secondary);font-size:0.9rem">Total</span>
+              <span class="total-amount" id="pedido-total">Gs. 0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:24px;">
+        <div style="font-size:0.8rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;">Clientes esta noche</div>
+        <div id="clientes-mesa-list"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-success" onclick="confirmarPedido()">
+          <svg class="icon"><use href="#icon-check"/></svg> Confirmar pedido
+        </button>
+        <button class="btn-warning hidden" id="btn-pagado" onclick="marcarPagado()">
+          <svg class="icon"><use href="#icon-dollar"/></svg> Pagado — Liberar
+        </button>
+        <button class="btn-blue" onclick="verHistorialMesa()">
+          <svg class="icon"><use href="#icon-history"/></svg> Historial
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR PRODUCTO -->
+<div class="modal-overlay" id="modal-edit-prod">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title">
+        <svg class="icon"><use href="#icon-edit"/></svg> Editar Producto
+      </div>
+      <button class="modal-close" onclick="cerrarEditProd()">
+        <svg class="icon"><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-prod-id"/>
+      <div class="field"><label>Nombre</label><input type="text" id="edit-prod-nombre"/></div>
+      <div class="field"><label>Precio (Gs.)</label><input type="number" id="edit-prod-precio" step="1" min="0"/></div>
+      <div class="field">
+        <label>Categoría</label>
+        <select id="edit-prod-cat">
+          <option value="comida">Comida</option>
+          <option value="bebida">Bebida</option>
+          <option value="postre">Postre</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:12px;">
+        <button class="btn-primary" onclick="guardarEditProd()"><svg class="icon"><use href="#icon-check"/></svg> Guardar</button>
+        <button class="btn-ghost" onclick="cerrarEditProd()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HISTORIAL COCINA -->
+<div class="modal-overlay" id="modal-hist-cocina" style="z-index:300;">
+  <div class="modal" style="max-width:720px;background:#1a1a2e;border:2px solid #2a2a4a;">
+    <div class="modal-header" style="background:#1a1a2e;border-bottom:2px solid #2a2a4a;">
+      <div class="modal-title" style="color:#eaeaea;">
+        <svg class="icon"><use href="#icon-history"/></svg> Pedidos Anteriores — Cocina
+      </div>
+      <button class="modal-close" style="background:rgba(255,255,255,0.1);color:#a0a0b0;" onclick="document.getElementById('modal-hist-cocina').classList.remove('open')">
+        <svg class="icon"><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
+      <div id="hist-cocina-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HISTORIAL MESA -->
+<div class="modal-overlay" id="modal-hist-mesa">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <div class="modal-title" id="hist-mesa-title">
+        <svg class="icon"><use href="#icon-history"/></svg> Historial Mesa
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modal-hist-mesa').classList.remove('open')">
+        <svg class="icon"><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    <div class="modal-body"><div id="hist-mesa-body"></div></div>
+  </div>
+</div>
+
+<!-- MODAL DÍAS ANTERIORES -->
+<div class="modal-overlay" id="modal-dias-anteriores">
+  <div class="modal" style="max-width:860px">
+    <div class="modal-header">
+      <div class="modal-title">
+        <svg class="icon"><use href="#icon-history"/></svg> Historial por Día
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modal-dias-anteriores').classList.remove('open')">
+        <svg class="icon"><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+        <input type="date" id="dias-ant-desde" style="padding:8px 12px;border:2px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;"/>
+        <span style="color:var(--text-muted);font-size:0.9rem;">al</span>
+        <input type="date" id="dias-ant-hasta" style="padding:8px 12px;border:2px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;"/>
+        <button class="btn-primary" onclick="filtrarDiasAnteriores()" style="padding:8px 16px;font-size:0.85rem;">
+          <svg class="icon icon-sm"><use href="#icon-search"/></svg> Filtrar
+        </button>
+        <button class="btn-ghost" onclick="exportarDiasAnteriores()" style="padding:8px 16px;font-size:0.85rem;">
+          <svg class="icon icon-sm"><use href="#icon-download"/></svg> Exportar
+        </button>
+      </div>
+      <div id="dias-ant-stats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;"></div>
+      <div id="dias-ant-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CAMBIAR CONTRASEÑA -->
+<div class="modal-overlay" id="modal-cambiar-pass">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title">
+        <svg class="icon"><use href="#icon-key"/></svg> Cambiar Contraseña
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modal-cambiar-pass').classList.remove('open')">
+        <svg class="icon"><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cp-user-id"/>
+      <div id="cp-user-name" style="font-weight:600;color:var(--text-secondary);margin-bottom:16px;font-size:1rem;display:flex;align-items:center;gap:8px;">
+        <svg class="icon icon-sm"><use href="#icon-user"/></svg>
+      </div>
+      <div class="field"><label>Nueva contraseña</label><input type="password" id="cp-pass"/></div>
+      <div class="field"><label>Confirmar</label><input type="password" id="cp-pass2"/></div>
+      <div style="display:flex;gap:12px;margin-top:12px;">
+        <button class="btn-primary" onclick="guardarNuevaPass()"><svg class="icon"><use href="#icon-check"/></svg> Guardar</button>
+        <button class="btn-ghost" onclick="document.getElementById('modal-cambiar-pass').classList.remove('open')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Módulo principal ES -->
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

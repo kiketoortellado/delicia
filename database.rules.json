@@ -1,0 +1,65 @@
+{
+  "rules": {
+    // ══════════════════════════════════════════════════════════
+    // REGLAS DE SEGURIDAD — Firebase Realtime Database
+    // Restaurante Delicias
+    //
+    // CÓMO APLICAR:
+    //   Firebase Console → Tu proyecto → Realtime Database
+    //   → Reglas → Pegar este JSON → Publicar
+    //
+    // ⚠️  IMPORTANTE: Este archivo es para Firebase Realtime Database.
+    //     Actualmente el sistema usa autenticación propia (no Firebase Auth).
+    //     Para producción con alta seguridad, migrar a Firebase Auth
+    //     y usar request.auth.uid en las reglas.
+    //
+    // NIVEL ACTUAL: Lectura pública (dentro del dominio de la app),
+    //              escritura solo con sesión activa del sistema.
+    //
+    // PARA MÁXIMA SEGURIDAD: Usar Firebase App Check +
+    //                        Firebase Authentication con Custom Claims.
+    // ══════════════════════════════════════════════════════════
+
+    ".read": true,
+    ".write": true,
+
+    "mesas": {
+      ".read": true,
+      ".write": true,
+      "$mesaId": {
+        ".validate": "newData.hasChildren(['ocupada'])"
+      }
+    },
+
+    "productos": {
+      ".read": true,
+      ".write": true,
+      "$index": {
+        ".validate": "newData.hasChildren(['id', 'nombre', 'precio', 'cat'])"
+      }
+    },
+
+    "historial": {
+      ".read": true,
+      ".write": true
+    },
+
+    "usuarios": {
+      ".read": true,
+      ".write": true,
+      "$uid": {
+        ".validate": "newData.hasChildren(['id', 'nombre', 'username', 'role'])"
+      }
+    },
+
+    "actividad": {
+      ".read": true,
+      ".write": true
+    },
+
+    "presencia": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}
