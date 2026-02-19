@@ -2929,23 +2929,18 @@ header{
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, get, onValue, runTransaction, onDisconnect, serverTimestamp,
-         enableNetwork, goOffline, goOnline }
+import { getDatabase, ref, set, get, onValue, runTransaction, onDisconnect, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// ════════════════════════════════════════════════════════════
-// CONFIGURACIÓN FIREBASE CORREGIDA - SIN ESPACIOS
-// ════════════════════════════════════════════════════════════
 const firebaseConfig = {
-  apiKey: "AIzaSyCdKSf2g1cIyXrD6k_u1aR9TMln9HaPJro",
-  authDomain: "delicia-restaurante.firebaseapp.com",
-  databaseURL: "https://delicia-restaurante-default-rtdb.firebaseio.com",
-  projectId: "delicia-restaurante",
-  storageBucket: "delicia-restaurante.appspot.com",
-  messagingSenderId: "653903447900",
-  appId: "1:653903447900:web:85cffda9d703e464af6399"
+  apiKey:"AIzaSyCdKSf2g1cIyXrD6k_u1aR9TMln9HaPJro",
+  authDomain:"delicia-restaurante.firebaseapp.com",
+  databaseURL:"https://delicia-restaurante-default-rtdb.firebaseio.com",
+  projectId:"delicia-restaurante",
+  storageBucket:"delicia-restaurante.firebasestorage.app",
+  messagingSenderId:"653903447900",
+  appId:"1:653903447900:web:85cffda9d703e464af6399"
 };
-
 const fbApp = initializeApp(firebaseConfig);
 const db    = getDatabase(fbApp);
 
@@ -3733,9 +3728,9 @@ function mostrarMensajeTicket(t){
           WhatsApp
         </a>
         <button id="btn-copiar-ticket"
-  style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:var(--bg-deep);border:none;border-radius:12px;padding:14px 10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">
-  📋 Copiar texto
-</button>
+          style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:var(--bg-deep);border:none;border-radius:12px;padding:14px 10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">
+          📋 Copiar texto
+        </button>
       </div>
     </div>`;
   // Fix copy button - capture msg in closure
