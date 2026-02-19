@@ -195,11 +195,12 @@ window.confirmarPedido = async function() {
 /* ── Marcar pagado ──────────────────────────── */
 window.marcarPagado = async function() {
   if (!mesaAbierta) return;
+  const mesaNum = mesaAbierta;
   const sesion = Store.get('sesion');
   if (sesion?.role !== 'admin') { toast('Solo el Admin puede marcar pagado.'); return; }
 
   const mesas  = Store.get('mesas') || {};
-  const m      = mesas[mesaAbierta] || mesaDefault();
+  const m      = mesas[mesaNum] || mesaDefault();
   const mesero = sesion.nombre || sesion.username;
   let ticketData = null;
 
@@ -224,15 +225,20 @@ window.marcarPagado = async function() {
       Store.set('historial', historial);
       await set(ref(db, 'historial'), historial);
 
-      await registrarActividad('accion-pago', `Marcó Mesa ${mesaAbierta} como pagada — ${fmt(total)}`);
-      ticketData = { mesa: mesaAbierta, clienteNum: cn.length, detalles, total, mesero, hora: hora(), fecha: fechaISO };
+      await registrarActividad('accion-pago', `Marcó Mesa ${mesaNum} como pagada — ${fmt(total)}`);
+      ticketData = { mesa: mesaNum, clienteNum: cn.length, detalles, total, mesero, hora: hora(), fecha: fechaISO };
     }
 
     m.ocupada = false; m.pedidoActual = {}; m.mesero = ''; m.ultimoUsuario = ''; m.tsOcupada = null;
-    await set(ref(db, `mesas/${mesaAbierta}`), m);
+    await liberarMesaConTransaccion(mesaNum, m);
+
+    const mesasActualizadas = { ...(Store.get('mesas') || {}), [mesaNum]: { ...m } };
+    Store.set('mesas', mesasActualizadas);
+    renderMesas();
+
     pedidoActual = {};
     window.cerrarModal();
-    toast(`Mesa ${mesaAbierta} liberada`);
+    toast(`Mesa ${mesaNum} liberada`);
     if (ticketData) setTimeout(() => manejarTicket(ticketData), 300);
   } catch (err) {
     console.error('Error al liberar mesa:', err);
@@ -243,14 +249,20 @@ window.marcarPagado = async function() {
 /* ── Limpiar mesa ───────────────────────────── */
 window.limpiarMesa = async function() {
   if (!mesaAbierta) return;
+  const mesaNum = mesaAbierta;
   if (!confirm('¿Limpiar la mesa sin cobrar?')) return;
   const mesas = Store.get('mesas') || {};
-  const m     = mesas[mesaAbierta] || mesaDefault();
+  const m     = mesas[mesaNum] || mesaDefault();
   m.ocupada = false; m.pedidoActual = {}; m.mesero = ''; m.tsOcupada = null;
-  await set(ref(db, `mesas/${mesaAbierta}`), m);
+  await liberarMesaConTransaccion(mesaNum, m);
+
+  const mesasActualizadas = { ...(Store.get('mesas') || {}), [mesaNum]: { ...m } };
+  Store.set('mesas', mesasActualizadas);
+  renderMesas();
+
   pedidoActual = {};
   window.cerrarModal();
-  toast(`Mesa ${mesaAbierta} limpiada`);
+  toast(`Mesa ${mesaNum} limpiada`);
 };
 
 /* ── Transacción para ocupar mesa (evita race condition) ── */
@@ -284,6 +296,19 @@ async function ocuparMesaConTransaccion(num, meseroNombre) {
     m.pedidoActual = { ...pedidoActual };
     await set(ref(db, `mesas/${num}`), m);
     return true;
+  }
+}
+
+async function liberarMesaConTransaccion(num, mesaActualizada) {
+  const mesaRef = ref(db, `mesas/${num}`);
+  try {
+    await runTransaction(mesaRef, (mesaActual) => {
+      const base = mesaActual || mesaDefault();
+      return { ...base, ...mesaActualizada, ocupada: false, pedidoActual: {} };
+    });
+  } catch (e) {
+    console.error('Error en transacción de liberación:', e);
+    await set(mesaRef, { ...mesaActualizada, ocupada: false, pedidoActual: {} });
   }
 }
 
