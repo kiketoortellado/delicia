@@ -1,4 +1,4 @@
-export const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyCdKSf2g1cIyXrD6k_u1aR9TMln9HaPJro",
   authDomain: "delicia-restaurante.firebaseapp.com",
   databaseURL: "https://delicia-restaurante-default-rtdb.firebaseio.com",
