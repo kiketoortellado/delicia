@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Delicias — Administración</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#12100e"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Delicias Admin"/>
 <style>
 :root{
   /* PALETA UNIFICADA - Tema claro sofisticado */
@@ -2487,7 +2493,22 @@ header{
 
     <!-- HISTORIAL -->
     <div id="tab-historial" class="hidden">
-      <div class="section-title">Historial de Ventas — Noche</div>
+      <div class="section-title" style="justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <span id="hist-titulo-lbl">Historial de Ventas — Hoy</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input type="date" id="hist-fecha-input"
+            onchange="cambiarFechaHistorial(this.value)"
+            style="padding:8px 12px;border:2px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer;"/>
+          <button class="btn-ghost" id="btn-hist-hoy" onclick="verHistorialHoy()" style="font-size:0.82rem;padding:8px 14px;display:none;">
+            <span class="icon icon-clock icon-sm"></span>
+            Hoy
+          </button>
+          <button class="btn-ghost" onclick="abrirHistorialDias()" style="font-size:0.82rem;padding:8px 14px;">
+            <span class="icon icon-history icon-sm"></span>
+            Días anteriores
+          </button>
+        </div>
+      </div>
       <div class="report-summary">
         <div class="stat-card">
           <div class="stat-val" id="stat-clientes">0</div>
@@ -2508,7 +2529,7 @@ header{
       <div id="btn-limpiar-wrap" style="margin-top:16px;text-align:right;display:none">
         <button class="btn-danger" onclick="limpiarHistorial()">
           <span class="icon icon-trash"></span>
-          Limpiar historial de noche
+          Limpiar historial de hoy
         </button>
       </div>
     </div>
@@ -2748,7 +2769,8 @@ header{
           <span class="icon icon-check"></span>
           Confirmar pedido
         </button>
-        <button class="btn-warning" onclick="marcarPagado()">
+        <!-- Solo visible para admin -->
+        <button class="btn-warning admin-only-btn hidden" id="btn-pagado" onclick="marcarPagado()">
           <span class="icon icon-dollar"></span>
           Pagado — Liberar
         </button>
@@ -2836,6 +2858,38 @@ header{
   </div>
 </div>
 
+<!-- MODAL DÍAS ANTERIORES -->
+<div class="modal-overlay" id="modal-dias-anteriores">
+  <div class="modal" style="max-width:860px">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="icon icon-history"></span>
+        Historial por Día
+      </div>
+      <button class="modal-close" onclick="$('modal-dias-anteriores').classList.remove('open')">
+        <span class="icon icon-x"></span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+        <input type="date" id="dias-ant-desde" style="padding:8px 12px;border:2px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;"/>
+        <span style="color:var(--text-muted);font-size:0.9rem;">al</span>
+        <input type="date" id="dias-ant-hasta" style="padding:8px 12px;border:2px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;"/>
+        <button class="btn-primary" onclick="filtrarDiasAnteriores()" style="padding:8px 16px;font-size:0.85rem;">
+          <span class="icon icon-search icon-sm"></span>
+          Filtrar
+        </button>
+        <button class="btn-ghost" onclick="exportarDiasAnteriores()" style="padding:8px 16px;font-size:0.85rem;">
+          <span class="icon icon-download icon-sm"></span>
+          Exportar
+        </button>
+      </div>
+      <div id="dias-ant-stats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;"></div>
+      <div id="dias-ant-body"></div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL CAMBIAR CONTRASEÑA -->
 <div class="modal-overlay" id="modal-cambiar-pass">
   <div class="modal" style="max-width:420px">
@@ -2875,7 +2929,8 @@ header{
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, get, onValue, runTransaction, onDisconnect, serverTimestamp }
+import { getDatabase, ref, set, get, onValue, runTransaction, onDisconnect, serverTimestamp,
+         enableNetwork, goOffline, goOnline }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -3469,6 +3524,9 @@ window.abrirMesa = function(num){
   $('modal-title').innerHTML=`<span class="icon icon-table"></span> Mesa ${num}`;
   $('modal-subtitle').textContent=m.ocupada?'Ocupada':'Disponible';
   $('inp-mesero').value=sesion?sesion.nombre||sesion.username:'';
+  // Solo admin puede marcar como pagado
+  const btnPagado=$('btn-pagado');
+  if(btnPagado) btnPagado.classList.toggle('hidden', sesion?.role!=='admin');
   catActiva='todos';
   document.querySelectorAll('#cat-tabs-modal .cat-tab').forEach(t=>t.classList.toggle('active',t.dataset.cat==='todos'));
   renderProductosGrid();
@@ -3540,31 +3598,43 @@ window.confirmarPedido = async function(){
 
 window.marcarPagado = async function(){
   if(!mesaAbierta) return;
+  if(sesion?.role!=='admin'){ toast('Solo el Admin puede marcar pagado.'); return; }
   const m=state.mesas[mesaAbierta];
   const mesero=sesion?sesion.nombre||sesion.username:'';
   let ticketData=null;
-  if(Object.keys(pedidoActual).length>0){
-    const cn=m.clientesNoche||[];
-    const detalles=Object.entries(pedidoActual).map(([pid,qty])=>{
-      const p=state.productos.find(p=>String(p.id)===String(pid));
-      return p?{nombre:p.nombre,qty,precio:p.precio,sub:p.precio*qty,cat:p.cat||'comida'}:null;
-    }).filter(Boolean);
-    const total=calcTotal(pedidoActual);
-    const tiempoOcupada=m.tsOcupada?Math.floor((Date.now()-m.tsOcupada)/60000):null;
-    cn.push({num:cn.length+1,detalles,total,mesero,usuario:sesion?.username||'',hora:hora(),tiempoMin:tiempoOcupada});
-    m.clientesNoche=cn;
-    state.historial.push({mesa:mesaAbierta,clienteNum:cn.length,detalles,total,mesero,usuario:sesion?.username||'',hora:hora()});
-    await saveHistorial();
-    await registrarActividad('accion-pago',`Marcó Mesa ${mesaAbierta} como pagada — ${fmt(total)}`);
-    ticketData={mesa:mesaAbierta,clienteNum:cn.length,detalles,total,mesero,hora:hora()};
-    capturarHistorialCocina(mesaAbierta, m, pedidoActual);
+  try{
+    if(Object.keys(pedidoActual).length>0){
+      const cn=m.clientesNoche||[];
+      const detalles=Object.entries(pedidoActual).map(([pid,qty])=>{
+        const p=state.productos.find(p=>String(p.id)===String(pid));
+        return p?{nombre:p.nombre,qty,precio:p.precio,sub:p.precio*qty,cat:p.cat||'comida'}:null;
+      }).filter(Boolean);
+      const total=calcTotal(pedidoActual);
+      const tiempoOcupada=m.tsOcupada?Math.floor((Date.now()-m.tsOcupada)/60000):null;
+      // Guardar fecha ISO para filtrado histórico por día
+      const fechaISO=fechaHoy();
+      cn.push({num:cn.length+1,detalles,total,mesero,usuario:sesion?.username||'',hora:hora(),tiempoMin:tiempoOcupada,fecha:fechaISO});
+      m.clientesNoche=cn;
+      state.historial.push({
+        mesa:mesaAbierta,clienteNum:cn.length,detalles,total,
+        mesero,usuario:sesion?.username||'',hora:hora(),
+        fecha:fechaISO, ts:Date.now()
+      });
+      await saveHistorial();
+      await registrarActividad('accion-pago',`Marcó Mesa ${mesaAbierta} como pagada — ${fmt(total)}`);
+      ticketData={mesa:mesaAbierta,clienteNum:cn.length,detalles,total,mesero,hora:hora(),fecha:fechaISO};
+      capturarHistorialCocina(mesaAbierta, m, pedidoActual);
+    }
+    m.ocupada=false; m.pedidoActual={}; m.mesero=''; m.ultimoUsuario=''; m.tsOcupada=null;
+    await saveMesa(mesaAbierta);
+    pedidoActual={};
+    cerrarModal();
+    toast(`Mesa ${mesaAbierta} liberada`);
+    if(ticketData) setTimeout(()=>manejarTicket(ticketData),300);
+  }catch(err){
+    console.error('Error al liberar mesa:',err);
+    toast('⚠ Error al guardar. Verificá la conexión.');
   }
-  m.ocupada=false; m.pedidoActual={}; m.mesero=''; m.ultimoUsuario=''; m.tsOcupada=null;
-  await saveMesa(mesaAbierta);
-  pedidoActual={};
-  cerrarModal();
-  toast(`Mesa ${mesaAbierta} liberada`);
-  if(ticketData) setTimeout(()=>imprimirTicket(ticketData),300);
 };
 
 function renderClientesMesa(num){
@@ -3603,18 +3673,112 @@ window.verHistorialMesa = function(){
   $('modal-hist-mesa').classList.add('open');
 };
 
-// ── TICKET 80mm ───────────────────────────────────────────────
-function imprimirTicket(t){
-  const cats={bebida:[],comida:[],postre:[]};
-  t.detalles.forEach(d=>{ const c=d.cat||'comida'; (cats[c]=cats[c]||[]).push(d); });
+// ── TICKET ROUTER: POS en desktop, mensaje en mobile ─────────
+function manejarTicket(t){
+  const esMobile=/Mobi|Android|iPhone|iPad|IEMobile/i.test(navigator.userAgent);
+  if(esMobile) mostrarMensajeTicket(t);
+  else imprimirTicketPOS(t);
+}
 
-  const catNames={comida:'COMIDAS',bebida:'BEBIDAS',postre:'POSTRES'};
-  let itemsHtml='';
+// ── MENSAJE PARA MOBILE (WhatsApp / copiar) ───────────────────
+function mostrarMensajeTicket(t){
+  const cats={comida:[],bebida:[],postre:[]};
+  t.detalles.forEach(d=>{ (cats[d.cat||'comida']=cats[d.cat||'comida']||[]).push(d); });
+  const catEmoji={comida:'🍽️',bebida:'🥤',postre:'🍮'};
+  const lineas=[];
+  lineas.push('🏪 *RESTAURANTE DELICIAS*');
+  lineas.push(`Mesa ${t.mesa} · Cliente ${t.clienteNum}°`);
+  const fechaTxt=t.fecha||new Date().toLocaleDateString('es-PY',{timeZone:TZ});
+  lineas.push(`📅 ${fechaTxt}  ${t.hora}`);
+  lineas.push(`👤 Mesero: ${t.mesero||'—'}`);
+  lineas.push('─────────────────────');
   ['comida','bebida','postre'].forEach(cat=>{
     if(!cats[cat]||!cats[cat].length) return;
+    lineas.push(`${catEmoji[cat]} *${cat.toUpperCase()}S*`);
+    cats[cat].forEach(d=>{
+      const n=d.nombre.length>24?d.nombre.slice(0,23)+'…':d.nombre;
+      lineas.push(`  ${d.qty}× ${n}  ${fmt(d.sub)}`);
+    });
+  });
+  lineas.push('─────────────────────');
+  lineas.push(`💰 *TOTAL: ${fmt(t.total)}*`);
+  lineas.push('¡Gracias por su visita! 🙏');
+  const msg=lineas.join('\n');
+  const encoded=encodeURIComponent(msg);
+
+  // Modal bottom-sheet
+  let overlay=document.getElementById('overlay-msg-ticket');
+  if(overlay) overlay.remove();
+  overlay=document.createElement('div');
+  overlay.id='overlay-msg-ticket';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9998;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);';
+  overlay.innerHTML=`
+    <div style="background:var(--surface);border-radius:24px 24px 0 0;padding:24px 20px 32px;width:100%;max-width:520px;border:1px solid var(--border);box-shadow:0 -8px 32px rgba(0,0,0,0.4);animation:slideUpModal 0.35s cubic-bezier(0.34,1.56,0.64,1);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;">
+          <span class="icon icon-receipt"></span> Resumen del pedido
+        </div>
+        <button onclick="document.getElementById('overlay-msg-ticket').remove()" style="background:var(--bg);border:none;border-radius:10px;width:34px;height:34px;cursor:pointer;color:var(--text-muted);font-size:1rem;">✕</button>
+      </div>
+      <pre style="font-family:'Courier New',monospace;font-size:0.82rem;color:var(--text-secondary);white-space:pre-wrap;background:var(--bg);border-radius:12px;padding:14px;border:1px solid var(--border);line-height:1.7;margin-bottom:16px;max-height:45vh;overflow-y:auto;">${msg.replace(/\*/g,'')}</pre>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <a href="https://wa.me/?text=${encoded}" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:#fff;border:none;border-radius:12px;padding:14px 10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;text-decoration:none;transition:opacity 0.2s;"
+          onmouseenter="this.style.opacity='0.9'" onmouseleave="this.style.opacity='1'">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </a>
+        <button onclick="navigator.clipboard&&navigator.clipboard.writeText(${repr(None)}.replace('PLACEHOLDER',document.querySelector('#overlay-msg-ticket pre').textContent)).then(()=>{this.textContent='✓ Copiado';setTimeout(()=>document.getElementById('overlay-msg-ticket')?.remove(),900)}).catch(()=>toast('No se pudo copiar'))"
+          id="btn-copiar-ticket"
+          style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:var(--bg-deep);border:none;border-radius:12px;padding:14px 10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">
+          📋 Copiar texto
+        </button>
+      </div>
+    </div>`;
+  // Fix copy button - capture msg in closure
+  document.body.appendChild(overlay);
+  overlay.querySelector('#btn-copiar-ticket').onclick=function(){
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(msg).then(()=>{
+        this.textContent='✓ Copiado!';
+        setTimeout(()=>overlay.remove(),900);
+      }).catch(()=>toast('No se pudo copiar'));
+    } else {
+      // Fallback
+      const ta=document.createElement('textarea');
+      ta.value=msg; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+      this.textContent='✓ Copiado!';
+      setTimeout(()=>overlay.remove(),900);
+    }
+  };
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) overlay.remove(); });
+}
+
+// ── TICKET POS 58/80mm para impresora térmica (desktop) ───────
+function imprimirTicketPOS(t){
+  const cats={comida:[],bebida:[],postre:[]};
+  t.detalles.forEach(d=>{ (cats[d.cat||'comida']=cats[d.cat||'comida']||[]).push(d); });
+  const catNames={comida:'── COMIDAS ──',bebida:'── BEBIDAS ──',postre:'── POSTRES ──'};
+  const now=new Date();
+  const fechaTk=now.toLocaleDateString('es-PY',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:TZ});
+  const horaTk=now.toLocaleTimeString('es-PY',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:TZ});
+
+  // Función para alinear dos columnas en ancho fijo (para POS)
+  function fmtLinea(izq,der,ancho=32){
+    izq=String(izq); der=String(der);
+    const espacios=Math.max(1,ancho-izq.length-der.length);
+    return izq+' '.repeat(espacios)+der;
+  }
+
+  let itemsHtml='';
+  let hayItems=false;
+  ['comida','bebida','postre'].forEach(cat=>{
+    if(!cats[cat]||!cats[cat].length) return;
+    hayItems=true;
     itemsHtml+=`<div class="ticket-cat-hdr">${catNames[cat]}</div>`;
     cats[cat].forEach(d=>{
-      const nombre = d.nombre.length>20 ? d.nombre.slice(0,19)+'…' : d.nombre;
+      const nombre=d.nombre.length>20?d.nombre.slice(0,19)+'…':d.nombre;
       itemsHtml+=`<div class="ticket-row">
         <span class="ticket-item-name">${d.qty}x ${nombre}</span>
         <span class="ticket-item-price">${fmt(d.sub)}</span>
@@ -3622,30 +3786,30 @@ function imprimirTicket(t){
     });
   });
 
-  const now=new Date();
-  const fechaTk=now.toLocaleDateString('es-PY',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:TZ});
-  const horaTk=now.toLocaleTimeString('es-PY',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:TZ});
-
-  $('ticket-print').innerHTML=`
-  <div class="ticket-wrap">
-    <div class="ticket-title">RESTAURANTE</div>
-    <div class="ticket-title" style="font-size:17pt;letter-spacing:4px;">DELICIAS</div>
+  $('ticket-print').innerHTML=`<div class="ticket-wrap">
+    <div class="ticket-title">★ RESTAURANTE ★</div>
+    <div class="ticket-title" style="font-size:18pt;letter-spacing:5px;margin:2mm 0;">DELICIAS</div>
+    <div class="ticket-sub">Asunción, Paraguay</div>
     <div class="ticket-div"></div>
     <div class="ticket-row bold"><span>Mesa:</span><span>${t.mesa}</span></div>
     <div class="ticket-row bold"><span>Cliente:</span><span>${t.clienteNum}°</span></div>
-    <div class="ticket-row"><span>Mesero:</span><span>${t.mesero||'—'}</span></div>
+    <div class="ticket-row"><span>Atendido por:</span><span>${t.mesero||'—'}</span></div>
     <div class="ticket-row"><span>Fecha:</span><span>${fechaTk}</span></div>
     <div class="ticket-row"><span>Hora:</span><span>${horaTk}</span></div>
     <div class="ticket-div"></div>
+    <div class="ticket-row" style="font-size:8pt;font-weight:700;letter-spacing:1px;color:#555;">
+      <span>DESCRIPCIÓN</span><span>IMPORTE</span>
+    </div>
+    <div class="ticket-div" style="margin:1mm 0;"></div>
     ${itemsHtml}
     <div class="ticket-div"></div>
-    <div class="ticket-row total"><span>TOTAL</span><span>${fmt(t.total)}</span></div>
+    <div class="ticket-row total"><span>TOTAL A PAGAR</span><span>${fmt(t.total)}</span></div>
     <div class="ticket-div"></div>
-    <div class="ticket-center">¡Gracias por su visita!</div>
-    <div class="ticket-center">Vuelva pronto</div>
+    <div class="ticket-center" style="font-size:10pt;font-weight:700;margin:2mm 0;">¡MUCHAS GRACIAS!</div>
+    <div class="ticket-center">Por su preferencia</div>
+    <div class="ticket-center" style="margin-top:3mm;font-size:8pt;color:#888;">Conserve este comprobante</div>
     <hr class="ticket-corte"/>
   </div>`;
-
   window.print();
 }
 
@@ -3828,15 +3992,52 @@ window.limpiarActividad = async function(){
 };
 
 // ── HISTORIAL ─────────────────────────────────────────────────
+// fecha en formato YYYY-MM-DD timezone PY
+function fechaHoy(){
+  return new Date().toLocaleDateString('es-PY',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:TZ})
+    .split('/').reverse().join('-'); // dd/mm/yyyy → yyyy-mm-dd
+}
+
+let histFechaFiltro = null; // null = hoy
+
 function renderHistorial(){
   if(sesion?.role==='cocinero') return;
-  const h=state.historial||[];
+  const hoy = fechaHoy();
+  const fechaTarget = histFechaFiltro || hoy;
+  const esHoy = fechaTarget === hoy;
+
+  // Set input de fecha
+  const inp=$('hist-fecha-input');
+  if(inp && !inp.value) inp.value=hoy;
+
+  // Titulo dinámico
+  const tituloEl=$('hist-titulo-lbl');
+  if(tituloEl) tituloEl.textContent = esHoy
+    ? 'Historial de Ventas — Hoy'
+    : `Historial — ${fechaTarget.split('-').reverse().join('/')}`;
+
+  // Boton "Hoy" solo visible cuando estamos viendo otro día
+  const btnHoy=$('btn-hist-hoy');
+  if(btnHoy) btnHoy.style.display = esHoy?'none':'';
+
+  // Filtrar registros por fecha
+  const all=state.historial||[];
+  const h=all.filter(r=>{ 
+    const f=r.fecha||hoy; // registros sin fecha = hoy (retrocompat)
+    return f===fechaTarget;
+  });
+
   let total=0; const mesasSet=new Set(); const byMesa={};
   h.forEach(r=>{ if(!byMesa[r.mesa]) byMesa[r.mesa]=[]; byMesa[r.mesa].push(r); total+=r.total; mesasSet.add(r.mesa); });
   const sc=$('stat-clientes'),sm=$('stat-mesas-h'),st=$('stat-total');
   if(sc) sc.textContent=h.length; if(sm) sm.textContent=mesasSet.size; if(st) st.textContent=fmt(total);
-  if(!h.length){ html('historial-container','<div class="empty-state"><span class="icon icon-empty icon-xl"></span><p>Sin ventas esta noche.</p></div>'); return; }
-  let t='<table class="history-table"><thead><tr><th>Mesa</th><th>Cliente</th><th>Hora</th><th>Productos</th><th>Mesero</th><th>Usuario</th><th>Total</th></tr></thead><tbody>';
+
+  if(!h.length){
+    const msg = esHoy ? 'Sin ventas registradas hoy.' : `Sin ventas el ${fechaTarget.split('-').reverse().join('/')}.`;
+    html('historial-container',`<div class="empty-state"><span class="icon icon-empty icon-xl"></span><p>${msg}</p></div>`);
+    return;
+  }
+  let t='<div style="overflow-x:auto;"><table class="history-table"><thead><tr><th>Mesa</th><th>Cliente</th><th>Hora</th><th>Productos</th><th>Mesero</th><th>Usuario</th><th>Total</th></tr></thead><tbody>';
   Object.keys(byMesa).sort((a,b)=>+a-+b).forEach(mesa=>{
     let tm=0; byMesa[mesa].forEach(r=>{ tm+=r.total;
       t+=`<tr><td><strong>Mesa ${mesa}</strong></td><td>${r.clienteNum}°</td><td>${r.hora}</td>
@@ -3846,18 +4047,158 @@ function renderHistorial(){
     });
     t+=`<tr class="total-row"><td colspan="6">Subtotal Mesa ${mesa}</td><td>${fmt(tm)}</td></tr>`;
   });
-  t+=`<tr class="total-row" style="background:rgba(201,168,76,0.08)"><td colspan="6">INGRESO TOTAL</td><td style="color:var(--gold-dark);font-size:1.1rem">${fmt(total)}</td></tr></tbody></table>`;
+  t+=`<tr class="total-row" style="background:rgba(201,168,76,0.08)"><td colspan="6">INGRESO TOTAL</td><td style="color:var(--gold-dark);font-size:1.1rem">${fmt(total)}</td></tr></tbody></table></div>`;
   html('historial-container',t);
 }
 
+window.cambiarFechaHistorial = function(fecha){
+  histFechaFiltro = fecha || null;
+  renderHistorial();
+};
+
+window.verHistorialHoy = function(){
+  histFechaFiltro=null;
+  const inp=$('hist-fecha-input'); if(inp) inp.value=fechaHoy();
+  renderHistorial();
+};
+
+window.abrirHistorialDias = function(){
+  // Obtener fechas disponibles en el historial
+  const all=state.historial||[];
+  const hoy=fechaHoy();
+  const fechas=[...new Set(all.map(r=>r.fecha||hoy))].sort().reverse();
+
+  // Setear fechas por defecto: últimos 7 días
+  const hace7=new Date(); hace7.setDate(hace7.getDate()-7);
+  const hace7str=hace7.toISOString().slice(0,10);
+  const inp1=$('dias-ant-desde'), inp2=$('dias-ant-hasta');
+  if(inp1) inp1.value=hace7str;
+  if(inp2) inp2.value=hoy;
+
+  filtrarDiasAnteriores();
+  $('modal-dias-anteriores').classList.add('open');
+};
+
+window.filtrarDiasAnteriores = function(){
+  const desde=$('dias-ant-desde')?.value;
+  const hasta=$('dias-ant-hasta')?.value;
+  const all=state.historial||[];
+  const hoy=fechaHoy();
+  
+  const filtrado=all.filter(r=>{
+    const f=r.fecha||hoy;
+    if(desde && f<desde) return false;
+    if(hasta && f>hasta) return false;
+    return true;
+  });
+
+  // Agrupar por fecha
+  const porFecha={};
+  filtrado.forEach(r=>{
+    const f=r.fecha||hoy;
+    if(!porFecha[f]) porFecha[f]=[];
+    porFecha[f].push(r);
+  });
+
+  const totalGlobal=filtrado.reduce((s,r)=>s+r.total,0);
+  const fechasOrdenadas=Object.keys(porFecha).sort().reverse();
+
+  // Stats resumen
+  const statsEl=$('dias-ant-stats');
+  if(statsEl) statsEl.innerHTML=`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 20px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--text);">${filtrado.length}</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;">Ventas</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 20px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--text);">${fechasOrdenadas.length}</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;">Días</div>
+    </div>
+    <div style="background:var(--gold-glow);border:1px solid var(--gold);border-radius:12px;padding:12px 20px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--gold);">${fmt(totalGlobal)}</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;">Total período</div>
+    </div>`;
+
+  const body=$('dias-ant-body');
+  if(!body) return;
+  if(!fechasOrdenadas.length){
+    body.innerHTML='<div class="empty-state"><span class="icon icon-empty icon-xl"></span><p>Sin ventas en el período seleccionado.</p></div>';
+    return;
+  }
+
+  body.innerHTML=fechasOrdenadas.map(fecha=>{
+    const registros=porFecha[fecha];
+    const totalDia=registros.reduce((s,r)=>s+r.total,0);
+    const clientesDia=registros.length;
+    const mesasDia=[...new Set(registros.map(r=>r.mesa))].length;
+    const fechaDisplay=fecha.split('-').reverse().join('/');
+
+    return `<div style="margin-bottom:20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+      <div style="background:var(--surface);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;cursor:pointer;"
+        onclick="this.nextElementSibling.classList.toggle('hidden')">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="icon icon-history icon-sm"></span>
+          <div>
+            <div style="font-weight:700;color:var(--text);font-size:0.95rem;">${fechaDisplay}</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);">${clientesDia} cliente${clientesDia!==1?'s':''} · ${mesasDia} mesa${mesasDia!==1?'s':''}</div>
+          </div>
+        </div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold);">${fmt(totalDia)}</div>
+      </div>
+      <div class="hidden" style="padding:16px;overflow-x:auto;">
+        <table class="history-table" style="font-size:0.82rem;">
+          <thead><tr><th>Mesa</th><th>Cliente</th><th>Hora</th><th>Productos</th><th>Mesero</th><th>Total</th></tr></thead>
+          <tbody>
+            ${registros.sort((a,b)=>(a.mesa||0)-(b.mesa||0)).map(r=>`
+              <tr>
+                <td><strong>Mesa ${r.mesa}</strong></td>
+                <td>${r.clienteNum}°</td>
+                <td>${r.hora}</td>
+                <td style="max-width:200px;">${r.detalles.map(d=>`${d.qty}× ${d.nombre}`).join(', ')}</td>
+                <td>${r.mesero||'—'}</td>
+                <td>${fmt(r.total)}</td>
+              </tr>`).join('')}
+            <tr class="total-row"><td colspan="5">Total del día</td><td>${fmt(totalDia)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+};
+
+window.exportarDiasAnteriores = function(){
+  const desde=$('dias-ant-desde')?.value;
+  const hasta=$('dias-ant-hasta')?.value;
+  const all=state.historial||[];
+  const hoy=fechaHoy();
+  const filtrado=all.filter(r=>{
+    const f=r.fecha||hoy;
+    if(desde && f<desde) return false;
+    if(hasta && f>hasta) return false;
+    return true;
+  });
+  if(!filtrado.length){ toast('Sin datos para exportar.'); return; }
+  cargarYExportar(filtrado, false);
+};
+
 window.limpiarHistorial = async function(){
   if(sesion?.role!=='admin'){ toast('Solo el Admin.'); return; }
-  if(!confirm('¿Limpiar todo el historial de la noche?')) return;
-  state.historial=[];
-  await set(ref(db,'historial'),[]);
-  for(let i=1;i<=TOTAL_MESAS;i++){ state.mesas[i].clientesNoche=[]; await saveMesa(i); }
-  await registrarActividad('accion-admin','Limpió el historial de ventas de la noche');
-  toast('Historial limpiado.');
+  const hoy=fechaHoy();
+  if(!confirm(`¿Limpiar el historial de HOY (${hoy.split('-').reverse().join('/')})?
+
+Los días anteriores se conservan.`)) return;
+  // Solo eliminar registros de hoy
+  state.historial=state.historial.filter(r=>(r.fecha||hoy)!==hoy);
+  await set(ref(db,'historial'),state.historial.length?state.historial:[]);
+  for(let i=1;i<=TOTAL_MESAS;i++){
+    if(state.mesas[i]){
+      state.mesas[i].clientesNoche=(state.mesas[i].clientesNoche||[]).filter(c=>(c.fecha||hoy)!==hoy);
+      await saveMesa(i);
+    }
+  }
+  await registrarActividad('accion-admin',`Limpió el historial de ventas del día ${hoy}`);
+  toast('Historial de hoy limpiado.');
+  renderHistorial();
 };
 
 // ── CIERRE DE CAJA ────────────────────────────────────────────
@@ -4100,6 +4441,43 @@ $('modal-hist-cocina').addEventListener('click',function(e){if(e.target===this)t
 $('modal-cambiar-pass').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 
 boot();
+
+// ── PWA: Service Worker ───────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      reg.addEventListener('updatefound',()=>{
+        const nw=reg.installing;
+        nw.addEventListener('statechange',()=>{
+          if(nw.state==='installed'&&navigator.serviceWorker.controller){
+            // Nueva versión disponible
+            const b=document.createElement('div');
+            b.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--bg-deep);padding:12px 20px;border-radius:100px;z-index:9999;font-weight:700;font-size:0.85rem;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.3);white-space:nowrap;';
+            b.textContent='🔄 Actualización disponible — Toca para recargar';
+            b.onclick=()=>location.reload();
+            document.body.appendChild(b);
+          }
+        });
+      });
+    }).catch(()=>{});
+  });
+}
+
+// ── Detectar offline / online ─────────────────────────────────
+let offlineBanner=null;
+window.addEventListener('online',()=>{
+  offlineBanner&&offlineBanner.remove(); offlineBanner=null;
+  toast('✅ Conexión restaurada');
+  setSyncOk(true);
+});
+window.addEventListener('offline',()=>{
+  if(offlineBanner) return;
+  offlineBanner=document.createElement('div');
+  offlineBanner.style.cssText='position:fixed;top:0;left:0;right:0;background:#c0392b;color:#fff;text-align:center;padding:10px;z-index:9999;font-size:0.9rem;font-weight:700;';
+  offlineBanner.textContent='📵 Sin conexión — Los cambios se guardarán al reconectar';
+  document.body.appendChild(offlineBanner);
+  setSyncOk(false);
+});
 </script>
 </body>
 </html>
