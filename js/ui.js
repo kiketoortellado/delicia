@@ -96,23 +96,22 @@ export function setTab(tab) {
 }
 
 // Exponer globalmente para los onclick inline en el HTML
+function _onAdminTab() {
+  import('./mesas.js').then(m => m.cargarConfigTicket?.());
+  import('./usuarios.js').then(m => { m.renderUsersList?.(); m.renderPresencia?.(); });
+  import('./config-publica.js').then(m => m.cargarConfigPublica?.());
+}
 window.setTab = (tab, el) => {
   qsAll('.tab').forEach(t => t.classList.remove('active'));
   if (el) el.classList.add('active');
   setTab(tab);
-  if (tab === 'admin') {
-    import('./mesas.js').then(m => m.cargarConfigTicket?.());
-    import('./usuarios.js').then(m => { m.renderUsersList?.(); m.renderPresencia?.(); });
-  }
+  if (tab === 'admin') _onAdminTab();
 };
 window.setTabMobile = (tab, el) => {
   qsAll('.bnav-btn').forEach(b => b.classList.remove('active'));
   if (el) el.classList.add('active');
   setTab(tab);
-  if (tab === 'admin') {
-    import('./mesas.js').then(m => m.cargarConfigTicket?.());
-    import('./usuarios.js').then(m => { m.renderUsersList?.(); m.renderPresencia?.(); });
-  }
+  if (tab === 'admin') _onAdminTab();
 };
 
 /* ── Offline/Online banner ──────────────────── */
