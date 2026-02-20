@@ -42,7 +42,8 @@ async function boot() {
 
   try {
     await setupAdminInicial();
-    await Promise.all([cargarDatosIniciales(), cargarConfigTicket()]);
+    await cargarDatosIniciales();
+    import('./mesas.js').then(m => m.cargarConfigTicket?.()).catch(() => {});
     suscribirCambiosRealtime();
     suscribirPresencia();
     setSyncOk(true);
