@@ -13,7 +13,7 @@
   --gold:#c9a84c;--gold2:#e8c96a;--gold3:#f0d88a;
   --cream:#f5ede0;--cream2:#ede0cc;
   --text:#f0e8dc;--text2:#b8a890;--text3:#7a6e60;
-  --red:#c0392b;--green:#1e7a4a;--orange:#c47a1e;
+  --red:#c0392b;--green:#1e7a4a;
   --shadow:0 4px 24px rgba(0,0,0,.5);
   --shadow-lg:0 12px 48px rgba(0,0,0,.7);
   --glow:0 0 40px rgba(201,168,76,.12);
@@ -21,15 +21,18 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-
 body::before{
   content:'';position:fixed;inset:0;
   background-image:
     radial-gradient(ellipse at 20% 20%,rgba(201,168,76,.06) 0%,transparent 50%),
-    radial-gradient(ellipse at 80% 80%,rgba(201,168,76,.04) 0%,transparent 50%),
-    url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='60' height='60' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    radial-gradient(ellipse at 80% 80%,rgba(201,168,76,.04) 0%,transparent 50%);
   pointer-events:none;z-index:0;
 }
+
+/* SVG icons helper */
+.ico{display:inline-block;width:1.1em;height:1.1em;vertical-align:middle;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+.ico-lg{width:1.8em;height:1.8em;}
+.ico-xl{width:2.8em;height:2.8em;opacity:.4;}
 
 /* ── LOADING ── */
 #loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:20px;}
@@ -39,53 +42,41 @@ body::before{
 
 /* ── HOME ── */
 #screen-home{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;text-align:center;}
-.home-ornament{font-size:3rem;margin-bottom:8px;animation:float 4s ease-in-out infinite;}
+.home-logo{color:var(--gold);margin-bottom:16px;animation:float 4s ease-in-out infinite;}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .home-brand{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,12vw,5.5rem);font-weight:700;color:var(--gold2);letter-spacing:.05em;line-height:1;margin-bottom:4px;text-shadow:0 0 60px rgba(201,168,76,.3);}
-.home-sub{font-size:.7rem;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);margin-bottom:40px;font-weight:500;}
-.home-divider{display:flex;align-items:center;gap:14px;margin-bottom:40px;width:100%;max-width:280px;}
+.home-sub{font-size:.7rem;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);margin-bottom:32px;font-weight:500;}
+.home-divider{display:flex;align-items:center;gap:14px;margin-bottom:32px;width:100%;max-width:280px;}
 .home-divider-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);}
 .home-divider-icon{color:var(--gold);font-size:.9rem;opacity:.6;}
 
 /* Mensaje admin */
-.admin-message{
-  display:none;
-  background:linear-gradient(135deg,rgba(201,168,76,.1) 0%,rgba(201,168,76,.05) 100%);
-  border:1px solid rgba(201,168,76,.3);
-  border-radius:8px;padding:20px 24px;
-  margin:0 auto 32px;
-  width:100%;max-width:380px;
-  text-align:center;position:relative;
-}
+.admin-message{display:none;background:linear-gradient(135deg,rgba(201,168,76,.1) 0%,rgba(201,168,76,.05) 100%);border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:20px 24px;margin:0 auto 28px;width:100%;max-width:380px;text-align:center;position:relative;}
 .admin-message.visible{display:block;animation:fadeIn .5s ease;}
 .admin-message::before{content:'✦';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--bg);padding:0 12px;color:var(--gold);font-size:1.2rem;}
 .admin-message-text{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-style:italic;color:var(--cream);line-height:1.6;}
 
 .home-btns{display:flex;flex-direction:column;gap:14px;width:100%;max-width:320px;}
-.btn-home{padding:17px 28px;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:.92rem;font-weight:600;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);letter-spacing:.06em;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px;}
-.btn-home::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.08) 0%,transparent 100%);opacity:0;transition:opacity .3s;}
-.btn-home:hover::before{opacity:1;}
+.btn-home{padding:16px 24px;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:.92rem;font-weight:600;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);letter-spacing:.05em;display:flex;align-items:center;justify-content:center;gap:12px;border:none;}
 .btn-home:active{transform:scale(.98);}
-.btn-menu{background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);color:#0d0b09;border:none;box-shadow:0 4px 20px rgba(201,168,76,.3);}
+.btn-menu{background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);color:#0d0b09;box-shadow:0 4px 20px rgba(201,168,76,.3);}
 .btn-menu:hover{box-shadow:0 6px 30px rgba(201,168,76,.45);transform:translateY(-2px);}
-.btn-pedido{background:transparent;color:var(--gold2);border:1.5px solid var(--gold);}
+.btn-pedido{background:transparent;color:var(--gold2);border:1.5px solid var(--gold) !important;}
 .btn-pedido:hover{background:rgba(201,168,76,.06);transform:translateY(-2px);}
-.btn-wifi{background:var(--surface);color:var(--cream2);border:1.5px solid var(--border2);position:relative;}
-.btn-wifi:hover{border-color:var(--gold);background:var(--surface2);transform:translateY(-2px);}
-.btn-wifi::after{content:'';position:absolute;top:8px;right:8px;width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:blink 2s infinite;}
+.btn-wifi{background:var(--surface);color:var(--cream2);border:1.5px solid var(--border2) !important;position:relative;}
+.btn-wifi:hover{border-color:var(--gold) !important;background:var(--surface2);transform:translateY(-2px);}
+.wifi-dot{position:absolute;top:10px;right:10px;width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:blink 2s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
 .home-footer{position:absolute;bottom:24px;left:0;right:0;text-align:center;}
-.personal-link{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);text-decoration:none;transition:color .2s;border-bottom:1px solid transparent;padding-bottom:1px;}
-.personal-link:hover{color:var(--text2);border-bottom-color:var(--border2);}
+.personal-link{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);text-decoration:none;transition:color .2s;display:inline-flex;align-items:center;gap:6px;}
+.personal-link:hover{color:var(--text2);}
 
 /* ── SCREENS ── */
 .screen{display:none;position:relative;z-index:1;min-height:100vh;}
 .screen.active{display:block;}
-
-/* ── HEADER COMÚN ── */
-.screen-header{position:sticky;top:0;z-index:100;background:rgba(13,11,9,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:14px;}
-.btn-back{width:36px;height:36px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-size:1rem;transition:all .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.screen-header{position:sticky;top:0;z-index:100;background:rgba(13,11,9,.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:14px;}
+.btn-back{width:36px;height:36px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .btn-back:hover{border-color:var(--gold);color:var(--gold);}
 .screen-title{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:700;color:var(--gold2);letter-spacing:.04em;}
 .screen-sub{font-size:.72rem;color:var(--text3);margin-top:1px;}
@@ -93,9 +84,9 @@ body::before{
 /* ── MENÚ ── */
 #screen-menu .main{padding:20px 16px 40px;}
 @media(min-width:600px){#screen-menu .main{padding:24px 24px 48px;}}
-.cat-filter{display:flex;gap:8px;overflow-x:auto;padding:16px 0 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.cat-filter{display:flex;gap:8px;overflow-x:auto;padding:16px 0 12px;scrollbar-width:none;}
 .cat-filter::-webkit-scrollbar{display:none;}
-.cat-pill{padding:7px 16px;border-radius:100px;border:1px solid var(--border2);background:transparent;font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .22s;letter-spacing:.04em;}
+.cat-pill{padding:7px 16px;border-radius:100px;border:1px solid var(--border2);background:transparent;font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .22s;letter-spacing:.04em;display:inline-flex;align-items:center;gap:6px;}
 .cat-pill.active{background:var(--gold);color:#0d0b09;border-color:var(--gold);}
 .cat-pill:not(.active):hover{color:var(--text);background:rgba(255,255,255,.04);}
 .menu-section{margin-bottom:32px;}
@@ -108,9 +99,9 @@ body::before{
 .menu-item::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));opacity:0;transition:opacity .25s;}
 .menu-item:hover{border-color:var(--border2);box-shadow:var(--glow);transform:translateY(-2px);}
 .menu-item:hover::before{opacity:1;}
-.menu-item-icon{font-size:1.6rem;margin-bottom:8px;display:block;}
+.menu-item-icon{color:var(--gold);margin-bottom:10px;display:block;}
 .menu-item-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.2;}
-.menu-item-cat{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+.menu-item-cat{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:4px;}
 .menu-item-price{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:var(--gold);}
 
 /* ── PEDIDO ── */
@@ -128,13 +119,14 @@ body::before{
 .pedido-result{display:none;}
 .pedido-result.visible{display:block;animation:fadeUp .4s ease;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 .pedido-mesa-badge{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:8px 8px 0 0;padding:16px 20px;border-bottom:none;}
 .pedido-mesa-num{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:700;color:var(--gold2);line-height:1;}
 .pedido-mesa-lbl{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);}
 .pedido-estado{display:inline-flex;align-items:center;gap:6px;background:rgba(30,122,74,.15);border:1px solid rgba(30,122,74,.3);border-radius:100px;padding:5px 12px;font-size:.72rem;font-weight:600;color:#2ecc71;}
 .pedido-estado-dot{width:6px;height:6px;border-radius:50%;background:#2ecc71;animation:blink 1.5s infinite;}
 .pedido-info-row{background:var(--surface2);border:1px solid var(--border);border-top:none;padding:12px 20px;display:flex;gap:20px;flex-wrap:wrap;border-bottom:none;}
-.pedido-info-item{font-size:.76rem;color:var(--text2);}
+.pedido-info-item{font-size:.76rem;color:var(--text2);display:flex;align-items:center;gap:5px;}
 .pedido-info-item strong{color:var(--text);font-weight:600;}
 .pedido-items-card{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;overflow:hidden;}
 .pedido-items-head{padding:12px 20px;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr auto auto;gap:10px;}
@@ -142,7 +134,7 @@ body::before{
 .pedido-item-row:last-of-type{border-bottom:none;}
 .pedido-item-row:hover{background:rgba(255,255,255,.02);}
 .item-name{font-size:.9rem;color:var(--text);font-weight:500;}
-.item-cat-tag{font-size:.65rem;color:var(--text3);}
+.item-cat-tag{font-size:.65rem;color:var(--text3);display:flex;align-items:center;gap:4px;}
 .item-qty{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.2);border-radius:4px;padding:3px 10px;font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:700;color:var(--gold2);text-align:center;min-width:36px;}
 .item-sub{font-size:.88rem;font-weight:600;color:var(--text2);text-align:right;}
 .pedido-total-row{background:var(--bg3);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-top:2px solid var(--border2);}
@@ -150,10 +142,10 @@ body::before{
 .total-amount{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--gold);}
 .pedido-timer-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 20px;margin-top:12px;display:flex;align-items:center;justify-content:space-between;}
 .timer-label{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);}
-.timer-val{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--cream2);font-variant-numeric:tabular-nums;}
+.timer-val{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--cream2);}
 .timer-val.alerta{color:#e74c3c;}
 .pedido-empty{text-align:center;padding:48px 20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;}
-.pedido-empty-icon{font-size:2.8rem;margin-bottom:12px;opacity:.4;}
+.pedido-empty-icon{color:var(--gold);opacity:.4;margin-bottom:12px;display:flex;justify-content:center;}
 .pedido-empty-txt{font-size:.9rem;color:var(--text3);}
 .error-msg{background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.25);border-radius:6px;padding:12px 16px;font-size:.84rem;color:#e74c3c;margin-top:12px;display:none;}
 .error-msg.visible{display:block;}
@@ -161,17 +153,16 @@ body::before{
 /* ── MODAL WIFI ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
 .modal-overlay.open{display:flex;animation:fadeIn .3s ease;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:400px;box-shadow:var(--shadow-lg);position:relative;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:400px;box-shadow:var(--shadow-lg);}
 .modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .modal-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--gold2);display:flex;align-items:center;gap:10px;}
 .modal-close{width:36px;height:36px;border:1px solid var(--border2);background:transparent;color:var(--text2);border-radius:6px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;}
 .modal-close:hover{border-color:var(--red);color:var(--red);}
 .modal-body{padding:24px;}
-.wifi-icon{font-size:3rem;margin-bottom:12px;display:block;text-align:center;}
-.wifi-ssid,.wifi-pass{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:16px;margin-bottom:12px;}
+.wifi-icon-wrap{text-align:center;margin-bottom:16px;color:var(--gold);}
+.wifi-field{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:16px;margin-bottom:12px;}
 .wifi-label{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
-.wifi-value{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--cream);letter-spacing:.02em;}
+.wifi-value{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--cream);}
 .wifi-instrucciones{font-size:.8rem;color:var(--text2);line-height:1.6;padding:12px;background:rgba(201,168,76,.05);border-radius:6px;border-left:3px solid var(--gold);}
 .btn-copy{width:100%;padding:12px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.9rem;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;}
 .btn-copy:hover{background:var(--gold);color:#0d0b09;border-color:var(--gold);}
@@ -179,11 +170,76 @@ body::before{
 /* ── TOAST ── */
 .toast{position:fixed;bottom:24px;right:16px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 16px;border-radius:4px;font-size:.82rem;z-index:9999;box-shadow:var(--shadow);animation:toastIn .3s ease;}
 @keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-@media(max-width:400px){.home-brand{font-size:3.2rem;}.btn-home{padding:15px 24px;}}
 </style>
 </head>
 <body>
+
+<!-- SVG sprite -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="icon-utensils" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/>
+    <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/>
+  </symbol>
+  <symbol id="icon-menu-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    <path d="M8 7h8"/><path d="M8 11h5"/>
+  </symbol>
+  <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+  </symbol>
+  <symbol id="icon-wifi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+    <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+    <circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+  </symbol>
+  <symbol id="icon-food" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/>
+    <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/>
+  </symbol>
+  <symbol id="icon-drink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 22h8"/><path d="M12 11v11"/><path d="m19 3-7 8-7-8Z"/>
+  </symbol>
+  <symbol id="icon-dessert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2a5 5 0 0 0-5 5c0 2 1 3.5 2.5 4.5"/><path d="M12 2a5 5 0 0 1 5 5c0 2-1 3.5-2.5 4.5"/>
+    <path d="M5 11h14"/><path d="M5 11c0 5 3 8 7 9 4-1 7-4 7-9"/><path d="M9 22h6"/>
+  </symbol>
+  <symbol id="icon-chair" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/>
+    <path d="M3 11v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/>
+    <path d="M5 18v2"/><path d="M19 18v2"/>
+  </symbol>
+  <symbol id="icon-timer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 2h4"/><path d="M12 14v-4"/><circle cx="12" cy="14" r="8"/>
+  </symbol>
+  <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+  </symbol>
+  <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+  </symbol>
+  <symbol id="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+  </symbol>
+  <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 6 6 18m0-12 12 12"/>
+  </symbol>
+  <symbol id="icon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  </symbol>
+  <symbol id="icon-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+    <rect x="5" y="5" width="3" height="3" fill="currentColor" stroke="none"/><rect x="16" y="5" width="3" height="3" fill="currentColor" stroke="none"/><rect x="5" y="16" width="3" height="3" fill="currentColor" stroke="none"/>
+    <path d="M14 14h3v3"/><path d="M17 17h3v3"/><path d="M14 20h3"/>
+  </symbol>
+  <symbol id="icon-table" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="7" width="18" height="12" rx="2"/>
+    <path d="M3 7v-2a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/><path d="M12 7v12"/>
+  </symbol>
+</svg>
 
 <!-- LOADING -->
 <div id="loading">
@@ -193,7 +249,9 @@ body::before{
 
 <!-- ══════ HOME ══════ -->
 <div id="screen-home" class="screen">
-  <div class="home-ornament">🍽</div>
+  <div class="home-logo">
+    <svg class="ico" style="width:3rem;height:3rem;" viewBox="0 0 24 24"><use href="#icon-utensils"/></svg>
+  </div>
   <div class="home-brand">Delicias</div>
   <div class="home-sub">Restaurante · Menú del día</div>
   <div class="home-divider">
@@ -207,20 +265,35 @@ body::before{
   </div>
 
   <div class="home-btns">
-    <button class="btn-home btn-menu" onclick="irA('menu')">📋 Ver Menú</button>
-    <button class="btn-home btn-pedido" onclick="irA('pedido')">🔎 Consultar mi Pedido</button>
-    <button class="btn-home btn-wifi" onclick="mostrarWifi()">📶 WiFi Gratis</button>
+    <button class="btn-home btn-menu" onclick="irA('menu')">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#icon-menu-book"/></svg>
+      Ver Menú
+    </button>
+    <button class="btn-home btn-pedido" onclick="irA('pedido')">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#icon-search"/></svg>
+      Consultar mi Pedido
+    </button>
+    <button class="btn-home btn-wifi" onclick="mostrarWifi()">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#icon-wifi"/></svg>
+      WiFi Gratis
+      <span class="wifi-dot"></span>
+    </button>
   </div>
 
   <div class="home-footer">
-    <a href="admin.html" class="personal-link">Acceso Personal →</a>
+    <a href="admin.html" class="personal-link">
+      Acceso Personal
+      <svg class="ico" style="width:.8em;height:.8em" viewBox="0 0 24 24"><use href="#icon-lock"/></svg>
+    </a>
   </div>
 </div>
 
 <!-- ══════ MENÚ ══════ -->
 <div id="screen-menu" class="screen">
   <div class="screen-header">
-    <button class="btn-back" onclick="irA('home')">←</button>
+    <button class="btn-back" onclick="irA('home')">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#icon-arrow-left"/></svg>
+    </button>
     <div>
       <div class="screen-title">Nuestro Menú</div>
       <div class="screen-sub" id="menu-count">Cargando productos...</div>
@@ -228,10 +301,18 @@ body::before{
   </div>
   <div class="main">
     <div class="cat-filter">
-      <button class="cat-pill active" data-cat="todos" onclick="filtrarMenu('todos',this)">✦ Todos</button>
-      <button class="cat-pill" data-cat="comida" onclick="filtrarMenu('comida',this)">🍕 Comidas</button>
-      <button class="cat-pill" data-cat="bebida" onclick="filtrarMenu('bebida',this)">🥤 Bebidas</button>
-      <button class="cat-pill" data-cat="postre" onclick="filtrarMenu('postre',this)">🍨 Postres</button>
+      <button class="cat-pill active" data-cat="todos" onclick="filtrarMenu('todos',this)">
+        <svg class="ico" style="width:.85em;height:.85em" viewBox="0 0 24 24"><use href="#icon-utensils"/></svg> Todos
+      </button>
+      <button class="cat-pill" data-cat="comida" onclick="filtrarMenu('comida',this)">
+        <svg class="ico" style="width:.85em;height:.85em" viewBox="0 0 24 24"><use href="#icon-food"/></svg> Comidas
+      </button>
+      <button class="cat-pill" data-cat="bebida" onclick="filtrarMenu('bebida',this)">
+        <svg class="ico" style="width:.85em;height:.85em" viewBox="0 0 24 24"><use href="#icon-drink"/></svg> Bebidas
+      </button>
+      <button class="cat-pill" data-cat="postre" onclick="filtrarMenu('postre',this)">
+        <svg class="ico" style="width:.85em;height:.85em" viewBox="0 0 24 24"><use href="#icon-dessert"/></svg> Postres
+      </button>
     </div>
     <div id="menu-body"></div>
   </div>
@@ -240,7 +321,9 @@ body::before{
 <!-- ══════ PEDIDO ══════ -->
 <div id="screen-pedido" class="screen">
   <div class="screen-header">
-    <button class="btn-back" onclick="irA('home')">←</button>
+    <button class="btn-back" onclick="irA('home')">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#icon-arrow-left"/></svg>
+    </button>
     <div>
       <div class="screen-title">Consultar Pedido</div>
       <div class="screen-sub">Ingresá el número de tu mesa</div>
@@ -248,7 +331,10 @@ body::before{
   </div>
   <div class="main">
     <div id="qr-chip-wrap" style="text-align:center;margin-bottom:4px;display:none;">
-      <span class="qr-chip">📱 Mesa detectada por QR</span>
+      <span class="qr-chip">
+        <svg class="ico" style="width:.9em;height:.9em" viewBox="0 0 24 24"><use href="#icon-qr"/></svg>
+        Mesa detectada por QR
+      </span>
     </div>
     <div class="mesa-input-wrap">
       <div class="mesa-input-label">¿Cuál es tu mesa?</div>
@@ -267,7 +353,7 @@ body::before{
         <div class="timer-label">Tiempo en mesa</div>
         <div class="timer-val" id="timer-display">—</div>
       </div>
-      <div style="font-size:2rem;opacity:.4">⏱</div>
+      <svg class="ico ico-lg" style="opacity:.35;color:var(--gold)" viewBox="0 0 24 24"><use href="#icon-timer"/></svg>
     </div>
   </div>
 </div>
@@ -276,30 +362,35 @@ body::before{
 <div class="modal-overlay" id="modal-wifi" onclick="cerrarWifi(event)">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-header">
-      <div class="modal-title">📶 Conectate al WiFi</div>
+      <div class="modal-title">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#icon-wifi"/></svg>
+        Conectate al WiFi
+      </div>
       <button class="modal-close" onclick="cerrarWifi()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18m0-12 12 12"/></svg>
+        <svg class="ico" viewBox="0 0 24 24"><use href="#icon-x"/></svg>
       </button>
     </div>
     <div class="modal-body">
-      <span class="wifi-icon">📡</span>
-      <div class="wifi-ssid">
+      <div class="wifi-icon-wrap">
+        <svg class="ico" style="width:3rem;height:3rem" viewBox="0 0 24 24"><use href="#icon-wifi"/></svg>
+      </div>
+      <div class="wifi-field">
         <div class="wifi-label">Nombre de Red (SSID)</div>
         <div class="wifi-value" id="wifi-ssid-val">—</div>
       </div>
-      <div class="wifi-pass">
+      <div class="wifi-field">
         <div class="wifi-label">Contraseña</div>
         <div class="wifi-value" id="wifi-pass-val">—</div>
       </div>
       <div class="wifi-instrucciones">
-        <strong>💡 Cómo conectarte:</strong><br>
+        <strong>Cómo conectarte:</strong><br>
         1. Abrí la configuración WiFi de tu dispositivo<br>
         2. Seleccioná la red indicada arriba<br>
-        3. Ingresá la contraseña — o tocá el botón para copiarla<br>
+        3. Ingresá la contraseña o tocá el botón para copiarla<br>
         4. ¡Listo! Disfrutá del internet gratuito
       </div>
       <button class="btn-copy" onclick="copiarWifi()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <svg class="ico" viewBox="0 0 24 24"><use href="#icon-copy"/></svg>
         Copiar Contraseña
       </button>
     </div>
@@ -323,23 +414,23 @@ const firebaseConfig = {
 const CURRENCY = 'Gs.';
 const TZ = 'America/Asuncion';
 const fmt = n => CURRENCY + ' ' + Math.round(n).toLocaleString('es-PY');
-const CAT_ICONS = { comida:'🍕', bebida:'🥤', postre:'🍨' };
-const CAT_NAMES = { comida:'Comidas', bebida:'Bebidas', postre:'Postres' };
-const CAT_ORDER = ['comida','bebida','postre'];
 const $ = id => document.getElementById(id);
 
-let productos = [];
-let mesas = {};
-let catMenuActiva = 'todos';
-let timerInterval = null;
-let currentMesaTs = null;
-let currentMesaNum = null;
-let wifiPass = '';
+// SVG helpers para JS-rendered content
+const CAT_ICON = {
+  comida: '<svg class="ico" style="width:.85em;height:.85em" viewBox="0 0 24 24"><use href="#icon-food"/></svg>',
+  bebida: '<svg class="ico" style="width:.85em;height:.85em" viewBox="0 0 24 24"><use href="#icon-drink"/></svg>',
+  postre: '<svg class="ico" style="width:.85em;height:.85em" viewBox="0 0 24 24"><use href="#icon-dessert"/></svg>'
+};
+const CAT_NAMES = { comida:'Comidas', bebida:'Bebidas', postre:'Postres' };
+const CAT_ORDER = ['comida','bebida','postre'];
+
+let productos = [], mesas = {}, catMenuActiva = 'todos';
+let timerInterval = null, currentMesaTs = null, currentMesaNum = null;
 
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
-/* ── Normalizar mesas (soporta mesa_N y legacy) ── */
 function normalizarMesas(raw) {
   if (!raw) return {};
   const norm = {};
@@ -355,17 +446,14 @@ function normalizarMesas(raw) {
   return norm;
 }
 
-/* ── Config pública: WiFi + Mensaje ── */
+// Config pública: WiFi + Mensaje
 onValue(ref(db, 'config/publico'), snap => {
   if (!snap.exists()) return;
   const cfg = snap.val();
-
   if (cfg.wifi) {
     $('wifi-ssid-val').textContent = cfg.wifi.ssid || '—';
     $('wifi-pass-val').textContent = cfg.wifi.pass || '—';
-    wifiPass = cfg.wifi.pass || '';
   }
-
   if (cfg.mensaje) {
     const msgEl   = $('admin-message');
     const msgText = $('admin-message-text');
@@ -378,7 +466,6 @@ onValue(ref(db, 'config/publico'), snap => {
   }
 });
 
-/* ── Productos ── */
 onValue(ref(db, 'productos'), snap => {
   const r = snap.val();
   productos = r ? (Array.isArray(r) ? r : Object.values(r)).filter(Boolean) : [];
@@ -387,13 +474,12 @@ onValue(ref(db, 'productos'), snap => {
   if (currentMesaNum) consultarMesa(currentMesaNum, false);
 });
 
-/* ── Mesas ── */
 onValue(ref(db, 'mesas'), snap => {
   mesas = normalizarMesas(snap.val());
   if (currentMesaNum) consultarMesa(currentMesaNum, false);
 });
 
-/* ── QR: ?mesa=X ── */
+// QR
 const mesaQR = new URLSearchParams(window.location.search).get('mesa');
 if (mesaQR && parseInt(mesaQR) >= 1 && parseInt(mesaQR) <= 12) {
   window.addEventListener('DOMContentLoaded', () => {
@@ -404,15 +490,10 @@ if (mesaQR && parseInt(mesaQR) >= 1 && parseInt(mesaQR) <= 12) {
   });
 }
 
-/* ── Navegación ── */
 window.irA = function(screen) {
   document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = ''; });
-  if (screen === 'home') {
-    $('screen-home').style.display = 'flex';
-    $('screen-home').classList.add('active');
-  } else {
-    $('screen-' + screen).classList.add('active');
-  }
+  if (screen === 'home') { $('screen-home').style.display = 'flex'; }
+  $('screen-' + (screen === 'home' ? 'home' : screen)).classList.add('active');
   if (screen !== 'pedido') {
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     currentMesaNum = null; currentMesaTs = null;
@@ -425,7 +506,6 @@ window.irA = function(screen) {
   window.scrollTo(0, 0);
 };
 
-/* ── WiFi ── */
 window.mostrarWifi = () => $('modal-wifi').classList.add('open');
 window.cerrarWifi  = (e) => { if (!e || e.target === $('modal-wifi')) $('modal-wifi').classList.remove('open'); };
 window.copiarWifi  = () => {
@@ -438,7 +518,6 @@ window.copiarWifi  = () => {
   });
 };
 
-/* ── Render Menú ── */
 function renderMenu() {
   const count = productos.length;
   $('menu-count').textContent = count + ' producto' + (count !== 1 ? 's' : '') + ' disponibles';
@@ -457,13 +536,16 @@ function renderMenuFiltrado() {
     const items = productos.filter(p => (p.cat || 'comida') === c);
     if (!items.length) return;
     html += `<div class="menu-section">
-      <div class="menu-section-title"><span class="section-dot"></span>${CAT_ICONS[c]} ${CAT_NAMES[c]}</div>
+      <div class="menu-section-title">
+        <span class="section-dot"></span>
+        ${CAT_ICON[c]} ${CAT_NAMES[c]}
+      </div>
       <div class="menu-grid">
         ${items.map(p => `
           <div class="menu-item">
-            <span class="menu-item-icon">${CAT_ICONS[p.cat || 'comida']}</span>
+            <div class="menu-item-icon">${CAT_ICON[p.cat || 'comida']}</div>
             <div class="menu-item-name">${p.nombre}</div>
-            <div class="menu-item-cat">${CAT_NAMES[p.cat || 'comida']}</div>
+            <div class="menu-item-cat">${CAT_ICON[p.cat || 'comida']} ${CAT_NAMES[p.cat || 'comida']}</div>
             <div class="menu-item-price">${fmt(p.precio)}</div>
           </div>`).join('')}
       </div>
@@ -478,13 +560,12 @@ window.filtrarMenu = function(cat, el) {
   renderMenuFiltrado();
 };
 
-/* ── Consultar Pedido ── */
 window.consultarPedido = function() {
   const num   = parseInt($('inp-mesa-num').value);
   const errEl = $('pedido-error');
   errEl.classList.remove('visible');
   if (isNaN(num) || num < 1 || num > 12) {
-    errEl.textContent = '⚠️ Ingresá un número de mesa válido (1 al 12).';
+    errEl.textContent = 'Ingresá un número de mesa válido (1 al 12).';
     errEl.classList.add('visible');
     return;
   }
@@ -494,13 +575,14 @@ window.consultarPedido = function() {
 function consultarMesa(num, animate) {
   const mesa      = mesas[num];
   const result    = $('pedido-result');
-  const errEl     = $('pedido-error');
   const timerCard = $('timer-card');
 
   if (!mesa || !mesa.ocupada) {
     result.innerHTML = `
       <div class="pedido-empty">
-        <div class="pedido-empty-icon">🪑</div>
+        <div class="pedido-empty-icon">
+          <svg class="ico" style="width:3rem;height:3rem;opacity:.35" viewBox="0 0 24 24"><use href="#icon-chair"/></svg>
+        </div>
         <div class="pedido-empty-txt" style="font-size:1rem;color:var(--text2);margin-bottom:6px;">Mesa ${num} sin pedido activo</div>
         <div class="pedido-empty-txt">Esta mesa está libre o aún no tiene pedidos registrados.</div>
       </div>`;
@@ -523,7 +605,10 @@ function consultarMesa(num, animate) {
   const total = items.reduce((s, i) => s + i.sub, 0);
 
   if (!items.length) {
-    result.innerHTML = `<div class="pedido-empty"><div class="pedido-empty-icon">🍽</div><div class="pedido-empty-txt">Mesa ${num} ocupada pero sin productos aún.</div></div>`;
+    result.innerHTML = `<div class="pedido-empty">
+      <div class="pedido-empty-icon"><svg class="ico" style="width:3rem;height:3rem" viewBox="0 0 24 24"><use href="#icon-table"/></svg></div>
+      <div class="pedido-empty-txt">Mesa ${num} ocupada pero sin productos aún.</div>
+    </div>`;
     result.classList.add('visible');
     timerCard.style.display = 'none';
     return;
@@ -538,14 +623,20 @@ function consultarMesa(num, animate) {
       <div class="pedido-estado"><span class="pedido-estado-dot"></span>Pedido activo</div>
     </div>
     <div class="pedido-info-row">
-      ${mesa.mesero ? `<span class="pedido-info-item">👤 Mesero: <strong>${mesa.mesero}</strong></span>` : ''}
-      <span class="pedido-info-item">🕐 Desde: <strong>${mesa.tsOcupada ? new Date(mesa.tsOcupada).toLocaleTimeString('es-PY',{hour:'2-digit',minute:'2-digit',timeZone:TZ}) : '—'}</strong></span>
+      ${mesa.mesero ? `<span class="pedido-info-item"><svg class="ico" style="width:.9em;height:.9em" viewBox="0 0 24 24"><use href="#icon-user"/></svg> <strong>${mesa.mesero}</strong></span>` : ''}
+      <span class="pedido-info-item">
+        <svg class="ico" style="width:.9em;height:.9em" viewBox="0 0 24 24"><use href="#icon-clock"/></svg>
+        <strong>${mesa.tsOcupada ? new Date(mesa.tsOcupada).toLocaleTimeString('es-PY',{hour:'2-digit',minute:'2-digit',timeZone:TZ}) : '—'}</strong>
+      </span>
     </div>
     <div class="pedido-items-card">
       <div class="pedido-items-head"><span>Producto</span><span>Cant.</span><span>Subtotal</span></div>
       ${items.map(i => `
         <div class="pedido-item-row">
-          <div><div class="item-name">${i.nombre}</div><div class="item-cat-tag">${CAT_ICONS[i.cat||'comida']} ${CAT_NAMES[i.cat||'comida']}</div></div>
+          <div>
+            <div class="item-name">${i.nombre}</div>
+            <div class="item-cat-tag">${CAT_ICON[i.cat||'comida']} ${CAT_NAMES[i.cat||'comida']}</div>
+          </div>
           <div class="item-qty">${i.qty}</div>
           <div class="item-sub">${fmt(i.sub)}</div>
         </div>`).join('')}
@@ -556,8 +647,7 @@ function consultarMesa(num, animate) {
     </div>`;
 
   result.classList.add('visible');
-  errEl.classList.remove('visible');
-
+  $('pedido-error').classList.remove('visible');
   timerCard.style.display = 'flex';
   if (timerInterval) clearInterval(timerInterval);
   function tick() {
@@ -574,7 +664,6 @@ function consultarMesa(num, animate) {
   timerInterval = setInterval(tick, 1000);
 }
 
-/* ── Toast ── */
 function toast(msg) {
   const el = document.createElement('div');
   el.className = 'toast'; el.textContent = msg;
@@ -582,7 +671,6 @@ function toast(msg) {
   setTimeout(() => el.remove(), 3000);
 }
 
-/* ── Init ── */
 $('screen-home').style.display = 'flex';
 $('screen-home').classList.add('active');
 </script>
