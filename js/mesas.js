@@ -479,10 +479,12 @@ function imprimirTicketPOS(t) {
       itemsHtml += `<div class="ticket-row"><span class="ticket-item-name">${d.qty}x ${nombre}</span><span class="ticket-item-price">${fmt(d.sub)}</span></div>`;
     });
   });
+  const ticketHeader = _ticketConfig.header
+    ? `<div class="ticket-title" style="font-size:13pt;letter-spacing:2px;">${_ticketConfig.header}</div>`
+    : `<div class="ticket-title">★ RESTAURANTE ★</div><div class="ticket-title" style="font-size:18pt;letter-spacing:5px;margin:2mm 0;">DELICIAS</div>`;
+
   getEl('ticket-print').innerHTML = `<div class="ticket-wrap">
-    <div class="ticket-title">★ RESTAURANTE ★</div>
-    <div class="ticket-title" style="font-size:18pt;letter-spacing:5px;margin:2mm 0;">DELICIAS</div>
-    ${_ticketConfig.header ? `<div class="ticket-sub" style="font-weight:700;font-size:10pt;">${_ticketConfig.header}</div>` : ''}
+    ${ticketHeader}
     <div class="ticket-sub">Asunción, Paraguay</div>
     <div class="ticket-div"></div>
     <div class="ticket-row bold"><span>Mesa:</span><span>${t.mesa}</span></div>
