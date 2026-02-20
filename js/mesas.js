@@ -363,6 +363,39 @@ export function actualizarTimers() {
   }
 }
 
+/* ── Config ticket (encabezado / despedida) ─── */
+const CONFIG_KEY = 'ticket_config';
+
+export async function cargarConfigTicket() {
+  try {
+    const snap = await get(ref(db, CONFIG_KEY));
+    if (snap.exists()) {
+      const c = snap.val();
+      const h = document.getElementById('ticket-header');
+      const f = document.getElementById('ticket-footer');
+      if (h) h.value = c.header || '';
+      if (f) f.value = c.footer || '';
+    }
+  } catch(e) { console.warn('Config ticket no disponible:', e); }
+}
+
+function getConfigTicket() {
+  return {
+    header: document.getElementById('ticket-header')?.value.trim() || '',
+    footer: document.getElementById('ticket-footer')?.value.trim() || ''
+  };
+}
+
+window.guardarConfigTicket = async function() {
+  const config = getConfigTicket();
+  try {
+    await set(ref(db, CONFIG_KEY), config);
+    toast('✓ Configuración guardada');
+  } catch(e) {
+    toast('⚠ Error al guardar configuración');
+  }
+};
+
 /* ── Ticket ─────────────────────────────────── */
 function manejarTicket(t) {
   const esMobile = /Mobi|Android|iPhone|iPad|IEMobile/i.test(navigator.userAgent);
@@ -375,8 +408,12 @@ function mostrarMensajeTicket(t) {
   const cats = { comida: [], bebida: [], postre: [] };
   t.detalles.forEach(d => { (cats[d.cat || 'comida'] = cats[d.cat || 'comida'] || []).push(d); });
   const catEmoji = { comida: '🍽️', bebida: '🥤', postre: '🍮' };
+  const cfg    = getConfigTicket();
+  const cabeza = cfg.header || '🏪 *RESTAURANTE DELICIAS*';
+  const despedida = cfg.footer || '¡Gracias por su visita! 🙏';
+
   const lineas   = [
-    '🏪 *RESTAURANTE DELICIAS*',
+    cabeza,
     `Mesa ${t.mesa} · Cliente ${t.clienteNum}°`,
     `📅 ${t.fecha || new Date().toLocaleDateString('es-PY', { timeZone: TZ })}  ${t.hora}`,
     `👤 Mesero: ${t.mesero || '—'}`,
@@ -390,7 +427,7 @@ function mostrarMensajeTicket(t) {
       lineas.push(`  ${d.qty}× ${n}  ${fmt(d.sub)}`);
     });
   });
-  lineas.push('─────────────────────', `💰 *TOTAL: ${fmt(t.total)}*`, '¡Gracias por su visita! 🙏');
+  lineas.push('─────────────────────', `💰 *TOTAL: ${fmt(t.total)}*`, despedida);
   const msg = lineas.join('\n');
 
   let overlay = document.getElementById('overlay-msg-ticket');
@@ -448,6 +485,7 @@ function imprimirTicketPOS(t) {
   getEl('ticket-print').innerHTML = `<div class="ticket-wrap">
     <div class="ticket-title">★ RESTAURANTE ★</div>
     <div class="ticket-title" style="font-size:18pt;letter-spacing:5px;margin:2mm 0;">DELICIAS</div>
+    ${(() => { const c = getConfigTicket(); return c.header ? `<div class="ticket-sub" style="font-weight:700;font-size:10pt;">${c.header}</div>` : ''; })()}
     <div class="ticket-sub">Asunción, Paraguay</div>
     <div class="ticket-div"></div>
     <div class="ticket-row bold"><span>Mesa:</span><span>${t.mesa}</span></div>
@@ -460,7 +498,7 @@ function imprimirTicketPOS(t) {
     <div class="ticket-div"></div>
     <div class="ticket-row total"><span>TOTAL A PAGAR</span><span>${fmt(t.total)}</span></div>
     <div class="ticket-div"></div>
-    <div class="ticket-center" style="font-size:10pt;font-weight:700;">¡MUCHAS GRACIAS!</div>
+    <div class="ticket-center" style="font-size:10pt;font-weight:700;">${(() => { const c = getConfigTicket(); return c.footer || '¡MUCHAS GRACIAS!'; })()}</div>
     <hr class="ticket-corte"/>
   </div>`;
   window.print();
