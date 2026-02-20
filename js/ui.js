@@ -37,17 +37,30 @@ export const fechaHoy = () =>
     .reverse()
     .join('-');  // dd/mm/yyyy → yyyy-mm-dd
 
+/* ── SVG Icons para reemplazar emojis ───────── */
+const ICONS = {
+  success: `<svg class="icon icon-sm" style="stroke:#27ae60;vertical-align:middle;margin-right:6px;"><use href="#icon-check"/></svg>`,
+  error: `<svg class="icon icon-sm" style="stroke:#e74c3c;vertical-align:middle;margin-right:6px;"><use href="#icon-x"/></svg>`,
+  warning: `<svg class="icon icon-sm" style="stroke:#f39c12;vertical-align:middle;margin-right:6px;"><use href="#icon-activity"/></svg>`,
+  wifi: `<svg class="icon icon-sm" style="stroke:#3498db;vertical-align:middle;margin-right:6px;"><use href="#icon-activity"/></svg>`,
+  offline: `<svg class="icon icon-sm" style="stroke:#e74c3c;vertical-align:middle;margin-right:6px;"><use href="#icon-x"/></svg>`
+};
+
 /* ── Toast ──────────────────────────────────── */
 let _toastTimer = null;
-export function toast(msg, duration = 3000) {
+export function toast(msg, duration = 3000, type = 'info') {
   // Remover toast previo si existe
   const prev = document.querySelector('.toast');
   if (prev) prev.remove();
   if (_toastTimer) clearTimeout(_toastTimer);
 
+  const icon = type === 'success' ? ICONS.success : 
+               type === 'error' ? ICONS.error : 
+               type === 'warning' ? ICONS.warning : '';
+
   const el = document.createElement('div');
   el.className = 'toast';
-  el.innerHTML = `<span>${msg}</span>`;
+  el.innerHTML = `<span>${icon}${msg}</span>`;
   document.body.appendChild(el);
 
   _toastTimer = setTimeout(() => {
@@ -107,7 +120,7 @@ let _offlineBanner = null;
 
 window.addEventListener('online', () => {
   if (_offlineBanner) { _offlineBanner.remove(); _offlineBanner = null; }
-  toast('✅ Conexión restaurada');
+  toast('Conexión restaurada', 3000, 'success');
   setSyncOk(true);
 });
 
@@ -116,7 +129,7 @@ window.addEventListener('offline', () => {
   _offlineBanner = document.createElement('div');
   _offlineBanner.style.cssText =
     'position:fixed;top:0;left:0;right:0;background:#c0392b;color:#fff;text-align:center;padding:10px;z-index:9999;font-size:0.9rem;font-weight:700;';
-  _offlineBanner.textContent = '📵 Sin conexión — Los cambios se guardarán al reconectar';
+  _offlineBanner.innerHTML = `${ICONS.offline}Sin conexión — Los cambios se guardarán al reconectar`;
   document.body.appendChild(_offlineBanner);
   setSyncOk(false);
 });
