@@ -34,6 +34,12 @@
   <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5v14"/></symbol>
   <symbol id="icon-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"/></symbol>
   <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="icon-wifi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+    <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+    <circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/>
+  </symbol>
   <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18m0-12 12 12"/></symbol>
   <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
   <symbol id="icon-dollar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
@@ -241,6 +247,50 @@
         </div>
 
         <div>
+          <!-- ── Configuración Pública ── -->
+          <div class="admin-card" style="margin-bottom:24px;">
+            <div class="admin-card-header">
+              <span class="admin-card-title">
+                <svg class="icon"><use href="#icon-wifi"/></svg> Configuración Pública
+              </span>
+            </div>
+            <div class="admin-card-body">
+              <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">Datos visibles en la app pública del cliente.</p>
+
+              <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Red WiFi</div>
+              <div class="field" style="margin-bottom:10px;">
+                <label style="font-size:0.82rem;color:var(--text-muted);margin-bottom:6px;display:block;">Nombre de red (SSID)</label>
+                <input type="text" id="cfg-wifi-ssid" placeholder="Ej: Delicias_Guest" maxlength="60"
+                  style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--text);box-sizing:border-box;"/>
+              </div>
+              <div class="field" style="margin-bottom:16px;">
+                <label style="font-size:0.82rem;color:var(--text-muted);margin-bottom:6px;display:block;">Contraseña WiFi</label>
+                <input type="text" id="cfg-wifi-pass" placeholder="Ej: delicias2024" maxlength="60"
+                  style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--text);box-sizing:border-box;"/>
+              </div>
+
+              <div style="border-top:1px solid var(--border);padding-top:14px;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                  <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;">Mensaje de Bienvenida</div>
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.82rem;color:var(--text-muted);">
+                    <span id="cfg-msg-lbl">Oculto</span>
+                    <div onclick="toggleMensaje()" style="width:44px;height:24px;background:var(--border2);border-radius:100px;position:relative;cursor:pointer;transition:background .25s;" id="cfg-msg-track">
+                      <div id="cfg-msg-thumb" style="position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.3);"></div>
+                    </div>
+                  </label>
+                </div>
+                <textarea id="cfg-msg-texto" placeholder="Ej: Bienvenidos a Delicias. Disfruten de una experiencia única..." maxlength="300" rows="3"
+                  style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.88rem;background:var(--bg);color:var(--text);box-sizing:border-box;resize:vertical;line-height:1.5;"></textarea>
+                <div style="font-size:0.73rem;color:var(--text-muted);margin-top:4px;">Máx. 300 caracteres. Se muestra en el inicio del menú del cliente.</div>
+              </div>
+
+              <button class="btn-primary" onclick="guardarConfigPublica()" style="width:100%;font-size:0.85rem;padding:10px;">
+                <svg class="icon icon-sm"><use href="#icon-check"/></svg> Guardar Configuración
+              </button>
+            </div>
+          </div>
+
+          <!-- ── Personalizar Ticket ── -->
           <div class="admin-card" style="margin-bottom:24px;">
             <div class="admin-card-header">
               <span class="admin-card-title">
