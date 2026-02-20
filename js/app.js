@@ -82,7 +82,7 @@ async function cargarDatosIniciales() {
   Store.set('mesas',     normalizarMesas(mesasSnap.val()));
   Store.set('productos', (() => { const r = prodSnap.val();  return r ? (Array.isArray(r) ? r : Object.values(r)) : []; })());
   Store.set('historial', (() => { const r = histSnap.val();  return r ? (Array.isArray(r) ? r : Object.values(r)) : []; })());
-  Store.set('usuarios',  (() => { const r = usersSnap.val(); return r ? (Array.isArray(r) ? r : Object.values(r)) : []; })());
+  Store.set('usuarios',  (() => { const r = usersSnap.val(); return r ? (Array.isArray(r) ? r : Object.values(r)).filter(Boolean) : []; })());
   Store.set('actividad', (() => { const r = actSnap.val();   return r ? (Array.isArray(r) ? r : Object.values(r)) : []; })());
 }
 
@@ -111,7 +111,7 @@ function suscribirCambiosRealtime() {
     }),
     onValue(ref(db, 'usuarios'), snap => {
       const r = snap.val();
-      Store.set('usuarios', r ? (Array.isArray(r) ? r : Object.values(r)) : []);
+      Store.set('usuarios', r ? (Array.isArray(r) ? r : Object.values(r)).filter(Boolean) : []);
       if (Store.get('sesion')?.role === 'admin') renderUsersList();
     }),
     onValue(ref(db, 'actividad'), snap => {
