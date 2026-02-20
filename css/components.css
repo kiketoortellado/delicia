@@ -271,7 +271,7 @@
   border-top: 1px solid var(--border);
 }
 
-/* ── Toast ──────────────────────────────────── */
+/* ── Toast (SIN EMOJIS - CON ICONOS SVG) ───── */
 .toast {
   position: fixed; bottom: 90px; right: 24px;
   background: var(--surface);
@@ -286,6 +286,8 @@
   backdrop-filter: blur(10px);
 }
 @media (min-width: 768px) { .toast { bottom: 32px; right: 32px; } }
+
+/* Icono por defecto en toast */
 .toast::before {
   content: '';
   width: 24px; height: 24px;
@@ -293,6 +295,44 @@
   border-radius: 50%; flex-shrink: 0;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
   background-size: 14px; background-position: center; background-repeat: no-repeat;
+}
+
+/* Variantes de toast con colores e iconos diferentes */
+.toast-success {
+  border-left: 4px solid var(--success);
+  border-color: var(--success);
+}
+.toast-success::before {
+  background: var(--success);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  background-size: 14px; background-position: center; background-repeat: no-repeat;
+}
+
+.toast-error {
+  border-left: 4px solid var(--error);
+  border-color: var(--error);
+}
+.toast-error::before {
+  background: var(--error);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E");
+  background-size: 14px; background-position: center; background-repeat: no-repeat;
+}
+
+.toast-warning {
+  border-left: 4px solid var(--warning);
+  border-color: var(--warning);
+}
+.toast-warning::before {
+  background: var(--warning);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4m0 4h.01'/%3E%3C/svg%3E");
+  background-size: 14px; background-position: center; background-repeat: no-repeat;
+}
+
+/* Iconos SVG dentro del toast */
+.toast svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 /* ── Categorías ─────────────────────────────── */
@@ -470,3 +510,11 @@
 .ticket-item-name  { flex: 1; padding-right: 4mm; word-break: break-word; }
 .ticket-item-price { white-space: nowrap; text-align: right; font-weight: 700; }
 .ticket-corte  { border: none; border-top: 2px dashed #000; margin: 6mm 0 0; width: 100%; }
+
+/* ── Animaciones ────────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUpModal { from { opacity: 0; transform: translateY(40px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes toastSlide { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
