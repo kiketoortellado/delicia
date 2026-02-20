@@ -1,20 +1,20 @@
 /**
  * app.js — Punto de entrada principal
  */
-import { db, ref, get, onValue } from './firebase.js';
-import Store                      from './state.js';
-import { toast, setSyncOk }       from './ui.js';
+import { db, ref, get, onValue }  from './firebase.js';
+import Store                       from './state.js';
+import { toast, setSyncOk }        from './ui.js';
 import { loadSession, mostrarSegunRol, setupAdminInicial } from './auth.js';
-import { renderMesas } from './mesas.js';
-import { renderProductosAdmin }           from './productos.js';
-import { renderHistorial }                from './historial.js';
-import { renderActividad }                from './actividad.js';
-import { renderUsersList }                from './usuarios.js';
-import { renderCocina }                   from './cocina.js';
+import { renderMesas }             from './mesas.js';
+import { renderProductosAdmin }    from './productos.js';
+import { renderHistorial }         from './historial.js';
+import { renderActividad }         from './actividad.js';
+import { renderUsersList, renderPresencia, suscribirPresencia } from './usuarios.js';
+import { renderCocina }            from './cocina.js';
 
 const _unsubscribers = [];
 
-/* ── Normalizar mesas desde Firebase ───────── */
+/* ── Normalizar mesas ───────────────────────── */
 function normalizarMesas(raw) {
   const norm = {};
   if (!raw) return norm;
@@ -30,6 +30,11 @@ function normalizarMesas(raw) {
   return norm;
 }
 
+function toArray(r) {
+  if (!r) return [];
+  return (Array.isArray(r) ? r : Object.values(r)).filter(Boolean);
+}
+
 /* ── BOOT ───────────────────────────────────── */
 async function boot() {
   const loadingEl = document.getElementById('loading-screen');
@@ -39,6 +44,7 @@ async function boot() {
     await setupAdminInicial();
     await cargarDatosIniciales();
     suscribirCambiosRealtime();
+    suscribirPresencia();
     setSyncOk(true);
     if (loadingEl) loadingEl.style.display = 'none';
 
@@ -80,10 +86,10 @@ async function cargarDatosIniciales() {
   ]);
 
   Store.set('mesas',     normalizarMesas(mesasSnap.val()));
-  Store.set('productos', (() => { const r = prodSnap.val();  return r ? (Array.isArray(r) ? r : Object.values(r)) : []; })());
-  Store.set('historial', (() => { const r = histSnap.val();  return r ? (Array.isArray(r) ? r : Object.values(r)) : []; })());
-  Store.set('usuarios',  (() => { const r = usersSnap.val(); return r ? (Array.isArray(r) ? r : Object.values(r)).filter(Boolean) : []; })());
-  Store.set('actividad', (() => { const r = actSnap.val();   return r ? (Array.isArray(r) ? r : Object.values(r)) : []; })());
+  Store.set('productos', toArray(prodSnap.val()));
+  Store.set('historial', toArray(histSnap.val()));
+  Store.set('usuarios',  toArray(usersSnap.val()));
+  Store.set('actividad', toArray(actSnap.val()));
 }
 
 /* ── Realtime ───────────────────────────────── */
@@ -100,23 +106,19 @@ function suscribirCambiosRealtime() {
       else renderMesas();
     }),
     onValue(ref(db, 'productos'), snap => {
-      const r = snap.val();
-      Store.set('productos', r ? (Array.isArray(r) ? r : Object.values(r)) : []);
+      Store.set('productos', toArray(snap.val()));
       if (Store.get('sesion')?.role !== 'cocinero') renderProductosAdmin();
     }),
     onValue(ref(db, 'historial'), snap => {
-      const r = snap.val();
-      Store.set('historial', r ? (Array.isArray(r) ? r : Object.values(r)) : []);
+      Store.set('historial', toArray(snap.val()));
       if (Store.get('sesion')?.role !== 'cocinero') renderHistorial();
     }),
     onValue(ref(db, 'usuarios'), snap => {
-      const r = snap.val();
-      Store.set('usuarios', r ? (Array.isArray(r) ? r : Object.values(r)).filter(Boolean) : []);
+      Store.set('usuarios', toArray(snap.val()));
       if (Store.get('sesion')?.role === 'admin') renderUsersList();
     }),
     onValue(ref(db, 'actividad'), snap => {
-      const r = snap.val();
-      Store.set('actividad', r ? (Array.isArray(r) ? r : Object.values(r)) : []);
+      Store.set('actividad', toArray(snap.val()));
       if (Store.get('sesion')?.role === 'admin') renderActividad();
     })
   );
