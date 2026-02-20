@@ -1,10 +1,9 @@
 /**
  * usuarios.js — Gestión de usuarios del sistema
- * Contraseñas hasheadas con SHA-256 — nunca se guarda texto plano
  */
 import Store from './state.js';
 import { getEl, toast, fechaHora } from './ui.js';
-import { db, ref, set } from './firebase.js';
+import { db, ref, set, onValue } from './firebase.js';
 import { registrarActividad } from './actividad.js';
 
 async function sha256(text) {
@@ -12,7 +11,6 @@ async function sha256(text) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-/* ── Guardar usuarios ───────────────────────── */
 const saveUsuarios = async () => {
   try {
     await set(ref(db, 'usuarios'), Store.get('usuarios'));
@@ -22,12 +20,12 @@ const saveUsuarios = async () => {
   }
 };
 
-/* ── Render lista ───────────────────────────── */
+/* ── Render lista de usuarios ───────────────── */
 export function renderUsersList() {
   const list = getEl('users-list');
   if (!list) return;
 
-  const usuarios = Store.get('usuarios') || [];
+  const usuarios = (Store.get('usuarios') || []).filter(Boolean);
 
   let h = `<div class="user-item">
     <div class="user-info">
@@ -65,7 +63,42 @@ export function renderUsersList() {
   list.innerHTML = h;
 }
 
-/* ── Mostrar / ocultar form de nuevo usuario ── */
+/* ── Render presencia (usuarios conectados) ─── */
+export function renderPresencia() {
+  const panel = getEl('presencia-panel');
+  if (!panel) return;
+
+  const presencia = Store.get('presencia') || {};
+  const sesion    = Store.get('sesion');
+  // Filtrar el usuario actual
+  const otros = Object.values(presencia).filter(p => p && p.nombre !== (sesion?.nombre || sesion?.username));
+
+  if (!otros.length) {
+    panel.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">No hay otros usuarios conectados.</div>';
+    return;
+  }
+
+  panel.innerHTML = otros.map(p => {
+    const roleLabel = p.rol === 'admin' ? 'Admin' : p.rol === 'cocinero' ? 'Cocinero/a' : 'Mesero';
+    const badgeClass = p.rol === 'admin' ? 'admin' : p.rol === 'cocinero' ? 'cocinero' : 'mesero';
+    return `<div class="user-item">
+      <div class="user-info">
+        <div class="uname"><svg class="icon icon-sm"><use href="#icon-user"/></svg> ${p.nombre}</div>
+      </div>
+      <span class="role-badge ${badgeClass}">${roleLabel}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ── Suscribir presencia en tiempo real ─────── */
+export function suscribirPresencia() {
+  onValue(ref(db, 'presencia'), snap => {
+    Store.set('presencia', snap.val() || {});
+    renderPresencia();
+  });
+}
+
+/* ── Mostrar / ocultar form nuevo usuario ───── */
 window.toggleAddUser = function() {
   const w = getEl('add-user-wrap-panel');
   if (!w) return;
@@ -97,9 +130,8 @@ window.crearUsuario = async function() {
 
   const sesion   = Store.get('sesion');
   const passHash = await sha256(pass);
-
   const nu = {
-    id:        'u_' + Date.now(),
+    id: 'u_' + Date.now(),
     nombre, username, passHash, role,
     creadoPor: sesion?.username || 'admin',
     creadoEn:  fechaHora()
@@ -108,7 +140,7 @@ window.crearUsuario = async function() {
   Store.set('usuarios', usuarios);
   await saveUsuarios();
   window.toggleAddUser();
-
+  renderUsersList();
   const roleLbl = role === 'cocinero' ? 'Cocinero/a' : 'Mesero';
   await registrarActividad('accion-admin', `Creó usuario ${roleLbl}: "${nombre}" (${username})`);
   toast(`Usuario "${nombre}" (${roleLbl}) creado.`);
@@ -122,6 +154,7 @@ window.eliminarUsuario = async function(id) {
   if (!confirm(`¿Eliminar a "${u.nombre}"?`)) return;
   Store.set('usuarios', usuarios.filter(u => u.id !== id));
   await saveUsuarios();
+  renderUsersList();
   await registrarActividad('accion-admin', `Eliminó usuario "${u.nombre}"`);
   toast('Usuario eliminado.');
 };
@@ -143,12 +176,15 @@ window.guardarNuevaPass = async function() {
   const pass  = getEl('cp-pass').value;
   const pass2 = getEl('cp-pass2').value;
 
-  if (!pass)         { toast('Ingresa la contraseña.'); return; }
-  if (pass !== pass2){ toast('No coinciden.'); return; }
+  if (!pass)          { toast('Ingresa la contraseña.'); return; }
+  if (pass !== pass2) { toast('No coinciden.'); return; }
 
   const usuarios = Store.get('usuarios') || [];
   const u = usuarios.find(u => u.id === id);
-  if (u) u.passHash = await sha256(pass);
+  if (u) {
+    u.passHash = await sha256(pass);
+    delete u.password; // limpiar legacy
+  }
   Store.set('usuarios', usuarios);
   await saveUsuarios();
   getEl('modal-cambiar-pass').classList.remove('open');
