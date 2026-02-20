@@ -11,6 +11,7 @@ let mesaAbierta   = null;
 let pedidoActual  = {};
 let catActiva     = 'todos';
 let timerInterval = null;
+let tabActivaModal = 'pedido'; // 'pedido' | 'clientes'
 
 /* ── Key Firebase siempre string con prefijo ── */
 const fbKey = n => `mesa_${n}`;
@@ -68,6 +69,8 @@ export function renderMesas() {
 /* ── Abrir modal mesa ───────────────────────── */
 window.abrirMesa = function(num) {
   mesaAbierta = num;
+  tabActivaModal = 'pedido'; // Siempre empezar en pedido
+  
   const mesas  = Store.get('mesas') || {};
   const m      = mesas[num] || mesaDefault();
   const sesion = Store.get('sesion');
@@ -89,7 +92,7 @@ window.abrirMesa = function(num) {
 
   renderProductosGrid();
   renderPedidoActual();
-  renderClientesMesa(num);
+  renderTabsModal();
   getEl('modal-mesa').classList.add('open');
 };
 
@@ -97,7 +100,93 @@ window.cerrarModal = function() {
   getEl('modal-mesa').classList.remove('open');
   mesaAbierta  = null;
   pedidoActual = {};
+  tabActivaModal = 'pedido';
 };
+
+window.cambiarTabModal = function(tab) {
+  tabActivaModal = tab;
+  renderTabsModal();
+};
+
+function renderTabsModal() {
+  const mesas = Store.get('mesas') || {};
+  const m = mesas[mesaAbierta] || mesaDefault();
+  const numClientes = (m.clientesNoche || []).length;
+  
+  const tabsHtml = `
+    <div class="modal-tabs">
+      <button class="modal-tab ${tabActivaModal === 'pedido' ? 'active' : ''}" onclick="cambiarTabModal('pedido')">
+        <svg class="icon icon-sm"><use href="#icon-receipt"/></svg>
+        Pedido Actual
+      </button>
+      <button class="modal-tab ${tabActivaModal === 'clientes' ? 'active' : ''}" onclick="cambiarTabModal('clientes')">
+        <svg class="icon icon-sm"><use href="#icon-history"/></svg>
+        Historial
+        ${numClientes > 0 ? `<span class="tab-badge">${numClientes}</span>` : ''}
+      </button>
+    </div>
+  `;
+  
+  const tabsContainer = getEl('modal-tabs-container');
+  if (tabsContainer) {
+    tabsContainer.innerHTML = tabsHtml;
+  }
+  
+  // Mostrar/ocultar paneles
+  const pedidoPanel = getEl('pedido-panel');
+  const clientesPanel = getEl('clientes-panel');
+  
+  if (pedidoPanel) pedidoPanel.style.display = tabActivaModal === 'pedido' ? 'block' : 'none';
+  if (clientesPanel) {
+    clientesPanel.style.display = tabActivaModal === 'clientes' ? 'block' : 'none';
+    if (tabActivaModal === 'clientes') renderClientesPanel();
+  }
+}
+
+function renderClientesPanel() {
+  const mesas = Store.get('mesas') || {};
+  const cl = mesas[mesaAbierta]?.clientesNoche || [];
+
+  if (!cl.length) {
+    html('clientes-panel-content', `
+      <div class="empty-state" style="padding:40px 20px;">
+        <svg class="icon" style="width:48px;height:48px;opacity:0.3;margin-bottom:12px;"><use href="#icon-empty"/></svg>
+        <p style="color:var(--text-muted);">Sin clientes esta noche</p>
+      </div>
+    `);
+    return;
+  }
+
+  let tot = 0;
+  const listaHtml = cl.map(c => {
+    tot += c.total;
+    return `
+      <div class="cliente-card">
+        <div class="cliente-card-header">
+          <span class="cliente-num">Cliente ${c.num}°</span>
+          <span class="cliente-total">${fmt(c.total)}</span>
+        </div>
+        <div class="cliente-detalles">
+          ${c.detalles.map(d => `${d.qty}× ${d.nombre}`).join(', ')}
+        </div>
+        <div class="cliente-meta">
+          <span><svg class="icon icon-sm"><use href="#icon-user"/></svg> ${c.mesero || '—'}</span>
+          ${c.tiempoMin ? `<span><svg class="icon icon-sm"><use href="#icon-clock"/></svg> ${c.tiempoMin}min</span>` : ''}
+          <span>${c.hora}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  html('clientes-panel-content', `
+    <div class="mesa-total-resumen">
+      <div class="mesa-total-label">Total Mesa</div>
+      <div class="mesa-total-valor">${fmt(tot)}</div>
+      <div class="mesa-total-clientes">${cl.length} cliente${cl.length !== 1 ? 's' : ''}</div>
+    </div>
+    <div class="clientes-lista">${listaHtml}</div>
+  `);
+}
 
 window.filtrarCat = function(cat, el) {
   catActiva = cat;
@@ -290,30 +379,7 @@ window.limpiarMesa = async function() {
   }
 };
 
-/* ── Render clientes de la mesa ─────────────── */
-function renderClientesMesa(num) {
-  const mesas = Store.get('mesas') || {};
-  const cl    = mesas[num]?.clientesNoche || [];
-
-  if (!cl.length) {
-    html('clientes-mesa-list', '<div style="color:var(--text-muted);font-size:0.85rem;">Sin clientes esta noche.</div>');
-    return;
-  }
-  html('clientes-mesa-list', cl.map(c => `
-    <div class="cliente-item">
-      <div class="cliente-header">
-        <span class="cliente-num"><svg class="icon icon-sm"><use href="#icon-user"/></svg> Cliente ${c.num}°</span>
-        <span style="font-size:0.95rem;font-weight:600;color:var(--text-secondary);font-family:'Playfair Display',serif;">${fmt(c.total)}</span>
-      </div>
-      <div class="cliente-items-list">${c.detalles.map(d => `${d.qty}x ${d.nombre} = ${fmt(d.sub)}`).join(' · ')}</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
-        ${c.mesero ? `<span class="mesero-badge"><svg class="icon icon-sm"><use href="#icon-user"/></svg> ${c.mesero}</span>` : ''}
-        ${c.tiempoMin != null ? `<span class="mesero-badge"><svg class="icon icon-sm"><use href="#icon-clock"/></svg> ${c.tiempoMin}min</span>` : ''}
-      </div>
-    </div>`).join(''));
-}
-
-/* ── Historial completo de la mesa ──────────── */
+/* ── Historial completo de la mesa (modal aparte) ──────────── */
 window.verHistorialMesa = function() {
   if (!mesaAbierta) return;
   const mesas = Store.get('mesas') || {};
@@ -361,17 +427,14 @@ export function actualizarTimers() {
   }
 }
 
-/* ── Config ticket (encabezado / despedida) ─── */
+/* ── Config ticket ─── */
 const CONFIG_KEY = 'ticket_config';
-
 let _ticketConfig = { header: '', footer: '' };
 
 export async function cargarConfigTicket() {
   try {
     const snap = await get(ref(db, CONFIG_KEY));
-    if (snap.exists()) {
-      _ticketConfig = snap.val();
-    }
+    if (snap.exists()) _ticketConfig = snap.val();
     const h = document.getElementById('ticket-header');
     const f = document.getElementById('ticket-footer');
     if (h) h.value = _ticketConfig.header || '';
@@ -385,9 +448,9 @@ window.guardarConfigTicket = async function() {
   _ticketConfig = { header, footer };
   try {
     await set(ref(db, CONFIG_KEY), _ticketConfig);
-    toast('Configuración de ticket guardada', 3000, 'success');
+    toast('Configuración guardada', 3000, 'success');
   } catch(e) {
-    toast('Error al guardar configuración', 5000, 'error');
+    toast('Error al guardar', 5000, 'error');
   }
 };
 
@@ -408,12 +471,7 @@ function mostrarMensajeTicket(t) {
   const cats = { comida: [], bebida: [], postre: [] };
   t.detalles.forEach(d => { (cats[d.cat || 'comida'] = cats[d.cat || 'comida'] || []).push(d); });
   
-  const catIcons = { 
-    comida: '[COMIDA]', 
-    bebida: '[BEBIDA]', 
-    postre: '[POSTRE]' 
-  };
-  
+  const catIcons = { comida: '[COMIDA]', bebida: '[BEBIDA]', postre: '[POSTRE]' };
   const cabeza    = _ticketConfig.header || '*** RESTAURANTE DELICIAS ***';
   const despedida = _ticketConfig.footer || 'Gracias por su visita';
 
@@ -448,7 +506,7 @@ function mostrarMensajeTicket(t) {
         <div style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;">
           <svg class="icon"><use href="#icon-receipt"/></svg> Resumen del pedido
         </div>
-        <button onclick="document.getElementById('overlay-msg-ticket').remove()" style="background:var(--bg);border:none;border-radius:10px;width:34px;height:34px;cursor:pointer;color:var(--text-muted);font-size:1rem;">
+        <button onclick="document.getElementById('overlay-msg-ticket').remove()" style="background:var(--bg);border:none;border-radius:10px;width:34px;height:34px;cursor:pointer;color:var(--text-muted);">
           <svg class="icon icon-sm"><use href="#icon-x"/></svg>
         </button>
       </div>
