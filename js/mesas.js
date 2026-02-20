@@ -366,31 +366,29 @@ export function actualizarTimers() {
 /* ── Config ticket (encabezado / despedida) ─── */
 const CONFIG_KEY = 'ticket_config';
 
+// Cache en memoria para que esté disponible al imprimir
+let _ticketConfig = { header: '', footer: '' };
+
 export async function cargarConfigTicket() {
   try {
     const snap = await get(ref(db, CONFIG_KEY));
     if (snap.exists()) {
-      const c = snap.val();
-      const h = document.getElementById('ticket-header');
-      const f = document.getElementById('ticket-footer');
-      if (h) h.value = c.header || '';
-      if (f) f.value = c.footer || '';
+      _ticketConfig = snap.val();
     }
+    const h = document.getElementById('ticket-header');
+    const f = document.getElementById('ticket-footer');
+    if (h) h.value = _ticketConfig.header || '';
+    if (f) f.value = _ticketConfig.footer || '';
   } catch(e) { console.warn('Config ticket no disponible:', e); }
 }
 
-function getConfigTicket() {
-  return {
-    header: document.getElementById('ticket-header')?.value.trim() || '',
-    footer: document.getElementById('ticket-footer')?.value.trim() || ''
-  };
-}
-
 window.guardarConfigTicket = async function() {
-  const config = getConfigTicket();
+  const header = document.getElementById('ticket-header')?.value.trim() || '';
+  const footer = document.getElementById('ticket-footer')?.value.trim() || '';
+  _ticketConfig = { header, footer };
   try {
-    await set(ref(db, CONFIG_KEY), config);
-    toast('✓ Configuración guardada');
+    await set(ref(db, CONFIG_KEY), _ticketConfig);
+    toast('✓ Configuración de ticket guardada');
   } catch(e) {
     toast('⚠ Error al guardar configuración');
   }
@@ -408,9 +406,8 @@ function mostrarMensajeTicket(t) {
   const cats = { comida: [], bebida: [], postre: [] };
   t.detalles.forEach(d => { (cats[d.cat || 'comida'] = cats[d.cat || 'comida'] || []).push(d); });
   const catEmoji = { comida: '🍽️', bebida: '🥤', postre: '🍮' };
-  const cfg    = getConfigTicket();
-  const cabeza = cfg.header || '🏪 *RESTAURANTE DELICIAS*';
-  const despedida = cfg.footer || '¡Gracias por su visita! 🙏';
+  const cabeza    = _ticketConfig.header || '🏪 *RESTAURANTE DELICIAS*';
+  const despedida = _ticketConfig.footer || '¡Gracias por su visita! 🙏';
 
   const lineas   = [
     cabeza,
@@ -485,7 +482,7 @@ function imprimirTicketPOS(t) {
   getEl('ticket-print').innerHTML = `<div class="ticket-wrap">
     <div class="ticket-title">★ RESTAURANTE ★</div>
     <div class="ticket-title" style="font-size:18pt;letter-spacing:5px;margin:2mm 0;">DELICIAS</div>
-    ${(() => { const c = getConfigTicket(); return c.header ? `<div class="ticket-sub" style="font-weight:700;font-size:10pt;">${c.header}</div>` : ''; })()}
+    ${_ticketConfig.header ? `<div class="ticket-sub" style="font-weight:700;font-size:10pt;">${_ticketConfig.header}</div>` : ''}
     <div class="ticket-sub">Asunción, Paraguay</div>
     <div class="ticket-div"></div>
     <div class="ticket-row bold"><span>Mesa:</span><span>${t.mesa}</span></div>
@@ -498,7 +495,7 @@ function imprimirTicketPOS(t) {
     <div class="ticket-div"></div>
     <div class="ticket-row total"><span>TOTAL A PAGAR</span><span>${fmt(t.total)}</span></div>
     <div class="ticket-div"></div>
-    <div class="ticket-center" style="font-size:10pt;font-weight:700;">${(() => { const c = getConfigTicket(); return c.footer || '¡MUCHAS GRACIAS!'; })()}</div>
+    <div class="ticket-center" style="font-size:10pt;font-weight:700;">${_ticketConfig.footer || '¡MUCHAS GRACIAS!'}</div>
     <hr class="ticket-corte"/>
   </div>`;
   window.print();
