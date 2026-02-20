@@ -1669,19 +1669,28 @@ function normMesas(raw) {
 
 /* ── Firebase listeners ── */
 onValue(ref(db,'config/publico'), snap => {
+  console.log('[Config] snap exists:', snap.exists(), snap.val());
   if (!snap.exists()) return;
   const c = snap.val();
-  if (c.wifi) {
-    $('wifi-ssid').textContent = c.wifi.ssid || '—';
-    $('wifi-pass').textContent = c.wifi.pass || '—';
-    $('wifi-sub-txt').textContent = c.wifi.ssid || 'Red disponible';
-  }
+
+  // WiFi
+  const ssid = c.wifi?.ssid || '';
+  const pass = c.wifi?.pass || '';
+  if ($('wifi-ssid')) $('wifi-ssid').textContent = ssid || '—';
+  if ($('wifi-pass')) $('wifi-pass').textContent = pass || '—';
+  if ($('wifi-sub-txt')) $('wifi-sub-txt').textContent = ssid || 'Red disponible';
+
+  // Mensaje
+  const msgEl  = $('admin-msg');
+  const msgTxt = $('admin-msg-text');
   if (c.mensaje?.visible && c.mensaje?.texto) {
-    $('admin-msg-text').textContent = c.mensaje.texto;
-    $('admin-msg').classList.add('visible');
+    if (msgTxt) msgTxt.textContent = c.mensaje.texto;
+    if (msgEl)  msgEl.classList.add('visible');
   } else {
-    $('admin-msg').classList.remove('visible');
+    if (msgEl)  msgEl.classList.remove('visible');
   }
+}, err => {
+  console.error('[Config] Error leyendo config/publico:', err);
 });
 
 onValue(ref(db,'productos'), snap => {
