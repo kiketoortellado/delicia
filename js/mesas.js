@@ -198,41 +198,53 @@ window.marcarPagado = async function() {
   const sesion = Store.get('sesion');
   if (sesion?.role !== 'admin') { toast('Solo el Admin puede marcar pagado.'); return; }
 
-  const mesas  = Store.get('mesas') || {};
-  const m      = mesas[mesaAbierta] || mesaDefault();
-  const mesero = sesion.nombre || sesion.username;
+  const mesaNum = mesaAbierta; // capturar antes de cerrar modal
+  const mesero  = sesion.nombre || sesion.username;
   let ticketData = null;
 
   try {
+    // Leer estado fresco de Firebase para evitar datos desactualizados
+    const snap = await get(ref(db, `mesas/${mesaNum}`));
+    const m = snap.exists() ? snap.val() : mesaDefault();
+
     if (Object.keys(pedidoActual).length > 0) {
-      const productos  = Store.get('productos') || [];
-      const cn         = m.clientesNoche || [];
-      const detalles   = Object.entries(pedidoActual).map(([pid, qty]) => {
+      const productos     = Store.get('productos') || [];
+      const cn            = Array.isArray(m.clientesNoche) ? m.clientesNoche : [];
+      const detalles      = Object.entries(pedidoActual).map(([pid, qty]) => {
         const p = productos.find(p => String(p.id) === String(pid));
         return p ? { nombre: p.nombre, qty, precio: p.precio, sub: p.precio * qty, cat: p.cat || 'comida' } : null;
       }).filter(Boolean);
 
-      const total        = calcTotal(pedidoActual);
+      const total         = calcTotal(pedidoActual);
       const tiempoOcupada = m.tsOcupada ? Math.floor((Date.now() - m.tsOcupada) / 60000) : null;
-      const fechaISO     = fechaHoy();
+      const fechaISO      = fechaHoy();
 
       cn.push({ num: cn.length + 1, detalles, total, mesero, usuario: sesion.username, hora: hora(), tiempoMin: tiempoOcupada, fecha: fechaISO });
-      m.clientesNoche = cn;
 
       const historial = Store.get('historial') || [];
-      historial.push({ mesa: mesaAbierta, clienteNum: cn.length, detalles, total, mesero, usuario: sesion.username, hora: hora(), fecha: fechaISO, ts: Date.now() });
+      historial.push({ mesa: mesaNum, clienteNum: cn.length, detalles, total, mesero, usuario: sesion.username, hora: hora(), fecha: fechaISO, ts: Date.now() });
       Store.set('historial', historial);
       await set(ref(db, 'historial'), historial);
+      await registrarActividad('accion-pago', `Marcó Mesa ${mesaNum} como pagada — ${fmt(total)}`);
+      ticketData = { mesa: mesaNum, clienteNum: cn.length, detalles, total, mesero, hora: hora(), fecha: fechaISO };
 
-      await registrarActividad('accion-pago', `Marcó Mesa ${mesaAbierta} como pagada — ${fmt(total)}`);
-      ticketData = { mesa: mesaAbierta, clienteNum: cn.length, detalles, total, mesero, hora: hora(), fecha: fechaISO };
+      // Guardar mesa con clientesNoche actualizado y luego limpiar
+      await set(ref(db, `mesas/${mesaNum}`), {
+        ...m,
+        clientesNoche: cn,
+        ocupada: false, pedidoActual: {}, mesero: '', ultimoUsuario: '', tsOcupada: null
+      });
+    } else {
+      // Sin pedido: solo liberar
+      await set(ref(db, `mesas/${mesaNum}`), {
+        ...m,
+        ocupada: false, pedidoActual: {}, mesero: '', ultimoUsuario: '', tsOcupada: null
+      });
     }
 
-    m.ocupada = false; m.pedidoActual = {}; m.mesero = ''; m.ultimoUsuario = ''; m.tsOcupada = null;
-    await set(ref(db, `mesas/${mesaAbierta}`), m);
     pedidoActual = {};
     window.cerrarModal();
-    toast(`Mesa ${mesaAbierta} liberada`);
+    toast(`Mesa ${mesaNum} liberada ✓`);
     if (ticketData) setTimeout(() => manejarTicket(ticketData), 300);
   } catch (err) {
     console.error('Error al liberar mesa:', err);
