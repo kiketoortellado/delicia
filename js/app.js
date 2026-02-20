@@ -81,15 +81,18 @@ async function cargarDatosIniciales() {
   const usuarios = usersSnap.val()   || [];
   const actividad = actSnap.val()    || [];
 
-  // Normalizar mesas: asegurar que sea objeto {1: {...}, 2: {...} ...}
+  // Normalizar mesas: soporta legacy (array o claves numericas) y nuevo formato (mesa_N)
   const mesasNorm = {};
   if (Array.isArray(mesas)) {
     mesas.forEach((m, i) => { if (m) mesasNorm[i + 1] = m; });
   } else {
-    Object.assign(mesasNorm, mesas);
+    Object.entries(mesas).forEach(([k, v]) => {
+      const num = k.startsWith('mesa_') ? parseInt(k.replace('mesa_', '')) : parseInt(k);
+      if (!isNaN(num) && v) mesasNorm[num] = v;
+    });
   }
 
-  Store.set('mesas',     mesasNorm);
+  Store.set('mesas', mesasNorm);
   Store.set('productos', Array.isArray(prods) ? prods : Object.values(prods));
   Store.set('historial', Array.isArray(hist)  ? hist  : Object.values(hist));
   Store.set('usuarios',  Array.isArray(usuarios) ? usuarios : Object.values(usuarios));
@@ -109,7 +112,10 @@ function suscribirCambiosRealtime() {
       if (Array.isArray(raw)) {
         raw.forEach((m, i) => { if (m) mesasNorm[i + 1] = m; });
       } else {
-        Object.assign(mesasNorm, raw);
+        Object.entries(raw).forEach(([k, v]) => {
+          const num = k.startsWith('mesa_') ? parseInt(k.replace('mesa_', '')) : parseInt(k);
+          if (!isNaN(num) && v) mesasNorm[num] = v;
+        });
       }
       Store.set('mesas', mesasNorm);
       const sesion = Store.get('sesion');
