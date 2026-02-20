@@ -5,7 +5,7 @@ import { db, ref, get, onValue } from './firebase.js';
 import Store                      from './state.js';
 import { toast, setSyncOk }       from './ui.js';
 import { loadSession, mostrarSegunRol, setupAdminInicial } from './auth.js';
-import { renderMesas, actualizarTimers }  from './mesas.js';
+import { renderMesas } from './mesas.js';
 import { renderProductosAdmin }           from './productos.js';
 import { renderHistorial }                from './historial.js';
 import { renderActividad }                from './actividad.js';
