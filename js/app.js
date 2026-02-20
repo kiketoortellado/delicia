@@ -67,7 +67,7 @@ async function boot() {
     console.error('Error de boot:', err);
     if (loadingEl) loadingEl.style.display = 'none';
     mostrarLogin();
-    toast('⚠ Error de conexión con Firebase. Verificá tu internet.');
+    toast('Error de conexión con Firebase. Verificá tu internet.', 5000, 'error');
     setSyncOk(false);
   }
 }
