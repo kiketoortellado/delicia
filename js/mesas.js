@@ -3,7 +3,7 @@
  */
 import Store from './state.js';
 import { getEl, html, fmt, hora, fechaHora, fechaHoy, toast, setText } from './ui.js';
-import { db, ref, set, runTransaction } from './firebase.js';
+import { db, ref, set, get } from './firebase.js';
 import { registrarActividad } from './actividad.js';
 
 const TOTAL_MESAS = 12;
@@ -69,13 +69,13 @@ export function renderMesas() {
 /* ── Modal mesa ─────────────────────────────── */
 window.abrirMesa = function(num) {
   mesaAbierta = num;
-  const mesas = Store.get('mesas') || {};
-  const m     = mesas[num] || mesaDefault();
+  const mesas  = Store.get('mesas') || {};
+  const m      = mesas[num] || mesaDefault();
   const sesion = Store.get('sesion');
 
   pedidoActual = { ...(m.pedidoActual || {}) };
 
-  getEl('modal-title').innerHTML    = `<svg class="icon"><use href="#icon-table"/></svg> Mesa ${num}`;
+  getEl('modal-title').innerHTML = `<svg class="icon"><use href="#icon-table"/></svg> Mesa ${num}`;
   setText('modal-subtitle', m.ocupada ? 'Ocupada' : 'Disponible');
 
   const inp = getEl('inp-mesero');
@@ -137,7 +137,7 @@ window.cambiarQty = function(pid, d) {
 };
 
 function renderPedidoActual() {
-  const items = Object.entries(pedidoActual);
+  const items    = Object.entries(pedidoActual);
   const productos = Store.get('productos') || [];
 
   if (!items.length) {
@@ -172,24 +172,32 @@ window.confirmarPedido = async function() {
   if (!mesaAbierta) return;
   if (!Object.keys(pedidoActual).length) { toast('Añade al menos un producto.'); return; }
 
-  const sesion = Store.get('sesion');
-  const mesas  = Store.get('mesas') || {};
-  const m      = mesas[mesaAbierta] || mesaDefault();
-  const mesero = sesion ? sesion.nombre || sesion.username : '';
-  const yaOcupada = m.ocupada;
+  const sesion    = Store.get('sesion');
+  const mesero    = sesion ? sesion.nombre || sesion.username : '';
+  const mesaNum   = mesaAbierta;
 
-  m.pedidoActual    = { ...pedidoActual };
-  m.mesero          = mesero;
-  m.ocupada         = true;
-  m.ultimoUsuario   = sesion?.username || '';
-  if (!yaOcupada) m.tsOcupada = Date.now();
+  try {
+    // Leer estado fresco de Firebase
+    const snap      = await get(ref(db, `mesas/${mesaNum}`));
+    const mActual   = snap.exists() ? snap.val() : mesaDefault();
 
-  const ok = await ocuparMesaConTransaccion(mesaAbierta, mesero);
-  if (!ok) return;
+    const nuevo = {
+      ...mActual,
+      pedidoActual: { ...pedidoActual },
+      mesero,
+      ocupada:      true,
+      ultimoUsuario: sesion?.username || '',
+      tsOcupada:    mActual.tsOcupada || Date.now()
+    };
 
-  setText('modal-subtitle', 'Ocupada');
-  await registrarActividad('accion-pedido', `Confirmó pedido en Mesa ${mesaAbierta} (${fmt(calcTotal(pedidoActual))})`);
-  toast(`Pedido confirmado — Mesa ${mesaAbierta}`);
+    await set(ref(db, `mesas/${mesaNum}`), nuevo);
+    setText('modal-subtitle', 'Ocupada');
+    await registrarActividad('accion-pedido', `Confirmó pedido en Mesa ${mesaNum} (${fmt(calcTotal(pedidoActual))})`);
+    toast(`Pedido confirmado — Mesa ${mesaNum}`);
+  } catch (err) {
+    console.error('Error confirmando pedido:', err);
+    toast('⚠ Error al guardar. Verificá la conexión.');
+  }
 };
 
 /* ── Marcar pagado ──────────────────────────── */
@@ -198,46 +206,52 @@ window.marcarPagado = async function() {
   const sesion = Store.get('sesion');
   if (sesion?.role !== 'admin') { toast('Solo el Admin puede marcar pagado.'); return; }
 
-  const mesaNum = mesaAbierta; // capturar antes de cerrar modal
-  const mesero  = sesion.nombre || sesion.username;
+  const mesaNum  = mesaAbierta;
+  const mesero   = sesion.nombre || sesion.username;
   let ticketData = null;
 
   try {
-    // Leer estado fresco de Firebase para evitar datos desactualizados
+    // Leer estado fresco de Firebase
     const snap = await get(ref(db, `mesas/${mesaNum}`));
-    const m = snap.exists() ? snap.val() : mesaDefault();
+    const m    = snap.exists() ? snap.val() : mesaDefault();
 
     if (Object.keys(pedidoActual).length > 0) {
       const productos     = Store.get('productos') || [];
-      const cn            = Array.isArray(m.clientesNoche) ? m.clientesNoche : [];
-      const detalles      = Object.entries(pedidoActual).map(([pid, qty]) => {
-        const p = productos.find(p => String(p.id) === String(pid));
-        return p ? { nombre: p.nombre, qty, precio: p.precio, sub: p.precio * qty, cat: p.cat || 'comida' } : null;
-      }).filter(Boolean);
+      const cn            = Array.isArray(m.clientesNoche) ? [...m.clientesNoche] : [];
+      const detalles      = Object.entries(pedidoActual)
+        .map(([pid, qty]) => {
+          const p = productos.find(p => String(p.id) === String(pid));
+          return p ? { nombre: p.nombre, qty, precio: p.precio, sub: p.precio * qty, cat: p.cat || 'comida' } : null;
+        }).filter(Boolean);
 
       const total         = calcTotal(pedidoActual);
       const tiempoOcupada = m.tsOcupada ? Math.floor((Date.now() - m.tsOcupada) / 60000) : null;
       const fechaISO      = fechaHoy();
 
-      cn.push({ num: cn.length + 1, detalles, total, mesero, usuario: sesion.username, hora: hora(), tiempoMin: tiempoOcupada, fecha: fechaISO });
+      cn.push({
+        num: cn.length + 1, detalles, total, mesero,
+        usuario: sesion.username, hora: hora(),
+        tiempoMin: tiempoOcupada, fecha: fechaISO
+      });
 
       const historial = Store.get('historial') || [];
-      historial.push({ mesa: mesaNum, clienteNum: cn.length, detalles, total, mesero, usuario: sesion.username, hora: hora(), fecha: fechaISO, ts: Date.now() });
+      historial.push({
+        mesa: mesaNum, clienteNum: cn.length, detalles, total, mesero,
+        usuario: sesion.username, hora: hora(), fecha: fechaISO, ts: Date.now()
+      });
       Store.set('historial', historial);
       await set(ref(db, 'historial'), historial);
       await registrarActividad('accion-pago', `Marcó Mesa ${mesaNum} como pagada — ${fmt(total)}`);
       ticketData = { mesa: mesaNum, clienteNum: cn.length, detalles, total, mesero, hora: hora(), fecha: fechaISO };
 
-      // Guardar mesa con clientesNoche actualizado y luego limpiar
       await set(ref(db, `mesas/${mesaNum}`), {
-        ...m,
         clientesNoche: cn,
         ocupada: false, pedidoActual: {}, mesero: '', ultimoUsuario: '', tsOcupada: null
       });
     } else {
-      // Sin pedido: solo liberar
+      // Sin pedido: solo liberar preservando clientesNoche
       await set(ref(db, `mesas/${mesaNum}`), {
-        ...m,
+        clientesNoche: Array.isArray(m.clientesNoche) ? m.clientesNoche : [],
         ocupada: false, pedidoActual: {}, mesero: '', ultimoUsuario: '', tsOcupada: null
       });
     }
@@ -256,48 +270,23 @@ window.marcarPagado = async function() {
 window.limpiarMesa = async function() {
   if (!mesaAbierta) return;
   if (!confirm('¿Limpiar la mesa sin cobrar?')) return;
-  const mesas = Store.get('mesas') || {};
-  const m     = mesas[mesaAbierta] || mesaDefault();
-  m.ocupada = false; m.pedidoActual = {}; m.mesero = ''; m.tsOcupada = null;
-  await set(ref(db, `mesas/${mesaAbierta}`), m);
-  pedidoActual = {};
-  window.cerrarModal();
-  toast(`Mesa ${mesaAbierta} limpiada`);
-};
 
-/* ── Transacción para ocupar mesa (evita race condition) ── */
-async function ocuparMesaConTransaccion(num, meseroNombre) {
-  const mesaRef = ref(db, `mesas/${num}`);
+  const mesaNum = mesaAbierta;
   try {
-    const result = await runTransaction(mesaRef, (mesaActual) => {
-      const mesas = Store.get('mesas') || {};
-      if (mesaActual?.ocupada && !mesas[num]?.ocupada) return undefined; // abort
-      const nuevo      = mesaActual || mesaDefault();
-      nuevo.mesero     = meseroNombre;
-      nuevo.ocupada    = true;
-      nuevo.ultimoUsuario = Store.get('sesion')?.username || '';
-      if (!mesaActual?.ocupada) nuevo.tsOcupada = Date.now();
-      nuevo.pedidoActual = { ...pedidoActual };
-      return nuevo;
+    const snap = await get(ref(db, `mesas/${mesaNum}`));
+    const m    = snap.exists() ? snap.val() : mesaDefault();
+    await set(ref(db, `mesas/${mesaNum}`), {
+      clientesNoche: Array.isArray(m.clientesNoche) ? m.clientesNoche : [],
+      ocupada: false, pedidoActual: {}, mesero: '', ultimoUsuario: '', tsOcupada: null
     });
-    if (!result.committed) {
-      toast('⚠ Esta mesa fue tomada por otro mesero. Actualizando...');
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.error('Error en transacción:', e);
-    // Fallback a set directo
-    const mesas = Store.get('mesas') || {};
-    const m     = mesas[num] || mesaDefault();
-    m.mesero = meseroNombre; m.ocupada = true;
-    m.ultimoUsuario = Store.get('sesion')?.username || '';
-    if (!m.tsOcupada) m.tsOcupada = Date.now();
-    m.pedidoActual = { ...pedidoActual };
-    await set(ref(db, `mesas/${num}`), m);
-    return true;
+    pedidoActual = {};
+    window.cerrarModal();
+    toast(`Mesa ${mesaNum} limpiada`);
+  } catch (err) {
+    console.error('Error limpiando mesa:', err);
+    toast('⚠ Error al limpiar. Verificá la conexión.');
   }
-}
+};
 
 /* ── Render clientes de la mesa ─────────────── */
 function renderClientesMesa(num) {
@@ -381,7 +370,7 @@ function manejarTicket(t) {
 }
 
 function mostrarMensajeTicket(t) {
-  const TZ = 'America/Asuncion';
+  const TZ   = 'America/Asuncion';
   const cats = { comida: [], bebida: [], postre: [] };
   t.detalles.forEach(d => { (cats[d.cat || 'comida'] = cats[d.cat || 'comida'] || []).push(d); });
   const catEmoji = { comida: '🍽️', bebida: '🥤', postre: '🍮' };
@@ -447,11 +436,11 @@ function mostrarMensajeTicket(t) {
 }
 
 function imprimirTicketPOS(t) {
-  const TZ = 'America/Asuncion';
-  const now = new Date();
+  const TZ     = 'America/Asuncion';
+  const now    = new Date();
   const fechaTk = now.toLocaleDateString('es-PY', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: TZ });
   const horaTk  = now.toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: TZ });
-  const cats = { comida: [], bebida: [], postre: [] };
+  const cats   = { comida: [], bebida: [], postre: [] };
   t.detalles.forEach(d => { (cats[d.cat || 'comida'] = cats[d.cat || 'comida'] || []).push(d); });
   const catNames = { comida: '── COMIDAS ──', bebida: '── BEBIDAS ──', postre: '── POSTRES ──' };
   let itemsHtml = '';
