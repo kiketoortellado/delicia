@@ -60,6 +60,16 @@
     "presencia": {
       ".read": true,
       ".write": true
+    },
+
+    "config": {
+      ".read": true,
+      ".write": true
+    },
+
+    "ticket_config": {
+      ".read": true,
+      ".write": true
     }
   }
 }
