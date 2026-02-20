@@ -11,6 +11,7 @@ import { renderHistorial }         from './historial.js';
 import { renderActividad }         from './actividad.js';
 import { renderUsersList, renderPresencia, suscribirPresencia } from './usuarios.js';
 import { renderCocina }            from './cocina.js';
+import { cargarConfigPublica }     from './config-publica.js';
 
 const _unsubscribers = [];
 
@@ -44,6 +45,7 @@ async function boot() {
     await setupAdminInicial();
     await cargarDatosIniciales();
     import('./mesas.js').then(m => m.cargarConfigTicket?.()).catch(() => {});
+    cargarConfigPublica().catch(() => {});
     suscribirCambiosRealtime();
     suscribirPresencia();
     setSyncOk(true);
@@ -67,7 +69,7 @@ async function boot() {
     console.error('Error de boot:', err);
     if (loadingEl) loadingEl.style.display = 'none';
     mostrarLogin();
-    toast('Error de conexión con Firebase. Verificá tu internet.', 5000, 'error');
+    toast('⚠ Error de conexión con Firebase. Verificá tu internet.');
     setSyncOk(false);
   }
 }
