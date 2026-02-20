@@ -42,7 +42,7 @@ async function boot() {
 
   try {
     await setupAdminInicial();
-    await cargarDatosIniciales();
+    await Promise.all([cargarDatosIniciales(), cargarConfigTicket()]);
     suscribirCambiosRealtime();
     suscribirPresencia();
     setSyncOk(true);
