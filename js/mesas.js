@@ -257,7 +257,7 @@ window.marcarPagado = async function() {
     pedidoActual = {};
     window.cerrarModal();
     toast(`Mesa ${mesaNum} liberada ✓`);
-    if (ticketData) setTimeout(() => manejarTicket(ticketData), 300);
+    if (ticketData) setTimeout(() => manejarTicket(ticketData), 500);
   } catch (err) {
     console.error('Error al liberar mesa:', err);
     toast('⚠ Error al guardar. Verificá la conexión.');
@@ -395,7 +395,13 @@ window.guardarConfigTicket = async function() {
 };
 
 /* ── Ticket ─────────────────────────────────── */
-function manejarTicket(t) {
+async function manejarTicket(t) {
+  // Siempre leer config fresca desde Firebase antes de generar ticket
+  try {
+    const snap = await get(ref(db, CONFIG_KEY));
+    if (snap.exists()) _ticketConfig = snap.val();
+  } catch(e) {}
+
   const esMobile = /Mobi|Android|iPhone|iPad|IEMobile/i.test(navigator.userAgent);
   if (esMobile) mostrarMensajeTicket(t);
   else imprimirTicketPOS(t);
@@ -479,6 +485,7 @@ function imprimirTicketPOS(t) {
       itemsHtml += `<div class="ticket-row"><span class="ticket-item-name">${d.qty}x ${nombre}</span><span class="ticket-item-price">${fmt(d.sub)}</span></div>`;
     });
   });
+  console.log('[Ticket] header config:', _ticketConfig.header);
   const ticketHeader = _ticketConfig.header
     ? `<div class="ticket-title" style="font-size:13pt;letter-spacing:2px;">${_ticketConfig.header}</div>`
     : `<div class="ticket-title">★ RESTAURANTE ★</div><div class="ticket-title" style="font-size:18pt;letter-spacing:5px;margin:2mm 0;">DELICIAS</div>`;
