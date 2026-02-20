@@ -247,6 +247,34 @@
 
         <!-- Columna derecha -->
         <div>
+
+          <!-- Config Ticket -->
+          <div class="admin-card" style="margin-bottom:24px;">
+            <div class="admin-card-header">
+              <span class="admin-card-title">
+                <svg class="icon"><use href="#icon-receipt"/></svg> Personalizar Ticket
+              </span>
+            </div>
+            <div class="admin-card-body">
+              <div class="field" style="margin-bottom:12px;">
+                <label style="font-size:0.82rem;color:var(--text-muted);margin-bottom:6px;display:block;">Encabezado</label>
+                <input type="text" id="ticket-header" placeholder="Ej: ★ Feliz Navidad ★" maxlength="60"
+                  style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--text);box-sizing:border-box;"/>
+              </div>
+              <div class="field" style="margin-bottom:12px;">
+                <label style="font-size:0.82rem;color:var(--text-muted);margin-bottom:6px;display:block;">Despedida</label>
+                <input type="text" id="ticket-footer" placeholder="Ej: ¡Felices Fiestas! 🎄" maxlength="80"
+                  style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--text);box-sizing:border-box;"/>
+              </div>
+              <button class="btn-primary" onclick="guardarConfigTicket()" style="width:100%;font-size:0.85rem;padding:10px;">
+                <svg class="icon icon-sm"><use href="#icon-check"/></svg> Guardar
+              </button>
+              <div style="margin-top:10px;font-size:0.78rem;color:var(--text-muted);">
+                Dejar vacío para usar el texto por defecto.
+              </div>
+            </div>
+          </div>
+
           <div class="admin-card" style="margin-bottom:24px;">
             <div class="admin-card-header">
               <span class="admin-card-title">
