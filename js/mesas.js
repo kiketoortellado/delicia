@@ -11,18 +11,15 @@ let mesaAbierta   = null;
 let pedidoActual  = {};
 let catActiva     = 'todos';
 let timerInterval = null;
-let tabActivaModal = 'pedido'; // 'pedido' | 'clientes'
+let tabActivaModal = 'pedido';
 
-/* ── Key Firebase siempre string con prefijo ── */
 const fbKey = n => `mesa_${n}`;
 
-/* ── Mesa default ───────────────────────────── */
 export const mesaDefault = () => ({
   ocupada: false, pedidoActual: {}, mesero: '',
   clientesNoche: [], tsOcupada: null, ultimoUsuario: ''
 });
 
-/* ── Calcular total ─────────────────────────── */
 export function calcTotal(pedido) {
   if (!pedido) return 0;
   const productos = Store.get('productos') || [];
@@ -32,7 +29,6 @@ export function calcTotal(pedido) {
   }, 0);
 }
 
-/* ── Render grid de mesas ───────────────────── */
 export function renderMesas() {
   const sesion = Store.get('sesion');
   if (sesion?.role === 'cocinero') return;
@@ -66,10 +62,9 @@ export function renderMesas() {
   actualizarTimers();
 }
 
-/* ── Abrir modal mesa ───────────────────────── */
 window.abrirMesa = function(num) {
   mesaAbierta = num;
-  tabActivaModal = 'pedido'; // Siempre empezar en pedido
+  tabActivaModal = 'pedido';
   
   const mesas  = Store.get('mesas') || {};
   const m      = mesas[num] || mesaDefault();
@@ -128,11 +123,8 @@ function renderTabsModal() {
   `;
   
   const tabsContainer = getEl('modal-tabs-container');
-  if (tabsContainer) {
-    tabsContainer.innerHTML = tabsHtml;
-  }
+  if (tabsContainer) tabsContainer.innerHTML = tabsHtml;
   
-  // Mostrar/ocultar paneles
   const pedidoPanel = getEl('pedido-panel');
   const clientesPanel = getEl('clientes-panel');
   
@@ -166,9 +158,7 @@ function renderClientesPanel() {
           <span class="cliente-num">Cliente ${c.num}°</span>
           <span class="cliente-total">${fmt(c.total)}</span>
         </div>
-        <div class="cliente-detalles">
-          ${c.detalles.map(d => `${d.qty}× ${d.nombre}`).join(', ')}
-        </div>
+        <div class="cliente-detalles">${c.detalles.map(d => `${d.qty}× ${d.nombre}`).join(', ')}</div>
         <div class="cliente-meta">
           <span><svg class="icon icon-sm"><use href="#icon-user"/></svg> ${c.mesero || '—'}</span>
           ${c.tiempoMin ? `<span><svg class="icon icon-sm"><use href="#icon-clock"/></svg> ${c.tiempoMin}min</span>` : ''}
@@ -195,7 +185,6 @@ window.filtrarCat = function(cat, el) {
   renderProductosGrid();
 };
 
-/* ── Grid productos en modal ────────────────── */
 function renderProductosGrid() {
   const productos = Store.get('productos') || [];
   const prods = catActiva === 'todos'
@@ -213,7 +202,6 @@ function renderProductosGrid() {
     </button>`).join(''));
 }
 
-/* ── Pedido actual ──────────────────────────── */
 window.addProd = function(pid) {
   pedidoActual[pid] = (pedidoActual[pid] || 0) + 1;
   renderPedidoActual();
@@ -226,7 +214,7 @@ window.cambiarQty = function(pid, d) {
 };
 
 function renderPedidoActual() {
-  const items     = Object.entries(pedidoActual);
+  const items = Object.entries(pedidoActual);
   const productos = Store.get('productos') || [];
 
   if (!items.length) {
@@ -256,26 +244,25 @@ function renderPedidoActual() {
   setText('pedido-total', fmt(total));
 }
 
-/* ── Confirmar pedido ───────────────────────── */
 window.confirmarPedido = async function() {
   if (!mesaAbierta) return;
   if (!Object.keys(pedidoActual).length) { toast('Añade al menos un producto.'); return; }
 
-  const sesion  = Store.get('sesion');
-  const mesero  = sesion ? sesion.nombre || sesion.username : '';
+  const sesion = Store.get('sesion');
+  const mesero = sesion ? sesion.nombre || sesion.username : '';
   const mesaNum = mesaAbierta;
 
   try {
-    const snap    = await get(ref(db, `mesas/${fbKey(mesaNum)}`));
+    const snap = await get(ref(db, `mesas/${fbKey(mesaNum)}`));
     const mActual = snap.exists() ? snap.val() : mesaDefault();
 
     await set(ref(db, `mesas/${fbKey(mesaNum)}`), {
-      clientesNoche:  Array.isArray(mActual.clientesNoche) ? mActual.clientesNoche : [],
-      pedidoActual:   { ...pedidoActual },
+      clientesNoche: Array.isArray(mActual.clientesNoche) ? mActual.clientesNoche : [],
+      pedidoActual: { ...pedidoActual },
       mesero,
-      ocupada:        true,
-      ultimoUsuario:  sesion?.username || '',
-      tsOcupada:      mActual.tsOcupada || Date.now()
+      ocupada: true,
+      ultimoUsuario: sesion?.username || '',
+      tsOcupada: mActual.tsOcupada || Date.now()
     });
 
     setText('modal-subtitle', 'Ocupada');
@@ -287,33 +274,32 @@ window.confirmarPedido = async function() {
   }
 };
 
-/* ── Marcar pagado / liberar mesa ───────────── */
 window.marcarPagado = async function() {
   if (!mesaAbierta) return;
   const sesion = Store.get('sesion');
   if (sesion?.role !== 'admin') { toast('Solo el Admin puede marcar pagado.'); return; }
 
-  const mesaNum  = mesaAbierta;
-  const mesero   = sesion.nombre || sesion.username;
+  const mesaNum = mesaAbierta;
+  const mesero = sesion.nombre || sesion.username;
   let ticketData = null;
 
   try {
-    const snap     = await get(ref(db, `mesas/${fbKey(mesaNum)}`));
-    const mFB      = snap.exists() ? snap.val() : mesaDefault();
+    const snap = await get(ref(db, `mesas/${fbKey(mesaNum)}`));
+    const mFB = snap.exists() ? snap.val() : mesaDefault();
     const cnActual = Array.isArray(mFB.clientesNoche) ? [...mFB.clientesNoche] : [];
 
     if (Object.keys(pedidoActual).length > 0) {
-      const productos     = Store.get('productos') || [];
-      const detalles      = Object.entries(pedidoActual)
+      const productos = Store.get('productos') || [];
+      const detalles = Object.entries(pedidoActual)
         .map(([pid, qty]) => {
           const p = productos.find(p => String(p.id) === String(pid));
           return p ? { nombre: p.nombre, qty, precio: p.precio, sub: p.precio * qty, cat: p.cat || 'comida' } : null;
         }).filter(Boolean);
 
-      const total         = calcTotal(pedidoActual);
-      const tiempoMin     = mFB.tsOcupada ? Math.floor((Date.now() - mFB.tsOcupada) / 60000) : null;
-      const fechaISO      = fechaHoy();
-      const horaActual    = hora();
+      const total = calcTotal(pedidoActual);
+      const tiempoMin = mFB.tsOcupada ? Math.floor((Date.now() - mFB.tsOcupada) / 60000) : null;
+      const fechaISO = fechaHoy();
+      const horaActual = hora();
 
       cnActual.push({
         num: cnActual.length + 1, detalles, total, mesero,
@@ -333,11 +319,11 @@ window.marcarPagado = async function() {
     }
 
     await set(ref(db, `mesas/${fbKey(mesaNum)}`), {
-      ocupada:       false,
-      pedidoActual:  {},
-      mesero:        '',
+      ocupada: false,
+      pedidoActual: {},
+      mesero: '',
       ultimoUsuario: '',
-      tsOcupada:     null,
+      tsOcupada: null,
       clientesNoche: cnActual
     });
 
@@ -351,7 +337,6 @@ window.marcarPagado = async function() {
   }
 };
 
-/* ── Limpiar mesa sin cobrar ────────────────── */
 window.limpiarMesa = async function() {
   if (!mesaAbierta) return;
   if (!confirm('¿Limpiar la mesa sin cobrar?')) return;
@@ -359,14 +344,14 @@ window.limpiarMesa = async function() {
   const mesaNum = mesaAbierta;
   try {
     const snap = await get(ref(db, `mesas/${fbKey(mesaNum)}`));
-    const mFB  = snap.exists() ? snap.val() : mesaDefault();
+    const mFB = snap.exists() ? snap.val() : mesaDefault();
 
     await set(ref(db, `mesas/${fbKey(mesaNum)}`), {
-      ocupada:       false,
-      pedidoActual:  {},
-      mesero:        '',
+      ocupada: false,
+      pedidoActual: {},
+      mesero: '',
       ultimoUsuario: '',
-      tsOcupada:     null,
+      tsOcupada: null,
       clientesNoche: Array.isArray(mFB.clientesNoche) ? mFB.clientesNoche : []
     });
 
@@ -379,11 +364,10 @@ window.limpiarMesa = async function() {
   }
 };
 
-/* ── Historial completo de la mesa (modal aparte) ──────────── */
 window.verHistorialMesa = function() {
   if (!mesaAbierta) return;
   const mesas = Store.get('mesas') || {};
-  const cl    = mesas[mesaAbierta]?.clientesNoche || [];
+  const cl = mesas[mesaAbierta]?.clientesNoche || [];
 
   getEl('hist-mesa-title').innerHTML = `<svg class="icon"><use href="#icon-history"/></svg> Historial — Mesa ${mesaAbierta}`;
 
@@ -391,7 +375,7 @@ window.verHistorialMesa = function() {
     html('hist-mesa-body', '<div class="empty-state"><svg class="icon icon-xl"><use href="#icon-empty"/></svg><p>Sin historial esta noche.</p></div>');
   } else {
     let tot = 0;
-    let t   = '<table class="history-table"><thead><tr><th>Cliente</th><th>Detalle</th><th>Mesero</th><th>Tiempo</th><th>Total</th></tr></thead><tbody>';
+    let t = '<table class="history-table"><thead><tr><th>Cliente</th><th>Detalle</th><th>Mesero</th><th>Tiempo</th><th>Total</th></tr></thead><tbody>';
     cl.forEach(c => {
       tot += c.total;
       t += `<tr><td>Cliente ${c.num}°</td><td>${c.detalles.map(d => `${d.qty}× ${d.nombre}`).join(', ')}</td><td>${c.mesero || '—'}</td><td>${c.tiempoMin != null ? c.tiempoMin + 'min' : '—'}</td><td>${fmt(c.total)}</td></tr>`;
@@ -402,14 +386,15 @@ window.verHistorialMesa = function() {
   getEl('modal-hist-mesa').classList.add('open');
 };
 
-/* ── Timers ─────────────────────────────────── */
 export function iniciarTimers() {
   detenerTimers();
   timerInterval = setInterval(actualizarTimers, 1000);
 }
+
 export function detenerTimers() {
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
 }
+
 export function actualizarTimers() {
   const ahora = Date.now();
   const mesas = Store.get('mesas') || {};
@@ -427,7 +412,6 @@ export function actualizarTimers() {
   }
 }
 
-/* ── Config ticket ─── */
 const CONFIG_KEY = 'ticket_config';
 let _ticketConfig = { header: '', footer: '' };
 
@@ -454,7 +438,6 @@ window.guardarConfigTicket = async function() {
   }
 };
 
-/* ── Ticket ─────────────────────────────────── */
 async function manejarTicket(t) {
   try {
     const snap = await get(ref(db, CONFIG_KEY));
@@ -467,15 +450,15 @@ async function manejarTicket(t) {
 }
 
 function mostrarMensajeTicket(t) {
-  const TZ   = 'America/Asuncion';
+  const TZ = 'America/Asuncion';
   const cats = { comida: [], bebida: [], postre: [] };
   t.detalles.forEach(d => { (cats[d.cat || 'comida'] = cats[d.cat || 'comida'] || []).push(d); });
   
   const catIcons = { comida: '[COMIDA]', bebida: '[BEBIDA]', postre: '[POSTRE]' };
-  const cabeza    = _ticketConfig.header || '*** RESTAURANTE DELICIAS ***';
+  const cabeza = _ticketConfig.header || '*** RESTAURANTE DELICIAS ***';
   const despedida = _ticketConfig.footer || 'Gracias por su visita';
 
-  const lineas   = [
+  const lineas = [
     cabeza,
     `Mesa ${t.mesa} · Cliente ${t.clienteNum}°`,
     `Fecha: ${t.fecha || new Date().toLocaleDateString('es-PY', { timeZone: TZ })}  ${t.hora}`,
@@ -533,11 +516,11 @@ function mostrarMensajeTicket(t) {
 }
 
 function imprimirTicketPOS(t) {
-  const TZ      = 'America/Asuncion';
-  const now     = new Date();
+  const TZ = 'America/Asuncion';
+  const now = new Date();
   const fechaTk = now.toLocaleDateString('es-PY', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: TZ });
-  const horaTk  = now.toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: TZ });
-  const cats    = { comida: [], bebida: [], postre: [] };
+  const horaTk = now.toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: TZ });
+  const cats = { comida: [], bebida: [], postre: [] };
   t.detalles.forEach(d => { (cats[d.cat || 'comida'] = cats[d.cat || 'comida'] || []).push(d); });
   const catNames = { comida: '-- COMIDAS --', bebida: '-- BEBIDAS --', postre: '-- POSTRES --' };
   let itemsHtml = '';
