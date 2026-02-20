@@ -14,41 +14,40 @@
   <link rel="stylesheet" href="css/base.css"/>
   <link rel="stylesheet" href="css/components.css"/>
   <link rel="stylesheet" href="css/layout.css"/>
-  <!-- Firebase config incluida directamente en js/firebase.js -->
 </head>
 <body>
 
-<!-- SVG Sprite inline (evita CORS al usar <use href="#id">) -->
+<!-- SVG Sprite -->
 <div style="display:none" aria-hidden="true">
 <svg xmlns="http://www.w3.org/2000/svg">
-  <symbol id="icon-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/></symbol>
-  <symbol id="icon-table" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 7V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/><path d="M12 7v12M8 7V4M16 7V4"/></symbol>
-  <symbol id="icon-products" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></symbol>
-  <symbol id="icon-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></symbol>
-  <symbol id="icon-admin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
-  <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
-  <symbol id="icon-chef" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" x2="18" y1="17" y2="17"/></symbol>
-  <symbol id="icon-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></symbol>
-  <symbol id="icon-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6m-3.5-3.5 3 3L22 7l-3-3"/></symbol>
-  <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></symbol>
-  <symbol id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
-  <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></symbol>
-  <symbol id="icon-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></symbol>
-  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
-  <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18m0-12 12 12"/></symbol>
-  <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
-  <symbol id="icon-dollar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
-  <symbol id="icon-receipt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6M16 12h-6M16 16h-6"/></symbol>
-  <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
-  <symbol id="icon-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></symbol>
-  <symbol id="icon-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
-  <symbol id="icon-food" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/></symbol>
-  <symbol id="icon-drink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6.01" y1="2" y2="2"/><line x1="10" x2="10.01" y1="2" y2="2"/><line x1="14" x2="14.01" y1="2" y2="2"/></symbol>
-  <symbol id="icon-dessert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="7"/><path d="M12 16v7M9 23h6"/></symbol>
-  <symbol id="icon-fire" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-2-2.143-2-4.286A5 5 0 0 0 12 2a5 5 0 0 0 5 5c0 2.143-1 2.143-2 4.286-.5 1-1 1.62-1 3a2.5 2.5 0 0 0 2.5 2.5"/><path d="M8.5 14.5c-1.5 1-2.5 2.5-2.5 4.5 0 3.5 3 6.5 6 7 3-.5 6-3.5 6-7 0-2-1-3.5-2.5-4.5"/></symbol>
-  <symbol id="icon-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
-  <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
-  <symbol id="icon-utensils" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/></symbol>
+  <symbol id="icon-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/></symbol>
+  <symbol id="icon-table" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 7V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/><path d="M12 7v12M8 7V4M16 7V4"/></symbol>
+  <symbol id="icon-products" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></symbol>
+  <symbol id="icon-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></symbol>
+  <symbol id="icon-admin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="icon-chef" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" x2="18" y1="17" y2="17"/></symbol>
+  <symbol id="icon-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></symbol>
+  <symbol id="icon-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6m-3.5-3.5 3 3L22 7l-3-3"/></symbol>
+  <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></symbol>
+  <symbol id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+  <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5v14"/></symbol>
+  <symbol id="icon-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"/></symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18m0-12 12 12"/></symbol>
+  <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="icon-dollar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+  <symbol id="icon-receipt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6M16 12h-6M16 16h-6"/></symbol>
+  <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="icon-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></symbol>
+  <symbol id="icon-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="icon-food" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/></symbol>
+  <symbol id="icon-drink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6.01" y1="2" y2="2"/><line x1="10" x2="10.01" y1="2" y2="2"/><line x1="14" x2="14.01" y1="2" y2="2"/></symbol>
+  <symbol id="icon-dessert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="9" r="7"/><path d="M12 16v7M9 23h6"/></symbol>
+  <symbol id="icon-fire" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-2-2.143-2-4.286A5 5 0 0 0 12 2a5 5 0 0 0 5 5c0 2.143-1 2.143-2 4.286-.5 1-1 1.62-1 3a2.5 2.5 0 0 0 2.5 2.5"/><path d="M8.5 14.5c-1.5 1-2.5 2.5-2.5 4.5 0 3.5 3 6.5 6 7 3-.5 6-3.5 6-7 0-2-1-3.5-2.5-4.5"/></symbol>
+  <symbol id="icon-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+  <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
+  <symbol id="icon-utensils" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/></symbol>
 </svg>
 </div>
 
@@ -82,10 +81,10 @@
   </div>
 </div>
 
-<!-- TICKET (solo impresión) -->
+<!-- TICKET -->
 <div id="ticket-print"></div>
 
-<!-- APP NORMAL (Admin / Mesero) -->
+<!-- APP -->
 <div id="app" class="hidden">
   <header>
     <div class="header-brand">
@@ -117,7 +116,6 @@
     </div>
   </header>
 
-  <!-- Tabs desktop -->
   <div class="tabs" id="tabs-bar">
     <button class="tab active" data-tab="mesas" onclick="setTab('mesas',this)">
       <svg class="icon"><use href="#icon-table"/></svg> Mesas
@@ -134,7 +132,6 @@
   </div>
 
   <div class="main">
-
     <!-- MESAS -->
     <div id="tab-mesas">
       <div class="section-title">
@@ -210,8 +207,6 @@
         <svg class="icon"><use href="#icon-admin"/></svg> Panel de Administración
       </div>
       <div class="admin-grid">
-
-        <!-- Usuarios -->
         <div class="admin-card">
           <div class="admin-card-header">
             <span class="admin-card-title">
@@ -245,10 +240,7 @@
           </div>
         </div>
 
-        <!-- Columna derecha -->
         <div>
-
-          <!-- Config Ticket -->
           <div class="admin-card" style="margin-bottom:24px;">
             <div class="admin-card-header">
               <span class="admin-card-title">
@@ -258,12 +250,12 @@
             <div class="admin-card-body">
               <div class="field" style="margin-bottom:12px;">
                 <label style="font-size:0.82rem;color:var(--text-muted);margin-bottom:6px;display:block;">Encabezado</label>
-                <input type="text" id="ticket-header" placeholder="Ej: ★ Feliz Navidad ★" maxlength="60"
+                <input type="text" id="ticket-header" placeholder="Ej: Feliz Navidad" maxlength="60"
                   style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--text);box-sizing:border-box;"/>
               </div>
               <div class="field" style="margin-bottom:12px;">
                 <label style="font-size:0.82rem;color:var(--text-muted);margin-bottom:6px;display:block;">Despedida</label>
-                <input type="text" id="ticket-footer" placeholder="Ej: ¡Felices Fiestas! 🎄" maxlength="80"
+                <input type="text" id="ticket-footer" placeholder="Ej: Felices Fiestas" maxlength="80"
                   style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--text);box-sizing:border-box;"/>
               </div>
               <button class="btn-primary" onclick="guardarConfigTicket()" style="width:100%;font-size:0.85rem;padding:10px;">
@@ -285,6 +277,7 @@
               <div id="presencia-panel"><div style="color:var(--text-muted);font-size:0.85rem;">Cargando...</div></div>
             </div>
           </div>
+          
           <div class="admin-card">
             <div class="admin-card-header">
               <span class="admin-card-title">
@@ -299,13 +292,12 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </div>
 
-<!-- Bottom Nav Móvil -->
+<!-- Bottom Nav -->
 <div class="bottom-nav" id="bottom-nav">
   <div class="bottom-nav-inner">
     <button class="bnav-btn active" data-tab="mesas" id="bnav-mesas" onclick="setTabMobile('mesas',this)">
@@ -360,9 +352,9 @@
   </div>
 </div>
 
-<!-- MODAL MESA -->
+<!-- MODAL MESA MEJORADO -->
 <div class="modal-overlay" id="modal-mesa">
-  <div class="modal">
+  <div class="modal modal-mesa">
     <div class="modal-header">
       <div>
         <div class="modal-title" id="modal-title">
@@ -374,31 +366,38 @@
         <svg class="icon"><use href="#icon-x"/></svg>
       </button>
     </div>
+    
     <div class="modal-body">
       <div class="field">
         <label>Mesero responsable</label>
         <input type="text" id="inp-mesero" readonly style="background:var(--bg);cursor:default"/>
       </div>
-      <div class="pedido-layout">
-        <div>
-          <div style="font-size:0.8rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Productos</div>
-          <div class="cat-tabs" id="cat-tabs-modal">
-            <button class="cat-tab active" data-cat="todos" onclick="filtrarCat('todos',this)">
-              <svg class="icon icon-sm"><use href="#icon-utensils"/></svg> Todos
-            </button>
-            <button class="cat-tab" data-cat="bebida" onclick="filtrarCat('bebida',this)">
-              <svg class="icon icon-sm"><use href="#icon-drink"/></svg> Bebidas
-            </button>
-            <button class="cat-tab" data-cat="comida" onclick="filtrarCat('comida',this)">
-              <svg class="icon icon-sm"><use href="#icon-food"/></svg> Comidas
-            </button>
-            <button class="cat-tab" data-cat="postre" onclick="filtrarCat('postre',this)">
-              <svg class="icon icon-sm"><use href="#icon-dessert"/></svg> Postres
-            </button>
+      
+      <!-- TABS -->
+      <div id="modal-tabs-container"></div>
+      
+      <!-- PANEL PEDIDO -->
+      <div id="pedido-panel">
+        <div class="pedido-layout">
+          <div class="productos-section">
+            <div class="section-label">Productos</div>
+            <div class="cat-tabs" id="cat-tabs-modal">
+              <button class="cat-tab active" data-cat="todos" onclick="filtrarCat('todos',this)">
+                <svg class="icon icon-sm"><use href="#icon-utensils"/></svg> Todos
+              </button>
+              <button class="cat-tab" data-cat="bebida" onclick="filtrarCat('bebida',this)">
+                <svg class="icon icon-sm"><use href="#icon-drink"/></svg> Bebidas
+              </button>
+              <button class="cat-tab" data-cat="comida" onclick="filtrarCat('comida',this)">
+                <svg class="icon icon-sm"><use href="#icon-food"/></svg> Comidas
+              </button>
+              <button class="cat-tab" data-cat="postre" onclick="filtrarCat('postre',this)">
+                <svg class="icon icon-sm"><use href="#icon-dessert"/></svg> Postres
+              </button>
+            </div>
+            <div class="productos-grid" id="productos-grid"></div>
           </div>
-          <div class="productos-grid" id="productos-grid"></div>
-        </div>
-        <div>
+          
           <div class="orden-panel">
             <h4>
               <svg class="icon icon-sm"><use href="#icon-receipt"/></svg> Pedido actual
@@ -407,17 +406,20 @@
               <div style="color:var(--text-muted);font-size:0.9rem;padding:12px 0">Sin productos</div>
             </div>
             <div class="orden-total">
-              <span style="font-weight:600;color:var(--text-secondary);font-size:0.9rem">Total</span>
+              <span>Total</span>
               <span class="total-amount" id="pedido-total">Gs. 0</span>
             </div>
           </div>
         </div>
       </div>
-      <div style="margin-top:24px;">
-        <div style="font-size:0.8rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;">Clientes esta noche</div>
-        <div id="clientes-mesa-list"></div>
+      
+      <!-- PANEL CLIENTES -->
+      <div id="clientes-panel" style="display:none;">
+        <div id="clientes-panel-content"></div>
       </div>
-      <div class="modal-actions">
+      
+      <!-- BOTONES STICKY -->
+      <div class="modal-actions-sticky">
         <button class="btn-success" onclick="confirmarPedido()">
           <svg class="icon"><use href="#icon-check"/></svg> Confirmar pedido
         </button>
@@ -425,7 +427,7 @@
           <svg class="icon"><use href="#icon-dollar"/></svg> Pagado — Liberar
         </button>
         <button class="btn-blue" onclick="verHistorialMesa()">
-          <svg class="icon"><use href="#icon-history"/></svg> Historial
+          <svg class="icon"><use href="#icon-history"/></svg> Historial completo
         </button>
       </div>
     </div>
@@ -550,7 +552,6 @@
   </div>
 </div>
 
-<!-- Módulo principal ES -->
 <script type="module" src="js/app.js"></script>
 </body>
 </html>
