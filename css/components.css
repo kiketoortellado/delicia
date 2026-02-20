@@ -271,7 +271,7 @@
   border-top: 1px solid var(--border);
 }
 
-/* ── Toast (SIN EMOJIS - CON ICONOS SVG) ───── */
+/* ── Toast ──────────────────────────────────── */
 .toast {
   position: fixed; bottom: 90px; right: 24px;
   background: var(--surface);
@@ -286,8 +286,6 @@
   backdrop-filter: blur(10px);
 }
 @media (min-width: 768px) { .toast { bottom: 32px; right: 32px; } }
-
-/* Icono por defecto en toast */
 .toast::before {
   content: '';
   width: 24px; height: 24px;
@@ -295,44 +293,6 @@
   border-radius: 50%; flex-shrink: 0;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
   background-size: 14px; background-position: center; background-repeat: no-repeat;
-}
-
-/* Variantes de toast con colores e iconos diferentes */
-.toast-success {
-  border-left: 4px solid var(--success);
-  border-color: var(--success);
-}
-.toast-success::before {
-  background: var(--success);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
-  background-size: 14px; background-position: center; background-repeat: no-repeat;
-}
-
-.toast-error {
-  border-left: 4px solid var(--error);
-  border-color: var(--error);
-}
-.toast-error::before {
-  background: var(--error);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E");
-  background-size: 14px; background-position: center; background-repeat: no-repeat;
-}
-
-.toast-warning {
-  border-left: 4px solid var(--warning);
-  border-color: var(--warning);
-}
-.toast-warning::before {
-  background: var(--warning);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4m0 4h.01'/%3E%3C/svg%3E");
-  background-size: 14px; background-position: center; background-repeat: no-repeat;
-}
-
-/* Iconos SVG dentro del toast */
-.toast svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
 }
 
 /* ── Categorías ─────────────────────────────── */
@@ -510,6 +470,262 @@
 .ticket-item-name  { flex: 1; padding-right: 4mm; word-break: break-word; }
 .ticket-item-price { white-space: nowrap; text-align: right; font-weight: 700; }
 .ticket-corte  { border: none; border-top: 2px dashed #000; margin: 6mm 0 0; width: 100%; }
+
+/* ═══════════════════════════════════════════════
+   MODAL MESA MEJORADO - Tabs y Layout
+   ═══════════════════════════════════════════════ */
+
+.modal-mesa {
+  max-width: 900px;
+}
+
+/* Tabs del modal */
+.modal-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.modal-tab {
+  flex: 1;
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+}
+
+.modal-tab:hover {
+  color: var(--text-secondary);
+  background: var(--bg);
+}
+
+.modal-tab.active {
+  color: var(--gold-dark);
+  border-bottom-color: var(--gold);
+  background: var(--gold-glow);
+}
+
+.tab-badge {
+  position: absolute;
+  top: 8px;
+  right: 20px;
+  background: var(--gold);
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  min-width: 18px;
+  font-weight: 700;
+}
+
+/* Layout de pedido */
+.pedido-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .pedido-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.productos-section {
+  min-height: 0;
+}
+
+.section-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.orden-panel {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  height: fit-content;
+  position: sticky;
+  top: 0;
+}
+
+.orden-panel h4 {
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.orden-items {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+}
+
+.orden-total {
+  border-top: 2px solid var(--border);
+  padding-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orden-total span:first-child {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.total-amount {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold-dark);
+}
+
+/* Panel de clientes */
+.mesa-total-resumen {
+  background: var(--gold-glow);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.mesa-total-label {
+  font-weight: 600;
+  color: var(--gold-dark);
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.mesa-total-valor {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gold-dark);
+  margin-bottom: 4px;
+}
+
+.mesa-total-clientes {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.clientes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.cliente-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+.cliente-card:hover {
+  border-color: var(--gold);
+  transform: translateX(4px);
+}
+
+.cliente-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cliente-num {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.cliente-total {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  color: var(--gold-dark);
+  font-size: 1.1rem;
+}
+
+.cliente-detalles {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.cliente-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.cliente-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Botones sticky */
+.modal-actions-sticky {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 2px solid var(--border);
+  position: sticky;
+  bottom: 0;
+  background: var(--surface);
+  padding-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  .modal-actions-sticky {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px;
+    margin: 0;
+    background: var(--surface);
+    border-top: 2px solid var(--border);
+    z-index: 100;
+    justify-content: center;
+  }
+  
+  .modal-body {
+    padding-bottom: 100px;
+  }
+}
 
 /* ── Animaciones ────────────────────────────── */
 @keyframes spin { to { transform: rotate(360deg); } }
