@@ -476,9 +476,11 @@
         <button class="btn-warning hidden" id="btn-pagado" onclick="marcarPagado()">
           <svg class="icon"><use href="#icon-dollar"/></svg> Pagado — Liberar
         </button>
-        <button class="btn-blue" onclick="verHistorialMesa()">
-          <svg class="icon"><use href="#icon-history"/></svg> Historial completo
-        </button>
+        <div id="btn-ver-historial-wrap" class="hidden">
+          <button class="btn-blue" onclick="verHistorialMesa()">
+            <svg class="icon"><use href="#icon-history"/></svg> Historial completo
+          </button>
+        </div>
       </div>
     </div>
   </div>
