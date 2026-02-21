@@ -11,15 +11,17 @@ let mesaAbierta   = null;
 let pedidoActual  = {};
 let catActiva     = 'todos';
 let timerInterval = null;
-let tabActivaModal = 'pedido';
 
+/* ── Key Firebase siempre string con prefijo ── */
 const fbKey = n => `mesa_${n}`;
 
+/* ── Mesa default ───────────────────────────── */
 export const mesaDefault = () => ({
   ocupada: false, pedidoActual: {}, mesero: '',
   clientesNoche: [], tsOcupada: null, ultimoUsuario: ''
 });
 
+/* ── Calcular total ─────────────────────────── */
 export function calcTotal(pedido) {
   if (!pedido) return 0;
   const productos = Store.get('productos') || [];
@@ -29,6 +31,7 @@ export function calcTotal(pedido) {
   }, 0);
 }
 
+/* ── Render grid de mesas ───────────────────── */
 export function renderMesas() {
   const sesion = Store.get('sesion');
   if (sesion?.role === 'cocinero') return;
@@ -62,10 +65,9 @@ export function renderMesas() {
   actualizarTimers();
 }
 
+/* ── Abrir modal mesa ───────────────────────── */
 window.abrirMesa = function(num) {
   mesaAbierta = num;
-  tabActivaModal = 'pedido';
-  
   const mesas  = Store.get('mesas') || {};
   const m      = mesas[num] || mesaDefault();
   const sesion = Store.get('sesion');
@@ -85,98 +87,53 @@ window.abrirMesa = function(num) {
   document.querySelectorAll('#cat-tabs-modal .cat-tab')
     .forEach(t => t.classList.toggle('active', t.dataset.cat === 'todos'));
 
+  // Generar tabs Pedido Actual / Historial
+  _renderModalTabs(m);
+
   renderProductosGrid();
   renderPedidoActual();
-  renderTabsModal();
+  renderClientesMesa(num);
   getEl('modal-mesa').classList.add('open');
+};
+
+function _renderModalTabs(m) {
+  const histCount = Object.keys(m.historial || {}).length;
+  const tc = getEl('modal-tabs-container');
+  if (!tc) return;
+  tc.innerHTML = `
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="mtab-pedido" onclick="_switchModalTab('pedido')">
+        <svg class="icon icon-sm"><use href="#icon-receipt"/></svg>
+        Pedido Actual
+      </button>
+      <button class="modal-tab" id="mtab-hist" onclick="_switchModalTab('hist')">
+        <svg class="icon icon-sm"><use href="#icon-history"/></svg>
+        Historial
+        ${histCount > 0 ? `<span class="tab-badge">${histCount}</span>` : ''}
+      </button>
+    </div>`;
+}
+
+window._switchModalTab = function(tab) {
+  const pedidoPanel = getEl('pedido-panel');
+  const histBtn     = getEl('btn-ver-historial-wrap');
+  getEl('mtab-pedido')?.classList.toggle('active', tab === 'pedido');
+  getEl('mtab-hist')?.classList.toggle('active', tab === 'hist');
+  if (tab === 'pedido') {
+    if (pedidoPanel) pedidoPanel.classList.remove('hidden');
+    if (histBtn) histBtn.classList.add('hidden');
+  } else {
+    if (pedidoPanel) pedidoPanel.classList.add('hidden');
+    if (histBtn) histBtn.classList.remove('hidden');
+    verHistorialMesa();
+  }
 };
 
 window.cerrarModal = function() {
   getEl('modal-mesa').classList.remove('open');
   mesaAbierta  = null;
   pedidoActual = {};
-  tabActivaModal = 'pedido';
 };
-
-window.cambiarTabModal = function(tab) {
-  tabActivaModal = tab;
-  renderTabsModal();
-};
-
-function renderTabsModal() {
-  const mesas = Store.get('mesas') || {};
-  const m = mesas[mesaAbierta] || mesaDefault();
-  const numClientes = (m.clientesNoche || []).length;
-  
-  const tabsHtml = `
-    <div class="modal-tabs">
-      <button class="modal-tab ${tabActivaModal === 'pedido' ? 'active' : ''}" onclick="cambiarTabModal('pedido')">
-        <svg class="icon icon-sm"><use href="#icon-receipt"/></svg>
-        Pedido Actual
-      </button>
-      <button class="modal-tab ${tabActivaModal === 'clientes' ? 'active' : ''}" onclick="cambiarTabModal('clientes')">
-        <svg class="icon icon-sm"><use href="#icon-history"/></svg>
-        Historial
-        ${numClientes > 0 ? `<span class="tab-badge">${numClientes}</span>` : ''}
-      </button>
-    </div>
-  `;
-  
-  const tabsContainer = getEl('modal-tabs-container');
-  if (tabsContainer) tabsContainer.innerHTML = tabsHtml;
-  
-  const pedidoPanel = getEl('pedido-panel');
-  const clientesPanel = getEl('clientes-panel');
-  
-  if (pedidoPanel) pedidoPanel.style.display = tabActivaModal === 'pedido' ? 'block' : 'none';
-  if (clientesPanel) {
-    clientesPanel.style.display = tabActivaModal === 'clientes' ? 'block' : 'none';
-    if (tabActivaModal === 'clientes') renderClientesPanel();
-  }
-}
-
-function renderClientesPanel() {
-  const mesas = Store.get('mesas') || {};
-  const cl = mesas[mesaAbierta]?.clientesNoche || [];
-
-  if (!cl.length) {
-    html('clientes-panel-content', `
-      <div class="empty-state" style="padding:40px 20px;">
-        <svg class="icon" style="width:48px;height:48px;opacity:0.3;margin-bottom:12px;"><use href="#icon-empty"/></svg>
-        <p style="color:var(--text-muted);">Sin clientes esta noche</p>
-      </div>
-    `);
-    return;
-  }
-
-  let tot = 0;
-  const listaHtml = cl.map(c => {
-    tot += c.total;
-    return `
-      <div class="cliente-card">
-        <div class="cliente-card-header">
-          <span class="cliente-num">Cliente ${c.num}°</span>
-          <span class="cliente-total">${fmt(c.total)}</span>
-        </div>
-        <div class="cliente-detalles">${c.detalles.map(d => `${d.qty}× ${d.nombre}`).join(', ')}</div>
-        <div class="cliente-meta">
-          <span><svg class="icon icon-sm"><use href="#icon-user"/></svg> ${c.mesero || '—'}</span>
-          ${c.tiempoMin ? `<span><svg class="icon icon-sm"><use href="#icon-clock"/></svg> ${c.tiempoMin}min</span>` : ''}
-          <span>${c.hora}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  html('clientes-panel-content', `
-    <div class="mesa-total-resumen">
-      <div class="mesa-total-label">Total Mesa</div>
-      <div class="mesa-total-valor">${fmt(tot)}</div>
-      <div class="mesa-total-clientes">${cl.length} cliente${cl.length !== 1 ? 's' : ''}</div>
-    </div>
-    <div class="clientes-lista">${listaHtml}</div>
-  `);
-}
 
 window.filtrarCat = function(cat, el) {
   catActiva = cat;
@@ -185,6 +142,7 @@ window.filtrarCat = function(cat, el) {
   renderProductosGrid();
 };
 
+/* ── Grid productos en modal ────────────────── */
 function renderProductosGrid() {
   const productos = Store.get('productos') || [];
   const prods = catActiva === 'todos'
@@ -202,6 +160,7 @@ function renderProductosGrid() {
     </button>`).join(''));
 }
 
+/* ── Pedido actual ──────────────────────────── */
 window.addProd = function(pid) {
   pedidoActual[pid] = (pedidoActual[pid] || 0) + 1;
   renderPedidoActual();
@@ -214,7 +173,7 @@ window.cambiarQty = function(pid, d) {
 };
 
 function renderPedidoActual() {
-  const items = Object.entries(pedidoActual);
+  const items     = Object.entries(pedidoActual);
   const productos = Store.get('productos') || [];
 
   if (!items.length) {
@@ -244,62 +203,65 @@ function renderPedidoActual() {
   setText('pedido-total', fmt(total));
 }
 
+/* ── Confirmar pedido ───────────────────────── */
 window.confirmarPedido = async function() {
   if (!mesaAbierta) return;
   if (!Object.keys(pedidoActual).length) { toast('Añade al menos un producto.'); return; }
 
-  const sesion = Store.get('sesion');
-  const mesero = sesion ? sesion.nombre || sesion.username : '';
+  const sesion  = Store.get('sesion');
+  const mesero  = sesion ? sesion.nombre || sesion.username : '';
   const mesaNum = mesaAbierta;
 
   try {
-    const snap = await get(ref(db, `mesas/${fbKey(mesaNum)}`));
+    const snap    = await get(ref(db, `mesas/${fbKey(mesaNum)}`));
     const mActual = snap.exists() ? snap.val() : mesaDefault();
 
     await set(ref(db, `mesas/${fbKey(mesaNum)}`), {
-      clientesNoche: Array.isArray(mActual.clientesNoche) ? mActual.clientesNoche : [],
-      pedidoActual: { ...pedidoActual },
+      clientesNoche:  Array.isArray(mActual.clientesNoche) ? mActual.clientesNoche : [],
+      pedidoActual:   { ...pedidoActual },
       mesero,
-      ocupada: true,
-      ultimoUsuario: sesion?.username || '',
-      tsOcupada: mActual.tsOcupada || Date.now()
+      ocupada:        true,
+      ultimoUsuario:  sesion?.username || '',
+      tsOcupada:      mActual.tsOcupada || Date.now()
     });
 
     setText('modal-subtitle', 'Ocupada');
     await registrarActividad('accion-pedido', `Confirmó pedido en Mesa ${mesaNum} (${fmt(calcTotal(pedidoActual))})`);
-    toast(`Pedido confirmado — Mesa ${mesaNum}`, 3000, 'success');
+    toast(`Pedido confirmado — Mesa ${mesaNum}`);
   } catch (err) {
     console.error('Error confirmando pedido:', err);
-    toast('Error al guardar. Verificá la conexión.', 5000, 'error');
+    toast('⚠ Error al guardar. Verificá la conexión.');
   }
 };
 
+/* ── Marcar pagado / liberar mesa ───────────── */
 window.marcarPagado = async function() {
   if (!mesaAbierta) return;
   const sesion = Store.get('sesion');
   if (sesion?.role !== 'admin') { toast('Solo el Admin puede marcar pagado.'); return; }
 
-  const mesaNum = mesaAbierta;
-  const mesero = sesion.nombre || sesion.username;
+  const mesaNum  = mesaAbierta;
+  const mesero   = sesion.nombre || sesion.username;
   let ticketData = null;
 
   try {
-    const snap = await get(ref(db, `mesas/${fbKey(mesaNum)}`));
-    const mFB = snap.exists() ? snap.val() : mesaDefault();
+    // Leer estado REAL desde Firebase (no del Store)
+    const snap     = await get(ref(db, `mesas/${fbKey(mesaNum)}`));
+    const mFB      = snap.exists() ? snap.val() : mesaDefault();
     const cnActual = Array.isArray(mFB.clientesNoche) ? [...mFB.clientesNoche] : [];
 
     if (Object.keys(pedidoActual).length > 0) {
-      const productos = Store.get('productos') || [];
-      const detalles = Object.entries(pedidoActual)
+      const productos     = Store.get('productos') || [];
+      const detalles      = Object.entries(pedidoActual)
         .map(([pid, qty]) => {
           const p = productos.find(p => String(p.id) === String(pid));
           return p ? { nombre: p.nombre, qty, precio: p.precio, sub: p.precio * qty, cat: p.cat || 'comida' } : null;
         }).filter(Boolean);
 
-      const total = calcTotal(pedidoActual);
-      const tiempoMin = mFB.tsOcupada ? Math.floor((Date.now() - mFB.tsOcupada) / 60000) : null;
-      const fechaISO = fechaHoy();
-      const horaActual = hora();
+      const total         = calcTotal(pedidoActual);
+      const tiempoMin     = mFB.tsOcupada ? Math.floor((Date.now() - mFB.tsOcupada) / 60000) : null;
+      const fechaISO      = fechaHoy();
+      const horaActual    = hora();
 
       cnActual.push({
         num: cnActual.length + 1, detalles, total, mesero,
@@ -318,25 +280,27 @@ window.marcarPagado = async function() {
       ticketData = { mesa: mesaNum, clienteNum: cnActual.length, detalles, total, mesero, hora: horaActual, fecha: fechaISO };
     }
 
+    // Escribir mesa liberada — UN SOLO set, limpio
     await set(ref(db, `mesas/${fbKey(mesaNum)}`), {
-      ocupada: false,
-      pedidoActual: {},
-      mesero: '',
+      ocupada:       false,
+      pedidoActual:  {},
+      mesero:        '',
       ultimoUsuario: '',
-      tsOcupada: null,
+      tsOcupada:     null,
       clientesNoche: cnActual
     });
 
     pedidoActual = {};
     window.cerrarModal();
-    toast(`Mesa ${mesaNum} liberada`, 3000, 'success');
+    toast(`Mesa ${mesaNum} liberada ✓`);
     if (ticketData) setTimeout(() => manejarTicket(ticketData), 500);
   } catch (err) {
     console.error('Error al liberar mesa:', err);
-    toast('Error al guardar. Verificá la conexión.', 5000, 'error');
+    toast('⚠ Error al guardar. Verificá la conexión.');
   }
 };
 
+/* ── Limpiar mesa sin cobrar ────────────────── */
 window.limpiarMesa = async function() {
   if (!mesaAbierta) return;
   if (!confirm('¿Limpiar la mesa sin cobrar?')) return;
@@ -344,30 +308,54 @@ window.limpiarMesa = async function() {
   const mesaNum = mesaAbierta;
   try {
     const snap = await get(ref(db, `mesas/${fbKey(mesaNum)}`));
-    const mFB = snap.exists() ? snap.val() : mesaDefault();
+    const mFB  = snap.exists() ? snap.val() : mesaDefault();
 
     await set(ref(db, `mesas/${fbKey(mesaNum)}`), {
-      ocupada: false,
-      pedidoActual: {},
-      mesero: '',
+      ocupada:       false,
+      pedidoActual:  {},
+      mesero:        '',
       ultimoUsuario: '',
-      tsOcupada: null,
+      tsOcupada:     null,
       clientesNoche: Array.isArray(mFB.clientesNoche) ? mFB.clientesNoche : []
     });
 
     pedidoActual = {};
     window.cerrarModal();
-    toast(`Mesa ${mesaNum} limpiada`, 3000, 'success');
+    toast(`Mesa ${mesaNum} limpiada`);
   } catch (err) {
     console.error('Error limpiando mesa:', err);
-    toast('Error. Verificá la conexión.', 5000, 'error');
+    toast('⚠ Error. Verificá la conexión.');
   }
 };
 
+/* ── Render clientes de la mesa ─────────────── */
+function renderClientesMesa(num) {
+  const mesas = Store.get('mesas') || {};
+  const cl    = mesas[num]?.clientesNoche || [];
+
+  if (!cl.length) {
+    html('clientes-mesa-list', '<div style="color:var(--text-muted);font-size:0.85rem;">Sin clientes esta noche.</div>');
+    return;
+  }
+  html('clientes-mesa-list', cl.map(c => `
+    <div class="cliente-item">
+      <div class="cliente-header">
+        <span class="cliente-num"><svg class="icon icon-sm"><use href="#icon-user"/></svg> Cliente ${c.num}°</span>
+        <span style="font-size:0.95rem;font-weight:600;color:var(--text-secondary);font-family:'Playfair Display',serif;">${fmt(c.total)}</span>
+      </div>
+      <div class="cliente-items-list">${c.detalles.map(d => `${d.qty}x ${d.nombre} = ${fmt(d.sub)}`).join(' · ')}</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
+        ${c.mesero ? `<span class="mesero-badge"><svg class="icon icon-sm"><use href="#icon-user"/></svg> ${c.mesero}</span>` : ''}
+        ${c.tiempoMin != null ? `<span class="mesero-badge"><svg class="icon icon-sm"><use href="#icon-clock"/></svg> ${c.tiempoMin}min</span>` : ''}
+      </div>
+    </div>`).join(''));
+}
+
+/* ── Historial completo de la mesa ──────────── */
 window.verHistorialMesa = function() {
   if (!mesaAbierta) return;
   const mesas = Store.get('mesas') || {};
-  const cl = mesas[mesaAbierta]?.clientesNoche || [];
+  const cl    = mesas[mesaAbierta]?.clientesNoche || [];
 
   getEl('hist-mesa-title').innerHTML = `<svg class="icon"><use href="#icon-history"/></svg> Historial — Mesa ${mesaAbierta}`;
 
@@ -375,7 +363,7 @@ window.verHistorialMesa = function() {
     html('hist-mesa-body', '<div class="empty-state"><svg class="icon icon-xl"><use href="#icon-empty"/></svg><p>Sin historial esta noche.</p></div>');
   } else {
     let tot = 0;
-    let t = '<table class="history-table"><thead><tr><th>Cliente</th><th>Detalle</th><th>Mesero</th><th>Tiempo</th><th>Total</th></tr></thead><tbody>';
+    let t   = '<table class="history-table"><thead><tr><th>Cliente</th><th>Detalle</th><th>Mesero</th><th>Tiempo</th><th>Total</th></tr></thead><tbody>';
     cl.forEach(c => {
       tot += c.total;
       t += `<tr><td>Cliente ${c.num}°</td><td>${c.detalles.map(d => `${d.qty}× ${d.nombre}`).join(', ')}</td><td>${c.mesero || '—'}</td><td>${c.tiempoMin != null ? c.tiempoMin + 'min' : '—'}</td><td>${fmt(c.total)}</td></tr>`;
@@ -386,15 +374,14 @@ window.verHistorialMesa = function() {
   getEl('modal-hist-mesa').classList.add('open');
 };
 
+/* ── Timers ─────────────────────────────────── */
 export function iniciarTimers() {
   detenerTimers();
   timerInterval = setInterval(actualizarTimers, 1000);
 }
-
 export function detenerTimers() {
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
 }
-
 export function actualizarTimers() {
   const ahora = Date.now();
   const mesas = Store.get('mesas') || {};
@@ -412,13 +399,18 @@ export function actualizarTimers() {
   }
 }
 
+/* ── Config ticket (encabezado / despedida) ─── */
 const CONFIG_KEY = 'ticket_config';
+
+// Cache en memoria para que esté disponible al imprimir
 let _ticketConfig = { header: '', footer: '' };
 
 export async function cargarConfigTicket() {
   try {
     const snap = await get(ref(db, CONFIG_KEY));
-    if (snap.exists()) _ticketConfig = snap.val();
+    if (snap.exists()) {
+      _ticketConfig = snap.val();
+    }
     const h = document.getElementById('ticket-header');
     const f = document.getElementById('ticket-footer');
     if (h) h.value = _ticketConfig.header || '';
@@ -432,13 +424,15 @@ window.guardarConfigTicket = async function() {
   _ticketConfig = { header, footer };
   try {
     await set(ref(db, CONFIG_KEY), _ticketConfig);
-    toast('Configuración guardada', 3000, 'success');
+    toast('✓ Configuración de ticket guardada');
   } catch(e) {
-    toast('Error al guardar', 5000, 'error');
+    toast('⚠ Error al guardar configuración');
   }
 };
 
+/* ── Ticket ─────────────────────────────────── */
 async function manejarTicket(t) {
+  // Siempre leer config fresca desde Firebase antes de generar ticket
   try {
     const snap = await get(ref(db, CONFIG_KEY));
     if (snap.exists()) _ticketConfig = snap.val();
@@ -450,32 +444,29 @@ async function manejarTicket(t) {
 }
 
 function mostrarMensajeTicket(t) {
-  const TZ = 'America/Asuncion';
+  const TZ   = 'America/Asuncion';
   const cats = { comida: [], bebida: [], postre: [] };
   t.detalles.forEach(d => { (cats[d.cat || 'comida'] = cats[d.cat || 'comida'] || []).push(d); });
-  
-  const catIcons = { comida: '[COMIDA]', bebida: '[BEBIDA]', postre: '[POSTRE]' };
-  const cabeza = _ticketConfig.header || '*** RESTAURANTE DELICIAS ***';
-  const despedida = _ticketConfig.footer || 'Gracias por su visita';
+  const catEmoji = { comida: '🍽️', bebida: '🥤', postre: '🍮' };
+  const cabeza    = _ticketConfig.header || '🏪 *RESTAURANTE DELICIAS*';
+  const despedida = _ticketConfig.footer || '¡Gracias por su visita! 🙏';
 
-  const lineas = [
+  const lineas   = [
     cabeza,
     `Mesa ${t.mesa} · Cliente ${t.clienteNum}°`,
-    `Fecha: ${t.fecha || new Date().toLocaleDateString('es-PY', { timeZone: TZ })}  ${t.hora}`,
-    `Mesero: ${t.mesero || '—'}`,
-    '------------------------'
+    `📅 ${t.fecha || new Date().toLocaleDateString('es-PY', { timeZone: TZ })}  ${t.hora}`,
+    `👤 Mesero: ${t.mesero || '—'}`,
+    '─────────────────────'
   ];
-  
   ['comida', 'bebida', 'postre'].forEach(cat => {
     if (!cats[cat]?.length) return;
-    lineas.push(`${catIcons[cat]} ${cat.toUpperCase()}S`);
+    lineas.push(`${catEmoji[cat]} *${cat.toUpperCase()}S*`);
     cats[cat].forEach(d => {
-      const n = d.nombre.length > 24 ? d.nombre.slice(0, 23) + '...' : d.nombre;
+      const n = d.nombre.length > 24 ? d.nombre.slice(0, 23) + '…' : d.nombre;
       lineas.push(`  ${d.qty}× ${n}  ${fmt(d.sub)}`);
     });
   });
-  
-  lineas.push('------------------------', `TOTAL: ${fmt(t.total)}`, despedida);
+  lineas.push('─────────────────────', `💰 *TOTAL: ${fmt(t.total)}*`, despedida);
   const msg = lineas.join('\n');
 
   let overlay = document.getElementById('overlay-msg-ticket');
@@ -489,11 +480,9 @@ function mostrarMensajeTicket(t) {
         <div style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;">
           <svg class="icon"><use href="#icon-receipt"/></svg> Resumen del pedido
         </div>
-        <button onclick="document.getElementById('overlay-msg-ticket').remove()" style="background:var(--bg);border:none;border-radius:10px;width:34px;height:34px;cursor:pointer;color:var(--text-muted);">
-          <svg class="icon icon-sm"><use href="#icon-x"/></svg>
-        </button>
+        <button onclick="document.getElementById('overlay-msg-ticket').remove()" style="background:var(--bg);border:none;border-radius:10px;width:34px;height:34px;cursor:pointer;color:var(--text-muted);font-size:1rem;">✕</button>
       </div>
-      <pre style="font-family:'Courier New',monospace;font-size:0.82rem;color:var(--text-secondary);white-space:pre-wrap;background:var(--bg);border-radius:12px;padding:14px;border:1px solid var(--border);line-height:1.7;margin-bottom:16px;max-height:45vh;overflow-y:auto;">${msg}</pre>
+      <pre style="font-family:'Courier New',monospace;font-size:0.82rem;color:var(--text-secondary);white-space:pre-wrap;background:var(--bg);border-radius:12px;padding:14px;border:1px solid var(--border);line-height:1.7;margin-bottom:16px;max-height:45vh;overflow-y:auto;">${msg.replace(/\*/g, '')}</pre>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <a href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener"
           style="display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:#fff;border:none;border-radius:12px;padding:14px 10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;text-decoration:none;">
@@ -501,40 +490,40 @@ function mostrarMensajeTicket(t) {
         </a>
         <button id="btn-copiar-ticket"
           style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:#fff;border:none;border-radius:12px;padding:14px 10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">
-          <svg class="icon icon-sm"><use href="#icon-check"/></svg> Copiar
+          📋 Copiar
         </button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
   overlay.querySelector('#btn-copiar-ticket').onclick = function() {
     navigator.clipboard?.writeText(msg).then(() => {
-      this.innerHTML = '<svg class="icon icon-sm"><use href="#icon-check"/></svg> Copiado!';
+      this.textContent = '✓ Copiado!';
       setTimeout(() => overlay.remove(), 900);
-    }).catch(() => toast('No se pudo copiar', 3000, 'error'));
+    }).catch(() => toast('No se pudo copiar'));
   };
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 
 function imprimirTicketPOS(t) {
-  const TZ = 'America/Asuncion';
-  const now = new Date();
+  const TZ      = 'America/Asuncion';
+  const now     = new Date();
   const fechaTk = now.toLocaleDateString('es-PY', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: TZ });
-  const horaTk = now.toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: TZ });
-  const cats = { comida: [], bebida: [], postre: [] };
+  const horaTk  = now.toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: TZ });
+  const cats    = { comida: [], bebida: [], postre: [] };
   t.detalles.forEach(d => { (cats[d.cat || 'comida'] = cats[d.cat || 'comida'] || []).push(d); });
-  const catNames = { comida: '-- COMIDAS --', bebida: '-- BEBIDAS --', postre: '-- POSTRES --' };
+  const catNames = { comida: '── COMIDAS ──', bebida: '── BEBIDAS ──', postre: '── POSTRES ──' };
   let itemsHtml = '';
   ['comida', 'bebida', 'postre'].forEach(cat => {
     if (!cats[cat]?.length) return;
     itemsHtml += `<div class="ticket-cat-hdr">${catNames[cat]}</div>`;
     cats[cat].forEach(d => {
-      const nombre = d.nombre.length > 20 ? d.nombre.slice(0, 19) + '...' : d.nombre;
+      const nombre = d.nombre.length > 20 ? d.nombre.slice(0, 19) + '…' : d.nombre;
       itemsHtml += `<div class="ticket-row"><span class="ticket-item-name">${d.qty}x ${nombre}</span><span class="ticket-item-price">${fmt(d.sub)}</span></div>`;
     });
   });
   const ticketHeader = _ticketConfig.header
     ? `<div class="ticket-title" style="font-size:13pt;letter-spacing:2px;">${_ticketConfig.header}</div>`
-    : `<div class="ticket-title">*** RESTAURANTE ***</div><div class="ticket-title" style="font-size:18pt;letter-spacing:5px;margin:2mm 0;">DELICIAS</div>`;
+    : `<div class="ticket-title">★ RESTAURANTE ★</div><div class="ticket-title" style="font-size:18pt;letter-spacing:5px;margin:2mm 0;">DELICIAS</div>`;
 
   getEl('ticket-print').innerHTML = `<div class="ticket-wrap">
     ${ticketHeader}
@@ -550,7 +539,7 @@ function imprimirTicketPOS(t) {
     <div class="ticket-div"></div>
     <div class="ticket-row total"><span>TOTAL A PAGAR</span><span>${fmt(t.total)}</span></div>
     <div class="ticket-div"></div>
-    <div class="ticket-center" style="font-size:10pt;font-weight:700;">${_ticketConfig.footer || 'MUCHAS GRACIAS!'}</div>
+    <div class="ticket-center" style="font-size:10pt;font-weight:700;">${_ticketConfig.footer || '¡MUCHAS GRACIAS!'}</div>
     <hr class="ticket-corte"/>
   </div>`;
   window.print();
