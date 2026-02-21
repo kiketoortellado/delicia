@@ -39,9 +39,9 @@
 }
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}
-html{height:100%;overflow:hidden;background:var(--bg);}
+html{height:100%;background:var(--bg);}
 body{
-  height:100%;
+  min-height:100%;
   font-family:'Outfit',sans-serif;
   background:var(--bg);
   color:var(--text);
@@ -95,6 +95,8 @@ body{
   padding-top:var(--safe-top);
   padding-left:var(--safe-left);
   padding-right:var(--safe-right);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
 }
 .page.active{
   transform:translateX(0);
@@ -107,18 +109,18 @@ body{
   z-index:5;
 }
 
-/* ════ HOME REDISEÑADO ════ */
+/* ════ HOME - CON SCROLL ════ */
 #page-home{
   transform:translateX(0);
   z-index:1;
-  justify-content:space-between;
-  overflow:hidden;
   background:radial-gradient(ellipse 120% 80% at 50% -20%, rgba(200,164,90,.12) 0%, transparent 60%),
               radial-gradient(ellipse 80% 50% at 50% 100%, rgba(200,164,90,.06) 0%, transparent 50%);
+  min-height:100%;
+  height:auto;
+  overflow-y:auto;
 }
 
 .home-top{
-  flex:1;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -126,9 +128,10 @@ body{
   padding:max(24px,var(--safe-top)) 20px 20px;
   position:relative;
   gap:16px;
+  min-height:100vh;
 }
 
-/* Logo Plato con D */
+/* Logo Plato + Tenedor y Cuchillo SIN destellos */
 .brand-icon{
   width:min(140px,35vw);
   height:min(140px,35vw);
@@ -148,24 +151,6 @@ body{
   width:100%;
   height:100%;
   filter:drop-shadow(0 0 20px rgba(200,164,90,.4));
-}
-
-/* Sparkles decorativos */
-.sparkle{
-  position:absolute;
-  width:4px;
-  height:4px;
-  background:var(--gold3);
-  border-radius:50%;
-  opacity:0;
-}
-.sparkle:nth-child(1){top:15%;left:20%;animation:sparkle 2.5s ease-in-out infinite 0s;}
-.sparkle:nth-child(2){top:25%;right:20%;animation:sparkle 2.5s ease-in-out infinite .8s;}
-.sparkle:nth-child(3){bottom:30%;left:30%;animation:sparkle 2.5s ease-in-out infinite 1.6s;}
-
-@keyframes sparkle{
-  0%,100%{opacity:0;transform:scale(0) rotate(0deg);}
-  50%{opacity:1;transform:scale(1) rotate(180deg);}
 }
 
 .brand-name{
@@ -228,7 +213,7 @@ body{
   animation:glowPulse 2s ease-in-out infinite;
 }
 
-/* Mensaje admin - ESTRELLITA SIN BORDE */
+/* Mensaje admin - SIN ESTRELLITA */
 #admin-msg{
   display:none;
   background:linear-gradient(135deg,rgba(200,164,90,.12),rgba(200,164,90,.05));
@@ -254,24 +239,6 @@ body{
   transform:translateY(0);
   opacity:1;
   animation:slideUp 0.5s ease;
-}
-
-/* Estrellita SIN borde negro, solo brillo */
-#admin-msg::before{
-  content:'✦';
-  position:absolute;
-  top:-16px;
-  left:50%;
-  transform:translateX(-50%);
-  background:var(--bg);
-  padding:0 12px;
-  color:var(--gold);
-  font-size:1.4rem;
-  font-style:normal;
-  animation:glowPulse 2s ease-in-out infinite;
-  text-shadow:0 0 15px rgba(200,164,90,0.9), 0 0 30px rgba(200,164,90,0.5);
-  line-height:1;
-  border-radius:50%;
 }
 
 /* Botones home */
@@ -427,15 +394,16 @@ body{
   animation:pulse 2s infinite;
 }
 
-/* Footer home - ACCESO ADMIN ABAJO VISIBLE */
+/* Footer home - ACCESO ADMIN ABAJO */
 .home-footer{
-  padding:16px 20px calc(24px + var(--safe-bottom));
+  padding:16px 20px calc(40px + var(--safe-bottom));
   text-align:center;
   opacity:0;
   animation:scaleIn 0.8s ease forwards 1.1s;
   width:100%;
   display:flex;
   justify-content:center;
+  margin-top:auto;
 }
 .home-footer a{
   font-size:.75rem;
@@ -553,7 +521,7 @@ body{
   padding-bottom:calc(24px + var(--safe-bottom));
 }
 
-/* ════ MENÚ MEJORADO ════ */
+/* ════ MENÚ ════ */
 .cat-bar{
   display:flex;
   gap:10px;
@@ -737,7 +705,7 @@ body{
   transform:scale(1.05);
 }
 
-/* ════ PEDIDO MEJORADO - SIN ICONO DE MESA ════ */
+/* ════ PEDIDO ════ */
 #page-pedido .page-body{padding:20px 16px calc(20px + var(--safe-bottom));}
 
 .mesa-card{
@@ -867,7 +835,6 @@ body{
 }
 .err-msg.show{display:block;}
 
-/* Resultado pedido - SIN ICONO DE MESA */
 #pedido-result{display:none;}
 #pedido-result.show{
   display:block;
@@ -1092,30 +1059,14 @@ body{
   animation:float 3s ease-in-out infinite;
 }
 
+/* Empty state SIN ICONO */
 .empty-state{
   text-align:center;
-  padding:48px 24px;
+  padding:40px 24px;
   background:linear-gradient(135deg,var(--surface),var(--surface2));
   border:1px solid var(--border);
   border-radius:20px;
   box-shadow:0 4px 30px rgba(0,0,0,.2);
-}
-.empty-ico{
-  color:var(--gold);
-  opacity:.4;
-  margin-bottom:16px;
-  display:flex;
-  justify-content:center;
-}
-.empty-ico svg{
-  width:56px;
-  height:56px;
-  stroke:currentColor;
-  stroke-width:1.2;
-  fill:none;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-  animation:float 4s ease-in-out infinite;
 }
 .empty-txt{
   font-size:.95rem;
@@ -1154,7 +1105,7 @@ body{
   stroke-linejoin:round;
 }
 
-/* ════ MODAL WIFI MEJORADO ════ */
+/* ════ MODAL WIFI ════ */
 .modal-overlay{
   position:fixed;
   inset:0;
@@ -1343,7 +1294,7 @@ body{
   transform:scale(1.1);
 }
 
-/* ════ TOAST MEJORADO ════ */
+/* ════ TOAST ════ */
 .toast{
   position:fixed;
   bottom:calc(24px + var(--safe-bottom));
@@ -1371,15 +1322,6 @@ body{
   }
 }
 
-/* Utilidades */
-.loading-shimmer{
-  background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
-  background-size:200% 100%;
-  animation:shimmer 1.5s infinite;
-  border-radius:8px;
-}
-
-/* Mejoras touch para móvil */
 @media(hover:none){
   .btn-nav:hover, .btn-nav:active{
     transform:translateY(-1px);
@@ -1389,22 +1331,6 @@ body{
   }
 }
 
-/* Ajustes para pantallas muy pequeñas */
-@media(max-height:700px){
-  .home-top{gap:12px;}
-  .brand-icon{margin-top:10px;}
-  .brand-divider{margin-bottom:20px;}
-  .home-btns{margin-bottom:20px;}
-}
-
-/* Orientación landscape en móvil */
-@media(max-height:500px) and (orientation:landscape){
-  #page-home{overflow-y:auto;}
-  .home-top{justify-content:flex-start;padding-top:20px;}
-  .brand-icon{width:80px;height:80px;}
-}
-
-/* Fix para iconos en móvil pequeño */
 @media(max-width:380px){
   .cat-chip{padding:10px 14px;}
   .cat-chip svg{width:16px;height:16px;}
@@ -1419,11 +1345,8 @@ body{
 <div id="page-home" class="page active">
   <div class="home-top">
 
-    <!-- LOGO: Plato con D -->
+    <!-- LOGO: Plato + Tenedor y Cuchillo SIN destellos -->
     <div class="brand-icon">
-      <div class="sparkle"></div>
-      <div class="sparkle"></div>
-      <div class="sparkle"></div>
       <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="plateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -1456,28 +1379,27 @@ body{
         <!-- Plato interior -->
         <circle cx="50" cy="50" r="28" stroke="url(#plateGrad)" stroke-width="1" fill="url(#innerGrad)" opacity="0.6"/>
         
-        <!-- Letra D en el centro -->
-        <text x="50" y="60" 
-              font-family="Playfair Display, serif" 
-              font-size="36" 
-              font-weight="900" 
-              fill="url(#plateGrad)" 
-              text-anchor="middle" 
-              filter="url(#glow)">D</text>
-        
         <!-- Reflejo del plato -->
         <path d="M30 35 Q50 25 70 35" stroke="rgba(240,212,138,0.4)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
         
-        <!-- Destellos decorativos -->
-        <circle cx="15" cy="30" r="1.5" fill="#f0d48a" opacity="0">
-          <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="0s"/>
-        </circle>
-        <circle cx="85" cy="25" r="1" fill="#f0d48a" opacity="0">
-          <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="0.6s"/>
-        </circle>
-        <circle cx="50" cy="12" r="1.2" fill="#f0d48a" opacity="0">
-          <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="1.2s"/>
-        </circle>
+        <!-- Tenedor izquierdo -->
+        <g transform="translate(22, 50) rotate(-15)">
+          <rect x="-2" y="0" width="4" height="35" rx="2" fill="url(#plateGrad)"/>
+          <path d="M-4 0 L4 0 L3 -8 L-3 -8 Z" fill="url(#plateGrad)"/>
+          <line x1="-2" y1="-8" x2="-2" y2="-22" stroke="url(#plateGrad)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="0" y1="-8" x2="0" y2="-22" stroke="url(#plateGrad)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="2" y1="-8" x2="2" y2="-22" stroke="url(#plateGrad)" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M-3 -8 Q0 -5 3 -8" stroke="url(#plateGrad)" stroke-width="1" fill="none"/>
+          <animateTransform attributeName="transform" type="rotate" values="-15 0 35; -12 0 35; -15 0 35" dur="4s" repeatCount="indefinite"/>
+        </g>
+        
+        <!-- Cuchillo derecho -->
+        <g transform="translate(78, 50) rotate(15)">
+          <rect x="-2.5" y="0" width="5" height="35" rx="2" fill="url(#plateGrad)"/>
+          <path d="M-3 0 L3 0 L3 -25 Q3 -30 0 -32 Q-3 -30 -3 -25 Z" fill="url(#plateGrad)"/>
+          <path d="M-3 -2 L3 -2" stroke="rgba(240,212,138,0.6)" stroke-width="0.5"/>
+          <animateTransform attributeName="transform" type="rotate" values="15 0 35; 12 0 35; 15 0 35" dur="4s" repeatCount="indefinite"/>
+        </g>
       </svg>
     </div>
 
@@ -1494,7 +1416,7 @@ body{
       <div class="brand-divider-line"></div>
     </div>
 
-    <!-- MENSAJE ADMIN CON ESTRELLITA SIN BORDE -->
+    <!-- MENSAJE ADMIN SIN ESTRELLITA -->
     <div id="admin-msg"><span id="admin-msg-text"></span></div>
 
     <div class="home-btns">
@@ -1536,7 +1458,7 @@ body{
     </div>
   </div>
 
-  <!-- ACCESO ADMIN ABAJO - VISIBLE -->
+  <!-- ACCESO ADMIN ABAJO -->
   <div class="home-footer">
     <a href="admin.html">
       <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -1581,7 +1503,7 @@ body{
   </div>
 </div>
 
-<!-- ══════════════ PEDIDO - SIN ICONO DE MESA ══════════════ -->
+<!-- ══════════════ PEDIDO ══════════════ -->
 <div id="page-pedido" class="page">
   <div class="page-header">
     <button class="btn-back" onclick="irAtras()">
@@ -1692,7 +1614,6 @@ let pageStack = [];
 
 const db = getDatabase(initializeApp(FC));
 
-/* ── Normalizar mesas ── */
 function normMesas(raw) {
   if (!raw) return {};
   const n = {};
@@ -1705,20 +1626,14 @@ function normMesas(raw) {
   return n;
 }
 
-/* ── Firebase listeners ── */
 onValue(ref(db,'config/publico'), snap => {
-  console.log('[Config] snap exists:', snap.exists(), snap.val());
   if (!snap.exists()) return;
   const c = snap.val();
-
-  // WiFi
   const ssid = c.wifi?.ssid || '';
   const pass = c.wifi?.pass || '';
   if ($('wifi-ssid')) $('wifi-ssid').textContent = ssid || '—';
   if ($('wifi-pass')) $('wifi-pass').textContent = pass || '—';
   if ($('wifi-sub-txt')) $('wifi-sub-txt').textContent = ssid || 'Red disponible';
-
-  // Mensaje
   const msgEl  = $('admin-msg');
   const msgTxt = $('admin-msg-text');
   if (c.mensaje?.visible && c.mensaje?.texto) {
@@ -1727,8 +1642,6 @@ onValue(ref(db,'config/publico'), snap => {
   } else {
     if (msgEl)  msgEl.classList.remove('visible');
   }
-}, err => {
-  console.error('[Config] Error leyendo config/publico:', err);
 });
 
 onValue(ref(db,'productos'), snap => {
@@ -1743,7 +1656,6 @@ onValue(ref(db,'mesas'), snap => {
   if (mesaActual) renderPedido(mesaActual, false);
 });
 
-/* ── Navegación ── */
 window.irA = function(pageId) {
   const cur = pageStack.length ? $('page-' + pageStack[pageStack.length-1]) : $('page-home');
   cur.classList.add('behind');
@@ -1752,14 +1664,6 @@ window.irA = function(pageId) {
   const next = $('page-' + pageId);
   next.classList.add('active');
   next.classList.remove('behind');
-  
-  setTimeout(() => {
-    const cards = next.querySelectorAll('.menu-card, .result-item');
-    cards.forEach((card, i) => {
-      card.style.animationDelay = `${i * 0.1}s`;
-      card.classList.add('animate-in');
-    });
-  }, 100);
 };
 
 window.irAtras = function() {
@@ -1780,7 +1684,6 @@ window.irAtras = function() {
   }
 };
 
-/* ── WiFi ── */
 window.abrirWifi = () => {
   $('modal-wifi').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1799,7 +1702,6 @@ window.copiarPass = () => {
   });
 };
 
-/* ── Render menú ── */
 function renderMenu() {
   const count = productos.length;
   $('menu-sub').textContent = count + ' producto' + (count !== 1 ? 's' : '');
@@ -1835,20 +1737,14 @@ window.filtrarCat = function(cat, el) {
   catActiva = cat;
   document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
-  
   const body = $('menu-body');
   body.style.opacity = '0';
-  body.style.transform = 'translateY(10px)';
-  body.style.transition = 'all 0.3s ease';
-  
   setTimeout(() => {
     renderMenuFiltrado();
     body.style.opacity = '1';
-    body.style.transform = 'translateY(0)';
   }, 300);
 };
 
-/* ── Consultar pedido ── */
 window.buscarPedido = function() {
   const num   = parseInt($('inp-mesa').value);
   const errEl = $('err-pedido');
@@ -1869,7 +1765,6 @@ function renderPedido(num, animate) {
 
   if (!mesa?.ocupada) {
     res.innerHTML = `<div class="empty-state">
-      <div class="empty-ico"><svg viewBox="0 0 24 24"><path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/><path d="M3 11v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/><path d="M5 18v2"/><path d="M19 18v2"/></svg></div>
       <div class="empty-txt"><strong>Mesa ${num} sin pedido activo</strong>Esta mesa está libre o aún no tiene pedidos registrados.</div>
     </div>`;
     res.classList.add('show');
@@ -1888,7 +1783,7 @@ function renderPedido(num, animate) {
   const total = items.reduce((s,i) => s + i.sub, 0);
 
   if (!items.length) {
-    res.innerHTML = `<div class="empty-state"><div class="empty-ico"><svg viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/></svg></div><div class="empty-txt"><strong>Mesa ${num} ocupada</strong>Aún no tiene productos registrados.</div></div>`;
+    res.innerHTML = `<div class="empty-state"><div class="empty-txt"><strong>Mesa ${num} ocupada</strong>Aún no tiene productos registrados.</div></div>`;
     res.classList.add('show');
     strip.style.display = 'none';
     return;
@@ -1938,7 +1833,6 @@ function renderPedido(num, animate) {
   timerInt = setInterval(tick, 1000);
 }
 
-/* ── QR ── */
 const mesaQR = new URLSearchParams(location.search).get('mesa');
 if (mesaQR && +mesaQR >= 1 && +mesaQR <= 12) {
   irA('pedido');
@@ -1948,7 +1842,6 @@ if (mesaQR && +mesaQR >= 1 && +mesaQR <= 12) {
   setTimeout(() => buscarPedido(), 1500);
 }
 
-/* ── Toast ── */
 function toast(msg) {
   const el = document.createElement('div');
   el.className = 'toast'; 
@@ -1956,7 +1849,6 @@ function toast(msg) {
   document.body.appendChild(el);
   setTimeout(() => {
     el.style.opacity = '0';
-    el.style.transform = 'translateX(-50%) translateY(20px)';
     setTimeout(() => el.remove(), 300);
   }, 2800);
 }
