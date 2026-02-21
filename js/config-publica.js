@@ -66,7 +66,7 @@ window.guardarConfigPublica = async function() {
       mensaje: { visible: _msgVisible, texto }
     });
     await registrarActividad('accion-admin', 'Actualizó configuración pública (WiFi/Mensaje)');
-    toast('✓ Configuración guardada', 3000, 'success');
+    toast('Configuración guardada', 3000, 'success');
   } catch(e) {
     console.error('guardarConfigPublica error:', e);
     toast('⚠ Error al guardar', 3000, 'error');
